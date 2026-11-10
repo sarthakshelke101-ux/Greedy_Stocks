@@ -1,0 +1,69 @@
+
+# Environment and secrets
+.env
+.env.*
+!.env.example
+
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+
+# Node / Next.js
+node_modules/
+.next/
+out/
+dist/
+
+# Market data and generated datasets
+database/raw/
+database/processed/
+database/rejected/
+
+# Logs
+*.log
+
+# OS and editor
+.DS_Store
+Thumbs.db
+.vscode/
+
+# Secrets and environment
+.env
+.env.*
+!.env.example
+
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+
+# Frontend
+node_modules/
+.next/
+out/
+dist/
+
+# Generated market data
+database/raw/
+database/processed/
+database/rejected/
+
+# Logs and temporary files
+*.log
+.DS_Store
+Thumbs.db
+.vscode/
+
+
+# Backup and temporary source files
+*.bak
+*.backup
+*.backup_*
+*.before-*
+*.pre_*
+*.new

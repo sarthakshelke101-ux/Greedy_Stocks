@@ -19,3 +19,20 @@ Total planned development: 60 hours
 - greedy_stocks database created
 - Project folders created
 - Git initialized
+
+## Historical Rankings — Structural Validation Passed
+
+- Validation script: analytics/validate_historical_rankings.py
+- Periods tested: 1M, 3M, 6M, 1Y
+- Company-period slots: 200
+- Universe: 50 companies per period
+- Failures: 0
+- Warnings: 13
+- Result: Structural ranking checks completed.
+- Production approval: Pending broader data validation.
+
+Known limitations:
+1. Latest monthly constituent snapshot is not exact daily historical membership.
+2. Corporate-action coverage is partial; dividends are not included.
+3. Trading sessions are derived from imported stock_prices dates, not an independently certified NSE calendar.
+4. Short-period CAGR must not be interpreted as an expected future return.

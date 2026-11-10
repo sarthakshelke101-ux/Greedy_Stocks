@@ -1,0 +1,1974 @@
+{
+  "audit_name": "GREEDY STOCKS 10-Year Historical Coverage",
+  "audit_version": 1,
+  "read_only": true,
+  "years_requested": 10,
+  "as_of_date": "2026-11-09",
+  "cutoff_date": "2016-11-09",
+  "methodology": {
+    "span_status": "Compares first and last observed price dates with the requested window. It does not certify every trading day.",
+    "missing_dates": "Not inferred from calendar days. Exchange trading calendar and security-specific listing periods are required.",
+    "adjustments": "This audit reports raw stock_prices coverage. It does not claim split, bonus or dividend-adjusted total returns."
+  },
+  "summary": {
+    "companies": 80,
+    "status_counts": {
+      "10Y_DATE_SPAN_OBSERVED": 66,
+      "PARTIAL_10Y_HISTORY": 11,
+      "HISTORY_ENDS_BEFORE_AS_OF": 3
+    },
+    "duplicate_company_date_keys": 0,
+    "invalid_price_rows": 0,
+    "monthly_buckets": 121
+  },
+  "companies": [
+    {
+      "company_id": 106,
+      "symbol": "ACC",
+      "company_name": "ACC LIMITED",
+      "is_active": true,
+      "total_rows": 2471,
+      "first_date": "2016-11-08",
+      "last_date": "2026-11-09",
+      "distinct_dates": 2471,
+      "rows_in_window": 2470,
+      "null_closes_in_window": 0,
+      "nonpositive_closes_in_window": 0,
+      "source_count": 2,
+      "span_status": "10Y_DATE_SPAN_OBSERVED"
+    },
+    {
+      "company_id": 1,
+      "symbol": "ADANIENT",
+      "company_name": "Adani Enterprises Ltd.",
+      "is_active": true,
+      "total_rows": 2471,
+      "first_date": "2016-11-08",
+      "last_date": "2026-11-09",
+      "distinct_dates": 2471,
+      "rows_in_window": 2470,
+      "null_closes_in_window": 0,
+      "nonpositive_closes_in_window": 0,
+      "source_count": 2,
+      "span_status": "10Y_DATE_SPAN_OBSERVED"
+    },
+    {
+      "company_id": 2,
+      "symbol": "ADANIPORTS",
+      "company_name": "Adani Ports and Special Economic Zone Ltd.",
+      "is_active": true,
+      "total_rows": 2471,
+      "first_date": "2016-11-08",
+      "last_date": "2026-11-09",
+      "distinct_dates": 2471,
+      "rows_in_window": 2470,
+      "null_closes_in_window": 0,
+      "nonpositive_closes_in_window": 0,
+      "source_count": 2,
+      "span_status": "10Y_DATE_SPAN_OBSERVED"
+    },
+    {
+      "company_id": 107,
+      "symbol": "AMBUJACEM",
+      "company_name": "AMBUJA CEMENTS LTD",
+      "is_active": true,
+      "total_rows": 2471,
+      "first_date": "2016-11-08",
+      "last_date": "2026-11-09",
+      "distinct_dates": 2471,
+      "rows_in_window": 2470,
+      "null_closes_in_window": 0,
+      "nonpositive_closes_in_window": 0,
+      "source_count": 2,
+      "span_status": "10Y_DATE_SPAN_OBSERVED"
+    },
+    {
+      "company_id": 3,
+      "symbol": "APOLLOHOSP",
+      "company_name": "Apollo Hospitals Enterprise Ltd.",
+      "is_active": true,
+      "total_rows": 2471,
+      "first_date": "2016-11-08",
+      "last_date": "2026-11-09",
+      "distinct_dates": 2471,
+      "rows_in_window": 2470,
+      "null_closes_in_window": 0,
+      "nonpositive_closes_in_window": 0,
+      "source_count": 2,
+      "span_status": "10Y_DATE_SPAN_OBSERVED"
+    },
+    {
+      "company_id": 4,
+      "symbol": "ASIANPAINT",
+      "company_name": "Asian Paints Ltd.",
+      "is_active": true,
+      "total_rows": 2471,
+      "first_date": "2016-11-08",
+      "last_date": "2026-11-09",
+      "distinct_dates": 2471,
+      "rows_in_window": 2470,
+      "null_closes_in_window": 0,
+      "nonpositive_closes_in_window": 0,
+      "source_count": 2,
+      "span_status": "10Y_DATE_SPAN_OBSERVED"
+    },
+    {
+      "company_id": 108,
+      "symbol": "AUROPHARMA",
+      "company_name": "AUROBINDO PHARMA LTD",
+      "is_active": true,
+      "total_rows": 2471,
+      "first_date": "2016-11-08",
+      "last_date": "2026-11-09",
+      "distinct_dates": 2471,
+      "rows_in_window": 2470,
+      "null_closes_in_window": 0,
+      "nonpositive_closes_in_window": 0,
+      "source_count": 2,
+      "span_status": "10Y_DATE_SPAN_OBSERVED"
+    },
+    {
+      "company_id": 5,
+      "symbol": "AXISBANK",
+      "company_name": "Axis Bank Ltd.",
+      "is_active": true,
+      "total_rows": 2471,
+      "first_date": "2016-11-08",
+      "last_date": "2026-11-09",
+      "distinct_dates": 2471,
+      "rows_in_window": 2470,
+      "null_closes_in_window": 0,
+      "nonpositive_closes_in_window": 0,
+      "source_count": 2,
+      "span_status": "10Y_DATE_SPAN_OBSERVED"
+    },
+    {
+      "company_id": 6,
+      "symbol": "BAJAJ-AUTO",
+      "company_name": "Bajaj Auto Ltd.",
+      "is_active": true,
+      "total_rows": 2471,
+      "first_date": "2016-11-08",
+      "last_date": "2026-11-09",
+      "distinct_dates": 2471,
+      "rows_in_window": 2470,
+      "null_closes_in_window": 0,
+      "nonpositive_closes_in_window": 0,
+      "source_count": 2,
+      "span_status": "10Y_DATE_SPAN_OBSERVED"
+    },
+    {
+      "company_id": 7,
+      "symbol": "BAJAJFINSV",
+      "company_name": "Bajaj Finserv Ltd.",
+      "is_active": true,
+      "total_rows": 2471,
+      "first_date": "2016-11-08",
+      "last_date": "2026-11-09",
+      "distinct_dates": 2471,
+      "rows_in_window": 2470,
+      "null_closes_in_window": 0,
+      "nonpositive_closes_in_window": 0,
+      "source_count": 2,
+      "span_status": "10Y_DATE_SPAN_OBSERVED"
+    },
+    {
+      "company_id": 8,
+      "symbol": "BAJFINANCE",
+      "company_name": "Bajaj Finance Ltd.",
+      "is_active": true,
+      "total_rows": 2471,
+      "first_date": "2016-11-08",
+      "last_date": "2026-11-09",
+      "distinct_dates": 2471,
+      "rows_in_window": 2470,
+      "null_closes_in_window": 0,
+      "nonpositive_closes_in_window": 0,
+      "source_count": 2,
+      "span_status": "10Y_DATE_SPAN_OBSERVED"
+    },
+    {
+      "company_id": 109,
+      "symbol": "BANKBARODA",
+      "company_name": "BANK OF BARODA",
+      "is_active": true,
+      "total_rows": 2471,
+      "first_date": "2016-11-08",
+      "last_date": "2026-11-09",
+      "distinct_dates": 2471,
+      "rows_in_window": 2470,
+      "null_closes_in_window": 0,
+      "nonpositive_closes_in_window": 0,
+      "source_count": 2,
+      "span_status": "10Y_DATE_SPAN_OBSERVED"
+    },
+    {
+      "company_id": 9,
+      "symbol": "BEL",
+      "company_name": "Bharat Electronics Ltd.",
+      "is_active": true,
+      "total_rows": 2471,
+      "first_date": "2016-11-08",
+      "last_date": "2026-11-09",
+      "distinct_dates": 2471,
+      "rows_in_window": 2470,
+      "null_closes_in_window": 0,
+      "nonpositive_closes_in_window": 0,
+      "source_count": 2,
+      "span_status": "10Y_DATE_SPAN_OBSERVED"
+    },
+    {
+      "company_id": 10,
+      "symbol": "BHARTIARTL",
+      "company_name": "Bharti Airtel Ltd.",
+      "is_active": true,
+      "total_rows": 2471,
+      "first_date": "2016-11-08",
+      "last_date": "2026-11-09",
+      "distinct_dates": 2471,
+      "rows_in_window": 2470,
+      "null_closes_in_window": 0,
+      "nonpositive_closes_in_window": 0,
+      "source_count": 2,
+      "span_status": "10Y_DATE_SPAN_OBSERVED"
+    },
+    {
+      "company_id": 110,
+      "symbol": "BHEL",
+      "company_name": "BHEL",
+      "is_active": true,
+      "total_rows": 2471,
+      "first_date": "2016-11-08",
+      "last_date": "2026-11-09",
+      "distinct_dates": 2471,
+      "rows_in_window": 2470,
+      "null_closes_in_window": 0,
+      "nonpositive_closes_in_window": 0,
+      "source_count": 2,
+      "span_status": "10Y_DATE_SPAN_OBSERVED"
+    },
+    {
+      "company_id": 111,
+      "symbol": "BOSCHLTD",
+      "company_name": "BOSCH LIMITED",
+      "is_active": true,
+      "total_rows": 2471,
+      "first_date": "2016-11-08",
+      "last_date": "2026-11-09",
+      "distinct_dates": 2471,
+      "rows_in_window": 2470,
+      "null_closes_in_window": 0,
+      "nonpositive_closes_in_window": 0,
+      "source_count": 2,
+      "span_status": "10Y_DATE_SPAN_OBSERVED"
+    },
+    {
+      "company_id": 112,
+      "symbol": "BPCL",
+      "company_name": "BHARAT PETROLEUM CORP  LT",
+      "is_active": true,
+      "total_rows": 2471,
+      "first_date": "2016-11-08",
+      "last_date": "2026-11-09",
+      "distinct_dates": 2471,
+      "rows_in_window": 2470,
+      "null_closes_in_window": 0,
+      "nonpositive_closes_in_window": 0,
+      "source_count": 2,
+      "span_status": "10Y_DATE_SPAN_OBSERVED"
+    },
+    {
+      "company_id": 113,
+      "symbol": "BRITANNIA",
+      "company_name": "BRITANNIA INDUSTRIES LTD",
+      "is_active": true,
+      "total_rows": 2471,
+      "first_date": "2016-11-08",
+      "last_date": "2026-11-09",
+      "distinct_dates": 2471,
+      "rows_in_window": 2470,
+      "null_closes_in_window": 0,
+      "nonpositive_closes_in_window": 0,
+      "source_count": 2,
+      "span_status": "10Y_DATE_SPAN_OBSERVED"
+    },
+    {
+      "company_id": 11,
+      "symbol": "BSE",
+      "company_name": "BSE Ltd.",
+      "is_active": true,
+      "total_rows": 2410,
+      "first_date": "2017-02-03",
+      "last_date": "2026-11-09",
+      "distinct_dates": 2410,
+      "rows_in_window": 2410,
+      "null_closes_in_window": 0,
+      "nonpositive_closes_in_window": 0,
+      "source_count": 2,
+      "span_status": "PARTIAL_10Y_HISTORY"
+    },
+    {
+      "company_id": 12,
+      "symbol": "CIPLA",
+      "company_name": "Cipla Ltd.",
+      "is_active": true,
+      "total_rows": 2471,
+      "first_date": "2016-11-08",
+      "last_date": "2026-11-09",
+      "distinct_dates": 2471,
+      "rows_in_window": 2470,
+      "null_closes_in_window": 0,
+      "nonpositive_closes_in_window": 0,
+      "source_count": 2,
+      "span_status": "10Y_DATE_SPAN_OBSERVED"
+    },
+    {
+      "company_id": 13,
+      "symbol": "COALINDIA",
+      "company_name": "Coal India Ltd.",
+      "is_active": true,
+      "total_rows": 2471,
+      "first_date": "2016-11-08",
+      "last_date": "2026-11-09",
+      "distinct_dates": 2471,
+      "rows_in_window": 2470,
+      "null_closes_in_window": 0,
+      "nonpositive_closes_in_window": 0,
+      "source_count": 2,
+      "span_status": "10Y_DATE_SPAN_OBSERVED"
+    },
+    {
+      "company_id": 114,
+      "symbol": "DIVISLAB",
+      "company_name": "DIVI S LABORATORIES LTD",
+      "is_active": true,
+      "total_rows": 2471,
+      "first_date": "2016-11-08",
+      "last_date": "2026-11-09",
+      "distinct_dates": 2471,
+      "rows_in_window": 2470,
+      "null_closes_in_window": 0,
+      "nonpositive_closes_in_window": 0,
+      "source_count": 2,
+      "span_status": "10Y_DATE_SPAN_OBSERVED"
+    },
+    {
+      "company_id": 14,
+      "symbol": "DRREDDY",
+      "company_name": "Dr. Reddy's Laboratories Ltd.",
+      "is_active": true,
+      "total_rows": 2471,
+      "first_date": "2016-11-08",
+      "last_date": "2026-11-09",
+      "distinct_dates": 2471,
+      "rows_in_window": 2470,
+      "null_closes_in_window": 0,
+      "nonpositive_closes_in_window": 0,
+      "source_count": 2,
+      "span_status": "10Y_DATE_SPAN_OBSERVED"
+    },
+    {
+      "company_id": 15,
+      "symbol": "EICHERMOT",
+      "company_name": "Eicher Motors Ltd.",
+      "is_active": true,
+      "total_rows": 2471,
+      "first_date": "2016-11-08",
+      "last_date": "2026-11-09",
+      "distinct_dates": 2471,
+      "rows_in_window": 2470,
+      "null_closes_in_window": 0,
+      "nonpositive_closes_in_window": 0,
+      "source_count": 2,
+      "span_status": "10Y_DATE_SPAN_OBSERVED"
+    },
+    {
+      "company_id": 16,
+      "symbol": "ETERNAL",
+      "company_name": "Eternal Ltd.",
+      "is_active": true,
+      "total_rows": 1308,
+      "first_date": "2021-07-23",
+      "last_date": "2026-11-09",
+      "distinct_dates": 1308,
+      "rows_in_window": 1308,
+      "null_closes_in_window": 0,
+      "nonpositive_closes_in_window": 0,
+      "source_count": 3,
+      "span_status": "PARTIAL_10Y_HISTORY"
+    },
+    {
+      "company_id": 115,
+      "symbol": "GAIL",
+      "company_name": "GAIL (INDIA) LTD",
+      "is_active": true,
+      "total_rows": 2471,
+      "first_date": "2016-11-08",
+      "last_date": "2026-11-09",
+      "distinct_dates": 2471,
+      "rows_in_window": 2470,
+      "null_closes_in_window": 0,
+      "nonpositive_closes_in_window": 0,
+      "source_count": 2,
+      "span_status": "10Y_DATE_SPAN_OBSERVED"
+    },
+    {
+      "company_id": 17,
+      "symbol": "GRASIM",
+      "company_name": "Grasim Industries Ltd.",
+      "is_active": true,
+      "total_rows": 2471,
+      "first_date": "2016-11-08",
+      "last_date": "2026-11-09",
+      "distinct_dates": 2471,
+      "rows_in_window": 2470,
+      "null_closes_in_window": 0,
+      "nonpositive_closes_in_window": 0,
+      "source_count": 2,
+      "span_status": "10Y_DATE_SPAN_OBSERVED"
+    },
+    {
+      "company_id": 18,
+      "symbol": "HCLTECH",
+      "company_name": "HCL Technologies Ltd.",
+      "is_active": true,
+      "total_rows": 2471,
+      "first_date": "2016-11-08",
+      "last_date": "2026-11-09",
+      "distinct_dates": 2471,
+      "rows_in_window": 2470,
+      "null_closes_in_window": 0,
+      "nonpositive_closes_in_window": 0,
+      "source_count": 2,
+      "span_status": "10Y_DATE_SPAN_OBSERVED"
+    },
+    {
+      "company_id": 116,
+      "symbol": "HDFC",
+      "company_name": "Housing Development Finance Corporation Limited",
+      "is_active": false,
+      "total_rows": 1652,
+      "first_date": "2016-11-08",
+      "last_date": "2023-07-12",
+      "distinct_dates": 1652,
+      "rows_in_window": 1651,
+      "null_closes_in_window": 0,
+      "nonpositive_closes_in_window": 0,
+      "source_count": 1,
+      "span_status": "HISTORY_ENDS_BEFORE_AS_OF"
+    },
+    {
+      "company_id": 19,
+      "symbol": "HDFCBANK",
+      "company_name": "HDFC Bank Ltd.",
+      "is_active": true,
+      "total_rows": 2471,
+      "first_date": "2016-11-08",
+      "last_date": "2026-11-09",
+      "distinct_dates": 2471,
+      "rows_in_window": 2470,
+      "null_closes_in_window": 0,
+      "nonpositive_closes_in_window": 0,
+      "source_count": 2,
+      "span_status": "10Y_DATE_SPAN_OBSERVED"
+    },
+    {
+      "company_id": 20,
+      "symbol": "HDFCLIFE",
+      "company_name": "HDFC Life Insurance Company Ltd.",
+      "is_active": true,
+      "total_rows": 2215,
+      "first_date": "2017-11-17",
+      "last_date": "2026-11-09",
+      "distinct_dates": 2215,
+      "rows_in_window": 2215,
+      "null_closes_in_window": 0,
+      "nonpositive_closes_in_window": 0,
+      "source_count": 2,
+      "span_status": "PARTIAL_10Y_HISTORY"
+    },
+    {
+      "company_id": 21,
+      "symbol": "HEROMOTOCO",
+      "company_name": "Hero MotoCorp Ltd.",
+      "is_active": true,
+      "total_rows": 2471,
+      "first_date": "2016-11-08",
+      "last_date": "2026-11-09",
+      "distinct_dates": 2471,
+      "rows_in_window": 2470,
+      "null_closes_in_window": 0,
+      "nonpositive_closes_in_window": 0,
+      "source_count": 2,
+      "span_status": "10Y_DATE_SPAN_OBSERVED"
+    },
+    {
+      "company_id": 22,
+      "symbol": "HINDALCO",
+      "company_name": "Hindalco Industries Ltd.",
+      "is_active": true,
+      "total_rows": 2471,
+      "first_date": "2016-11-08",
+      "last_date": "2026-11-09",
+      "distinct_dates": 2471,
+      "rows_in_window": 2470,
+      "null_closes_in_window": 0,
+      "nonpositive_closes_in_window": 0,
+      "source_count": 2,
+      "span_status": "10Y_DATE_SPAN_OBSERVED"
+    },
+    {
+      "company_id": 117,
+      "symbol": "HINDPETRO",
+      "company_name": "HINDUSTAN PETROLEUM CORP",
+      "is_active": true,
+      "total_rows": 2471,
+      "first_date": "2016-11-08",
+      "last_date": "2026-11-09",
+      "distinct_dates": 2471,
+      "rows_in_window": 2470,
+      "null_closes_in_window": 0,
+      "nonpositive_closes_in_window": 0,
+      "source_count": 2,
+      "span_status": "10Y_DATE_SPAN_OBSERVED"
+    },
+    {
+      "company_id": 23,
+      "symbol": "HINDUNILVR",
+      "company_name": "Hindustan Unilever Ltd.",
+      "is_active": true,
+      "total_rows": 2471,
+      "first_date": "2016-11-08",
+      "last_date": "2026-11-09",
+      "distinct_dates": 2471,
+      "rows_in_window": 2470,
+      "null_closes_in_window": 0,
+      "nonpositive_closes_in_window": 0,
+      "source_count": 2,
+      "span_status": "10Y_DATE_SPAN_OBSERVED"
+    },
+    {
+      "company_id": 24,
+      "symbol": "ICICIBANK",
+      "company_name": "ICICI Bank Ltd.",
+      "is_active": true,
+      "total_rows": 2471,
+      "first_date": "2016-11-08",
+      "last_date": "2026-11-09",
+      "distinct_dates": 2471,
+      "rows_in_window": 2470,
+      "null_closes_in_window": 0,
+      "nonpositive_closes_in_window": 0,
+      "source_count": 2,
+      "span_status": "10Y_DATE_SPAN_OBSERVED"
+    },
+    {
+      "company_id": 119,
+      "symbol": "IDEA",
+      "company_name": "VODAFONE IDEA LIMITED",
+      "is_active": true,
+      "total_rows": 2471,
+      "first_date": "2016-11-08",
+      "last_date": "2026-11-09",
+      "distinct_dates": 2471,
+      "rows_in_window": 2470,
+      "null_closes_in_window": 0,
+      "nonpositive_closes_in_window": 0,
+      "source_count": 2,
+      "span_status": "10Y_DATE_SPAN_OBSERVED"
+    },
+    {
+      "company_id": 25,
+      "symbol": "INDIGO",
+      "company_name": "InterGlobe Aviation Ltd.",
+      "is_active": true,
+      "total_rows": 2471,
+      "first_date": "2016-11-08",
+      "last_date": "2026-11-09",
+      "distinct_dates": 2471,
+      "rows_in_window": 2470,
+      "null_closes_in_window": 0,
+      "nonpositive_closes_in_window": 0,
+      "source_count": 2,
+      "span_status": "10Y_DATE_SPAN_OBSERVED"
+    },
+    {
+      "company_id": 26,
+      "symbol": "INDUSINDBK",
+      "company_name": "IndusInd Bank Ltd.",
+      "is_active": true,
+      "total_rows": 2471,
+      "first_date": "2016-11-08",
+      "last_date": "2026-11-09",
+      "distinct_dates": 2471,
+      "rows_in_window": 2470,
+      "null_closes_in_window": 0,
+      "nonpositive_closes_in_window": 0,
+      "source_count": 2,
+      "span_status": "10Y_DATE_SPAN_OBSERVED"
+    },
+    {
+      "company_id": 120,
+      "symbol": "INDUSTOWER",
+      "company_name": "Indus Towers Limited",
+      "is_active": true,
+      "total_rows": 1018,
+      "first_date": "2016-11-08",
+      "last_date": "2026-11-09",
+      "distinct_dates": 1018,
+      "rows_in_window": 1017,
+      "null_closes_in_window": 0,
+      "nonpositive_closes_in_window": 0,
+      "source_count": 2,
+      "span_status": "10Y_DATE_SPAN_OBSERVED"
+    },
+    {
+      "company_id": 27,
+      "symbol": "INFY",
+      "company_name": "Infosys Ltd.",
+      "is_active": true,
+      "total_rows": 2471,
+      "first_date": "2016-11-08",
+      "last_date": "2026-11-09",
+      "distinct_dates": 2471,
+      "rows_in_window": 2470,
+      "null_closes_in_window": 0,
+      "nonpositive_closes_in_window": 0,
+      "source_count": 2,
+      "span_status": "10Y_DATE_SPAN_OBSERVED"
+    },
+    {
+      "company_id": 121,
+      "symbol": "IOC",
+      "company_name": "INDIAN OIL CORP LTD",
+      "is_active": true,
+      "total_rows": 2471,
+      "first_date": "2016-11-08",
+      "last_date": "2026-11-09",
+      "distinct_dates": 2471,
+      "rows_in_window": 2470,
+      "null_closes_in_window": 0,
+      "nonpositive_closes_in_window": 0,
+      "source_count": 2,
+      "span_status": "10Y_DATE_SPAN_OBSERVED"
+    },
+    {
+      "company_id": 28,
+      "symbol": "ITC",
+      "company_name": "ITC Ltd.",
+      "is_active": true,
+      "total_rows": 2471,
+      "first_date": "2016-11-08",
+      "last_date": "2026-11-09",
+      "distinct_dates": 2471,
+      "rows_in_window": 2470,
+      "null_closes_in_window": 0,
+      "nonpositive_closes_in_window": 0,
+      "source_count": 2,
+      "span_status": "10Y_DATE_SPAN_OBSERVED"
+    },
+    {
+      "company_id": 29,
+      "symbol": "JIOFIN",
+      "company_name": "Jio Financial Services Ltd.",
+      "is_active": true,
+      "total_rows": 783,
+      "first_date": "2023-09-04",
+      "last_date": "2026-11-09",
+      "distinct_dates": 783,
+      "rows_in_window": 783,
+      "null_closes_in_window": 0,
+      "nonpositive_closes_in_window": 0,
+      "source_count": 2,
+      "span_status": "PARTIAL_10Y_HISTORY"
+    },
+    {
+      "company_id": 30,
+      "symbol": "JSWSTEEL",
+      "company_name": "JSW Steel Ltd.",
+      "is_active": true,
+      "total_rows": 2471,
+      "first_date": "2016-11-08",
+      "last_date": "2026-11-09",
+      "distinct_dates": 2471,
+      "rows_in_window": 2470,
+      "null_closes_in_window": 0,
+      "nonpositive_closes_in_window": 0,
+      "source_count": 2,
+      "span_status": "10Y_DATE_SPAN_OBSERVED"
+    },
+    {
+      "company_id": 31,
+      "symbol": "KOTAKBANK",
+      "company_name": "Kotak Mahindra Bank Ltd.",
+      "is_active": true,
+      "total_rows": 2471,
+      "first_date": "2016-11-08",
+      "last_date": "2026-11-09",
+      "distinct_dates": 2471,
+      "rows_in_window": 2470,
+      "null_closes_in_window": 0,
+      "nonpositive_closes_in_window": 0,
+      "source_count": 2,
+      "span_status": "10Y_DATE_SPAN_OBSERVED"
+    },
+    {
+      "company_id": 32,
+      "symbol": "LT",
+      "company_name": "Larsen & Toubro Ltd.",
+      "is_active": true,
+      "total_rows": 2471,
+      "first_date": "2016-11-08",
+      "last_date": "2026-11-09",
+      "distinct_dates": 2471,
+      "rows_in_window": 2470,
+      "null_closes_in_window": 0,
+      "nonpositive_closes_in_window": 0,
+      "source_count": 2,
+      "span_status": "10Y_DATE_SPAN_OBSERVED"
+    },
+    {
+      "company_id": 122,
+      "symbol": "LTM",
+      "company_name": "LTIMindtree Limited",
+      "is_active": true,
+      "total_rows": 799,
+      "first_date": "2022-12-05",
+      "last_date": "2026-11-09",
+      "distinct_dates": 799,
+      "rows_in_window": 799,
+      "null_closes_in_window": 0,
+      "nonpositive_closes_in_window": 0,
+      "source_count": 2,
+      "span_status": "PARTIAL_10Y_HISTORY"
+    },
+    {
+      "company_id": 123,
+      "symbol": "LUPIN",
+      "company_name": "LUPIN LIMITED",
+      "is_active": true,
+      "total_rows": 2471,
+      "first_date": "2016-11-08",
+      "last_date": "2026-11-09",
+      "distinct_dates": 2471,
+      "rows_in_window": 2470,
+      "null_closes_in_window": 0,
+      "nonpositive_closes_in_window": 0,
+      "source_count": 2,
+      "span_status": "10Y_DATE_SPAN_OBSERVED"
+    },
+    {
+      "company_id": 33,
+      "symbol": "M&M",
+      "company_name": "Mahindra & Mahindra Ltd.",
+      "is_active": true,
+      "total_rows": 2471,
+      "first_date": "2016-11-08",
+      "last_date": "2026-11-09",
+      "distinct_dates": 2471,
+      "rows_in_window": 2470,
+      "null_closes_in_window": 0,
+      "nonpositive_closes_in_window": 0,
+      "source_count": 2,
+      "span_status": "10Y_DATE_SPAN_OBSERVED"
+    },
+    {
+      "company_id": 34,
+      "symbol": "MARUTI",
+      "company_name": "Maruti Suzuki India Ltd.",
+      "is_active": true,
+      "total_rows": 2471,
+      "first_date": "2016-11-08",
+      "last_date": "2026-11-09",
+      "distinct_dates": 2471,
+      "rows_in_window": 2470,
+      "null_closes_in_window": 0,
+      "nonpositive_closes_in_window": 0,
+      "source_count": 2,
+      "span_status": "10Y_DATE_SPAN_OBSERVED"
+    },
+    {
+      "company_id": 35,
+      "symbol": "MAXHEALTH",
+      "company_name": "Max Healthcare Institute Ltd.",
+      "is_active": true,
+      "total_rows": 1526,
+      "first_date": "2020-09-04",
+      "last_date": "2026-11-09",
+      "distinct_dates": 1526,
+      "rows_in_window": 1526,
+      "null_closes_in_window": 0,
+      "nonpositive_closes_in_window": 0,
+      "source_count": 2,
+      "span_status": "PARTIAL_10Y_HISTORY"
+    },
+    {
+      "company_id": 36,
+      "symbol": "NESTLEIND",
+      "company_name": "Nestle India Ltd.",
+      "is_active": true,
+      "total_rows": 2471,
+      "first_date": "2016-11-08",
+      "last_date": "2026-11-09",
+      "distinct_dates": 2471,
+      "rows_in_window": 2470,
+      "null_closes_in_window": 0,
+      "nonpositive_closes_in_window": 0,
+      "source_count": 2,
+      "span_status": "10Y_DATE_SPAN_OBSERVED"
+    },
+    {
+      "company_id": 37,
+      "symbol": "NTPC",
+      "company_name": "NTPC Ltd.",
+      "is_active": true,
+      "total_rows": 2471,
+      "first_date": "2016-11-08",
+      "last_date": "2026-11-09",
+      "distinct_dates": 2471,
+      "rows_in_window": 2470,
+      "null_closes_in_window": 0,
+      "nonpositive_closes_in_window": 0,
+      "source_count": 2,
+      "span_status": "10Y_DATE_SPAN_OBSERVED"
+    },
+    {
+      "company_id": 38,
+      "symbol": "ONGC",
+      "company_name": "Oil & Natural Gas Corporation Ltd.",
+      "is_active": true,
+      "total_rows": 2471,
+      "first_date": "2016-11-08",
+      "last_date": "2026-11-09",
+      "distinct_dates": 2471,
+      "rows_in_window": 2470,
+      "null_closes_in_window": 0,
+      "nonpositive_closes_in_window": 0,
+      "source_count": 2,
+      "span_status": "10Y_DATE_SPAN_OBSERVED"
+    },
+    {
+      "company_id": 39,
+      "symbol": "POWERGRID",
+      "company_name": "Power Grid Corporation of India Ltd.",
+      "is_active": true,
+      "total_rows": 2471,
+      "first_date": "2016-11-08",
+      "last_date": "2026-11-09",
+      "distinct_dates": 2471,
+      "rows_in_window": 2470,
+      "null_closes_in_window": 0,
+      "nonpositive_closes_in_window": 0,
+      "source_count": 2,
+      "span_status": "10Y_DATE_SPAN_OBSERVED"
+    },
+    {
+      "company_id": 40,
+      "symbol": "RELIANCE",
+      "company_name": "Reliance Industries Ltd.",
+      "is_active": true,
+      "total_rows": 2471,
+      "first_date": "2016-11-08",
+      "last_date": "2026-11-09",
+      "distinct_dates": 2471,
+      "rows_in_window": 2470,
+      "null_closes_in_window": 0,
+      "nonpositive_closes_in_window": 0,
+      "source_count": 2,
+      "span_status": "10Y_DATE_SPAN_OBSERVED"
+    },
+    {
+      "company_id": 118,
+      "symbol": "SAMMAANCAP",
+      "company_name": "Sammaan Capital Limited",
+      "is_active": true,
+      "total_rows": 1906,
+      "first_date": "2016-11-08",
+      "last_date": "2026-11-09",
+      "distinct_dates": 1906,
+      "rows_in_window": 1905,
+      "null_closes_in_window": 0,
+      "nonpositive_closes_in_window": 0,
+      "source_count": 2,
+      "span_status": "10Y_DATE_SPAN_OBSERVED"
+    },
+    {
+      "company_id": 41,
+      "symbol": "SBILIFE",
+      "company_name": "SBI Life Insurance Company Ltd.",
+      "is_active": true,
+      "total_rows": 2247,
+      "first_date": "2017-10-03",
+      "last_date": "2026-11-09",
+      "distinct_dates": 2247,
+      "rows_in_window": 2247,
+      "null_closes_in_window": 0,
+      "nonpositive_closes_in_window": 0,
+      "source_count": 2,
+      "span_status": "PARTIAL_10Y_HISTORY"
+    },
+    {
+      "company_id": 42,
+      "symbol": "SBIN",
+      "company_name": "State Bank of India",
+      "is_active": true,
+      "total_rows": 2471,
+      "first_date": "2016-11-08",
+      "last_date": "2026-11-09",
+      "distinct_dates": 2471,
+      "rows_in_window": 2470,
+      "null_closes_in_window": 0,
+      "nonpositive_closes_in_window": 0,
+      "source_count": 2,
+      "span_status": "10Y_DATE_SPAN_OBSERVED"
+    },
+    {
+      "company_id": 124,
+      "symbol": "SHREECEM",
+      "company_name": "SHREE CEMENT LIMITED",
+      "is_active": true,
+      "total_rows": 2471,
+      "first_date": "2016-11-08",
+      "last_date": "2026-11-09",
+      "distinct_dates": 2471,
+      "rows_in_window": 2470,
+      "null_closes_in_window": 0,
+      "nonpositive_closes_in_window": 0,
+      "source_count": 2,
+      "span_status": "10Y_DATE_SPAN_OBSERVED"
+    },
+    {
+      "company_id": 43,
+      "symbol": "SHRIRAMFIN",
+      "company_name": "Shriram Finance Ltd.",
+      "is_active": true,
+      "total_rows": 958,
+      "first_date": "2022-12-20",
+      "last_date": "2026-11-09",
+      "distinct_dates": 958,
+      "rows_in_window": 958,
+      "null_closes_in_window": 0,
+      "nonpositive_closes_in_window": 0,
+      "source_count": 2,
+      "span_status": "PARTIAL_10Y_HISTORY"
+    },
+    {
+      "company_id": 44,
+      "symbol": "SUNPHARMA",
+      "company_name": "Sun Pharmaceutical Industries Ltd.",
+      "is_active": true,
+      "total_rows": 2471,
+      "first_date": "2016-11-08",
+      "last_date": "2026-11-09",
+      "distinct_dates": 2471,
+      "rows_in_window": 2470,
+      "null_closes_in_window": 0,
+      "nonpositive_closes_in_window": 0,
+      "source_count": 2,
+      "span_status": "10Y_DATE_SPAN_OBSERVED"
+    },
+    {
+      "company_id": 45,
+      "symbol": "TATACONSUM",
+      "company_name": "Tata Consumer Products Ltd.",
+      "is_active": true,
+      "total_rows": 1655,
+      "first_date": "2020-02-27",
+      "last_date": "2026-11-09",
+      "distinct_dates": 1655,
+      "rows_in_window": 1655,
+      "null_closes_in_window": 0,
+      "nonpositive_closes_in_window": 0,
+      "source_count": 2,
+      "span_status": "PARTIAL_10Y_HISTORY"
+    },
+    {
+      "company_id": 50,
+      "symbol": "TATAMOTORS",
+      "company_name": "Tata Motors Limited (Pre-Demerger)",
+      "is_active": false,
+      "total_rows": 2214,
+      "first_date": "2016-11-08",
+      "last_date": "2025-10-23",
+      "distinct_dates": 2214,
+      "rows_in_window": 2213,
+      "null_closes_in_window": 0,
+      "nonpositive_closes_in_window": 0,
+      "source_count": 2,
+      "span_status": "HISTORY_ENDS_BEFORE_AS_OF"
+    },
+    {
+      "company_id": 125,
+      "symbol": "TATAMTRDVR",
+      "company_name": "TATA MOTORS DVR  A  ORD",
+      "is_active": false,
+      "total_rows": 1929,
+      "first_date": "2016-11-08",
+      "last_date": "2024-08-29",
+      "distinct_dates": 1929,
+      "rows_in_window": 1928,
+      "null_closes_in_window": 0,
+      "nonpositive_closes_in_window": 0,
+      "source_count": 2,
+      "span_status": "HISTORY_ENDS_BEFORE_AS_OF"
+    },
+    {
+      "company_id": 126,
+      "symbol": "TATAPOWER",
+      "company_name": "TATA POWER CO LTD",
+      "is_active": true,
+      "total_rows": 2471,
+      "first_date": "2016-11-08",
+      "last_date": "2026-11-09",
+      "distinct_dates": 2471,
+      "rows_in_window": 2470,
+      "null_closes_in_window": 0,
+      "nonpositive_closes_in_window": 0,
+      "source_count": 2,
+      "span_status": "10Y_DATE_SPAN_OBSERVED"
+    },
+    {
+      "company_id": 46,
+      "symbol": "TATASTEEL",
+      "company_name": "Tata Steel Ltd.",
+      "is_active": true,
+      "total_rows": 2471,
+      "first_date": "2016-11-08",
+      "last_date": "2026-11-09",
+      "distinct_dates": 2471,
+      "rows_in_window": 2470,
+      "null_closes_in_window": 0,
+      "nonpositive_closes_in_window": 0,
+      "source_count": 2,
+      "span_status": "10Y_DATE_SPAN_OBSERVED"
+    },
+    {
+      "company_id": 47,
+      "symbol": "TCS",
+      "company_name": "Tata Consultancy Services Ltd.",
+      "is_active": true,
+      "total_rows": 2471,
+      "first_date": "2016-11-08",
+      "last_date": "2026-11-09",
+      "distinct_dates": 2471,
+      "rows_in_window": 2470,
+      "null_closes_in_window": 0,
+      "nonpositive_closes_in_window": 0,
+      "source_count": 2,
+      "span_status": "10Y_DATE_SPAN_OBSERVED"
+    },
+    {
+      "company_id": 48,
+      "symbol": "TECHM",
+      "company_name": "Tech Mahindra Ltd.",
+      "is_active": true,
+      "total_rows": 2471,
+      "first_date": "2016-11-08",
+      "last_date": "2026-11-09",
+      "distinct_dates": 2471,
+      "rows_in_window": 2470,
+      "null_closes_in_window": 0,
+      "nonpositive_closes_in_window": 0,
+      "source_count": 2,
+      "span_status": "10Y_DATE_SPAN_OBSERVED"
+    },
+    {
+      "company_id": 49,
+      "symbol": "TITAN",
+      "company_name": "Titan Company Ltd.",
+      "is_active": true,
+      "total_rows": 2471,
+      "first_date": "2016-11-08",
+      "last_date": "2026-11-09",
+      "distinct_dates": 2471,
+      "rows_in_window": 2470,
+      "null_closes_in_window": 0,
+      "nonpositive_closes_in_window": 0,
+      "source_count": 2,
+      "span_status": "10Y_DATE_SPAN_OBSERVED"
+    },
+    {
+      "company_id": 55,
+      "symbol": "TMCV",
+      "company_name": "Tata Motors Limited",
+      "is_active": true,
+      "total_rows": 235,
+      "first_date": "2025-11-26",
+      "last_date": "2026-11-09",
+      "distinct_dates": 235,
+      "rows_in_window": 235,
+      "null_closes_in_window": 0,
+      "nonpositive_closes_in_window": 0,
+      "source_count": 1,
+      "span_status": "PARTIAL_10Y_HISTORY"
+    },
+    {
+      "company_id": 51,
+      "symbol": "TMPV",
+      "company_name": "Tata Motors Passenger Vehicles Limited",
+      "is_active": true,
+      "total_rows": 257,
+      "first_date": "2025-10-24",
+      "last_date": "2026-11-09",
+      "distinct_dates": 257,
+      "rows_in_window": 257,
+      "null_closes_in_window": 0,
+      "nonpositive_closes_in_window": 0,
+      "source_count": 1,
+      "span_status": "PARTIAL_10Y_HISTORY"
+    },
+    {
+      "company_id": 52,
+      "symbol": "TRENT",
+      "company_name": "Trent Ltd.",
+      "is_active": true,
+      "total_rows": 2471,
+      "first_date": "2016-11-08",
+      "last_date": "2026-11-09",
+      "distinct_dates": 2471,
+      "rows_in_window": 2470,
+      "null_closes_in_window": 0,
+      "nonpositive_closes_in_window": 0,
+      "source_count": 2,
+      "span_status": "10Y_DATE_SPAN_OBSERVED"
+    },
+    {
+      "company_id": 53,
+      "symbol": "ULTRACEMCO",
+      "company_name": "UltraTech Cement Ltd.",
+      "is_active": true,
+      "total_rows": 2471,
+      "first_date": "2016-11-08",
+      "last_date": "2026-11-09",
+      "distinct_dates": 2471,
+      "rows_in_window": 2470,
+      "null_closes_in_window": 0,
+      "nonpositive_closes_in_window": 0,
+      "source_count": 2,
+      "span_status": "10Y_DATE_SPAN_OBSERVED"
+    },
+    {
+      "company_id": 127,
+      "symbol": "UPL",
+      "company_name": "UPL LIMITED",
+      "is_active": true,
+      "total_rows": 2471,
+      "first_date": "2016-11-08",
+      "last_date": "2026-11-09",
+      "distinct_dates": 2471,
+      "rows_in_window": 2470,
+      "null_closes_in_window": 0,
+      "nonpositive_closes_in_window": 0,
+      "source_count": 2,
+      "span_status": "10Y_DATE_SPAN_OBSERVED"
+    },
+    {
+      "company_id": 128,
+      "symbol": "VEDL",
+      "company_name": "VEDANTA LIMITED",
+      "is_active": true,
+      "total_rows": 2471,
+      "first_date": "2016-11-08",
+      "last_date": "2026-11-09",
+      "distinct_dates": 2471,
+      "rows_in_window": 2470,
+      "null_closes_in_window": 0,
+      "nonpositive_closes_in_window": 0,
+      "source_count": 2,
+      "span_status": "10Y_DATE_SPAN_OBSERVED"
+    },
+    {
+      "company_id": 54,
+      "symbol": "WIPRO",
+      "company_name": "Wipro Ltd.",
+      "is_active": true,
+      "total_rows": 2471,
+      "first_date": "2016-11-08",
+      "last_date": "2026-11-09",
+      "distinct_dates": 2471,
+      "rows_in_window": 2470,
+      "null_closes_in_window": 0,
+      "nonpositive_closes_in_window": 0,
+      "source_count": 2,
+      "span_status": "10Y_DATE_SPAN_OBSERVED"
+    },
+    {
+      "company_id": 129,
+      "symbol": "YESBANK",
+      "company_name": "YES BANK LIMITED",
+      "is_active": true,
+      "total_rows": 2471,
+      "first_date": "2016-11-08",
+      "last_date": "2026-11-09",
+      "distinct_dates": 2471,
+      "rows_in_window": 2470,
+      "null_closes_in_window": 0,
+      "nonpositive_closes_in_window": 0,
+      "source_count": 2,
+      "span_status": "10Y_DATE_SPAN_OBSERVED"
+    },
+    {
+      "company_id": 130,
+      "symbol": "ZEEL",
+      "company_name": "ZEE ENTERTAINMENT ENT LTD",
+      "is_active": true,
+      "total_rows": 2471,
+      "first_date": "2016-11-08",
+      "last_date": "2026-11-09",
+      "distinct_dates": 2471,
+      "rows_in_window": 2470,
+      "null_closes_in_window": 0,
+      "nonpositive_closes_in_window": 0,
+      "source_count": 2,
+      "span_status": "10Y_DATE_SPAN_OBSERVED"
+    }
+  ],
+  "price_sources": [
+    {
+      "source": "NSE CM-Legacy EQ",
+      "row_count": 138224,
+      "first_date": "2016-11-09",
+      "last_date": "2024-07-05"
+    },
+    {
+      "source": "NSE CM-UDiFF EQ",
+      "row_count": 42957,
+      "first_date": "2024-07-08",
+      "last_date": "2026-11-09"
+    },
+    {
+      "source": "NSE CM-UDiFF EQ - historical ticker ZOMATO",
+      "row_count": 6,
+      "first_date": "2025-04-01",
+      "last_date": "2025-04-08"
+    }
+  ],
+  "monthly_coverage": [
+    {
+      "month": "2016-11",
+      "price_rows": 1035,
+      "companies_covered": 69,
+      "observed_dates": 15
+    },
+    {
+      "month": "2016-12",
+      "price_rows": 1518,
+      "companies_covered": 69,
+      "observed_dates": 22
+    },
+    {
+      "month": "2017-01",
+      "price_rows": 1449,
+      "companies_covered": 69,
+      "observed_dates": 21
+    },
+    {
+      "month": "2017-02",
+      "price_rows": 1328,
+      "companies_covered": 70,
+      "observed_dates": 19
+    },
+    {
+      "month": "2017-03",
+      "price_rows": 1540,
+      "companies_covered": 70,
+      "observed_dates": 22
+    },
+    {
+      "month": "2017-04",
+      "price_rows": 1260,
+      "companies_covered": 70,
+      "observed_dates": 18
+    },
+    {
+      "month": "2017-05",
+      "price_rows": 1540,
+      "companies_covered": 70,
+      "observed_dates": 22
+    },
+    {
+      "month": "2017-06",
+      "price_rows": 1470,
+      "companies_covered": 70,
+      "observed_dates": 21
+    },
+    {
+      "month": "2017-07",
+      "price_rows": 1470,
+      "companies_covered": 70,
+      "observed_dates": 21
+    },
+    {
+      "month": "2017-08",
+      "price_rows": 1470,
+      "companies_covered": 70,
+      "observed_dates": 21
+    },
+    {
+      "month": "2017-09",
+      "price_rows": 1470,
+      "companies_covered": 70,
+      "observed_dates": 21
+    },
+    {
+      "month": "2017-10",
+      "price_rows": 1420,
+      "companies_covered": 71,
+      "observed_dates": 20
+    },
+    {
+      "month": "2017-11",
+      "price_rows": 1572,
+      "companies_covered": 72,
+      "observed_dates": 22
+    },
+    {
+      "month": "2017-12",
+      "price_rows": 1440,
+      "companies_covered": 72,
+      "observed_dates": 20
+    },
+    {
+      "month": "2018-01",
+      "price_rows": 1584,
+      "companies_covered": 72,
+      "observed_dates": 22
+    },
+    {
+      "month": "2018-02",
+      "price_rows": 1368,
+      "companies_covered": 72,
+      "observed_dates": 19
+    },
+    {
+      "month": "2018-03",
+      "price_rows": 1368,
+      "companies_covered": 72,
+      "observed_dates": 19
+    },
+    {
+      "month": "2018-04",
+      "price_rows": 1512,
+      "companies_covered": 72,
+      "observed_dates": 21
+    },
+    {
+      "month": "2018-05",
+      "price_rows": 1584,
+      "companies_covered": 72,
+      "observed_dates": 22
+    },
+    {
+      "month": "2018-06",
+      "price_rows": 1512,
+      "companies_covered": 72,
+      "observed_dates": 21
+    },
+    {
+      "month": "2018-07",
+      "price_rows": 1584,
+      "companies_covered": 72,
+      "observed_dates": 22
+    },
+    {
+      "month": "2018-08",
+      "price_rows": 1512,
+      "companies_covered": 72,
+      "observed_dates": 21
+    },
+    {
+      "month": "2018-09",
+      "price_rows": 1296,
+      "companies_covered": 72,
+      "observed_dates": 18
+    },
+    {
+      "month": "2018-10",
+      "price_rows": 1512,
+      "companies_covered": 72,
+      "observed_dates": 21
+    },
+    {
+      "month": "2018-11",
+      "price_rows": 1440,
+      "companies_covered": 72,
+      "observed_dates": 20
+    },
+    {
+      "month": "2018-12",
+      "price_rows": 1440,
+      "companies_covered": 72,
+      "observed_dates": 20
+    },
+    {
+      "month": "2019-01",
+      "price_rows": 1656,
+      "companies_covered": 72,
+      "observed_dates": 23
+    },
+    {
+      "month": "2019-02",
+      "price_rows": 1440,
+      "companies_covered": 72,
+      "observed_dates": 20
+    },
+    {
+      "month": "2019-03",
+      "price_rows": 1368,
+      "companies_covered": 72,
+      "observed_dates": 19
+    },
+    {
+      "month": "2019-04",
+      "price_rows": 1368,
+      "companies_covered": 72,
+      "observed_dates": 19
+    },
+    {
+      "month": "2019-05",
+      "price_rows": 1584,
+      "companies_covered": 72,
+      "observed_dates": 22
+    },
+    {
+      "month": "2019-06",
+      "price_rows": 1368,
+      "companies_covered": 72,
+      "observed_dates": 19
+    },
+    {
+      "month": "2019-07",
+      "price_rows": 1656,
+      "companies_covered": 72,
+      "observed_dates": 23
+    },
+    {
+      "month": "2019-08",
+      "price_rows": 1440,
+      "companies_covered": 72,
+      "observed_dates": 20
+    },
+    {
+      "month": "2019-09",
+      "price_rows": 1368,
+      "companies_covered": 72,
+      "observed_dates": 19
+    },
+    {
+      "month": "2019-10",
+      "price_rows": 1368,
+      "companies_covered": 72,
+      "observed_dates": 19
+    },
+    {
+      "month": "2019-11",
+      "price_rows": 1440,
+      "companies_covered": 72,
+      "observed_dates": 20
+    },
+    {
+      "month": "2019-12",
+      "price_rows": 1512,
+      "companies_covered": 72,
+      "observed_dates": 21
+    },
+    {
+      "month": "2020-01",
+      "price_rows": 1656,
+      "companies_covered": 72,
+      "observed_dates": 23
+    },
+    {
+      "month": "2020-02",
+      "price_rows": 1370,
+      "companies_covered": 73,
+      "observed_dates": 19
+    },
+    {
+      "month": "2020-03",
+      "price_rows": 1533,
+      "companies_covered": 73,
+      "observed_dates": 21
+    },
+    {
+      "month": "2020-04",
+      "price_rows": 1314,
+      "companies_covered": 73,
+      "observed_dates": 18
+    },
+    {
+      "month": "2020-05",
+      "price_rows": 1387,
+      "companies_covered": 73,
+      "observed_dates": 19
+    },
+    {
+      "month": "2020-06",
+      "price_rows": 1606,
+      "companies_covered": 73,
+      "observed_dates": 22
+    },
+    {
+      "month": "2020-07",
+      "price_rows": 1679,
+      "companies_covered": 73,
+      "observed_dates": 23
+    },
+    {
+      "month": "2020-08",
+      "price_rows": 1533,
+      "companies_covered": 73,
+      "observed_dates": 21
+    },
+    {
+      "month": "2020-09",
+      "price_rows": 1625,
+      "companies_covered": 74,
+      "observed_dates": 22
+    },
+    {
+      "month": "2020-10",
+      "price_rows": 1554,
+      "companies_covered": 74,
+      "observed_dates": 21
+    },
+    {
+      "month": "2020-11",
+      "price_rows": 1406,
+      "companies_covered": 74,
+      "observed_dates": 19
+    },
+    {
+      "month": "2020-12",
+      "price_rows": 1619,
+      "companies_covered": 74,
+      "observed_dates": 22
+    },
+    {
+      "month": "2021-01",
+      "price_rows": 1460,
+      "companies_covered": 73,
+      "observed_dates": 20
+    },
+    {
+      "month": "2021-02",
+      "price_rows": 1460,
+      "companies_covered": 73,
+      "observed_dates": 20
+    },
+    {
+      "month": "2021-03",
+      "price_rows": 1533,
+      "companies_covered": 73,
+      "observed_dates": 21
+    },
+    {
+      "month": "2021-04",
+      "price_rows": 1387,
+      "companies_covered": 73,
+      "observed_dates": 19
+    },
+    {
+      "month": "2021-05",
+      "price_rows": 1460,
+      "companies_covered": 73,
+      "observed_dates": 20
+    },
+    {
+      "month": "2021-06",
+      "price_rows": 1606,
+      "companies_covered": 73,
+      "observed_dates": 22
+    },
+    {
+      "month": "2021-07",
+      "price_rows": 1539,
+      "companies_covered": 74,
+      "observed_dates": 21
+    },
+    {
+      "month": "2021-08",
+      "price_rows": 1554,
+      "companies_covered": 74,
+      "observed_dates": 21
+    },
+    {
+      "month": "2021-09",
+      "price_rows": 1554,
+      "companies_covered": 74,
+      "observed_dates": 21
+    },
+    {
+      "month": "2021-10",
+      "price_rows": 1480,
+      "companies_covered": 74,
+      "observed_dates": 20
+    },
+    {
+      "month": "2021-11",
+      "price_rows": 1480,
+      "companies_covered": 74,
+      "observed_dates": 20
+    },
+    {
+      "month": "2021-12",
+      "price_rows": 1702,
+      "companies_covered": 74,
+      "observed_dates": 23
+    },
+    {
+      "month": "2022-01",
+      "price_rows": 1480,
+      "companies_covered": 74,
+      "observed_dates": 20
+    },
+    {
+      "month": "2022-02",
+      "price_rows": 1480,
+      "companies_covered": 74,
+      "observed_dates": 20
+    },
+    {
+      "month": "2022-03",
+      "price_rows": 1554,
+      "companies_covered": 74,
+      "observed_dates": 21
+    },
+    {
+      "month": "2022-04",
+      "price_rows": 1406,
+      "companies_covered": 74,
+      "observed_dates": 19
+    },
+    {
+      "month": "2022-05",
+      "price_rows": 1554,
+      "companies_covered": 74,
+      "observed_dates": 21
+    },
+    {
+      "month": "2022-06",
+      "price_rows": 1628,
+      "companies_covered": 74,
+      "observed_dates": 22
+    },
+    {
+      "month": "2022-07",
+      "price_rows": 1554,
+      "companies_covered": 74,
+      "observed_dates": 21
+    },
+    {
+      "month": "2022-08",
+      "price_rows": 1480,
+      "companies_covered": 74,
+      "observed_dates": 20
+    },
+    {
+      "month": "2022-09",
+      "price_rows": 1628,
+      "companies_covered": 74,
+      "observed_dates": 22
+    },
+    {
+      "month": "2022-10",
+      "price_rows": 1406,
+      "companies_covered": 74,
+      "observed_dates": 19
+    },
+    {
+      "month": "2022-11",
+      "price_rows": 1554,
+      "companies_covered": 74,
+      "observed_dates": 21
+    },
+    {
+      "month": "2022-12",
+      "price_rows": 1657,
+      "companies_covered": 76,
+      "observed_dates": 22
+    },
+    {
+      "month": "2023-01",
+      "price_rows": 1596,
+      "companies_covered": 76,
+      "observed_dates": 21
+    },
+    {
+      "month": "2023-02",
+      "price_rows": 1520,
+      "companies_covered": 76,
+      "observed_dates": 20
+    },
+    {
+      "month": "2023-03",
+      "price_rows": 1596,
+      "companies_covered": 76,
+      "observed_dates": 21
+    },
+    {
+      "month": "2023-04",
+      "price_rows": 1292,
+      "companies_covered": 76,
+      "observed_dates": 17
+    },
+    {
+      "month": "2023-05",
+      "price_rows": 1672,
+      "companies_covered": 76,
+      "observed_dates": 22
+    },
+    {
+      "month": "2023-06",
+      "price_rows": 1596,
+      "companies_covered": 76,
+      "observed_dates": 21
+    },
+    {
+      "month": "2023-07",
+      "price_rows": 1583,
+      "companies_covered": 76,
+      "observed_dates": 21
+    },
+    {
+      "month": "2023-08",
+      "price_rows": 1650,
+      "companies_covered": 75,
+      "observed_dates": 22
+    },
+    {
+      "month": "2023-09",
+      "price_rows": 1519,
+      "companies_covered": 76,
+      "observed_dates": 20
+    },
+    {
+      "month": "2023-10",
+      "price_rows": 1520,
+      "companies_covered": 76,
+      "observed_dates": 20
+    },
+    {
+      "month": "2023-11",
+      "price_rows": 1520,
+      "companies_covered": 76,
+      "observed_dates": 20
+    },
+    {
+      "month": "2023-12",
+      "price_rows": 1520,
+      "companies_covered": 76,
+      "observed_dates": 20
+    },
+    {
+      "month": "2024-01",
+      "price_rows": 1596,
+      "companies_covered": 76,
+      "observed_dates": 21
+    },
+    {
+      "month": "2024-02",
+      "price_rows": 1596,
+      "companies_covered": 76,
+      "observed_dates": 21
+    },
+    {
+      "month": "2024-03",
+      "price_rows": 1368,
+      "companies_covered": 76,
+      "observed_dates": 18
+    },
+    {
+      "month": "2024-04",
+      "price_rows": 1520,
+      "companies_covered": 76,
+      "observed_dates": 20
+    },
+    {
+      "month": "2024-05",
+      "price_rows": 1596,
+      "companies_covered": 76,
+      "observed_dates": 21
+    },
+    {
+      "month": "2024-06",
+      "price_rows": 1444,
+      "companies_covered": 76,
+      "observed_dates": 19
+    },
+    {
+      "month": "2024-07",
+      "price_rows": 1668,
+      "companies_covered": 76,
+      "observed_dates": 22
+    },
+    {
+      "month": "2024-08",
+      "price_rows": 1574,
+      "companies_covered": 75,
+      "observed_dates": 21
+    },
+    {
+      "month": "2024-09",
+      "price_rows": 1554,
+      "companies_covered": 74,
+      "observed_dates": 21
+    },
+    {
+      "month": "2024-10",
+      "price_rows": 1628,
+      "companies_covered": 74,
+      "observed_dates": 22
+    },
+    {
+      "month": "2024-11",
+      "price_rows": 1406,
+      "companies_covered": 74,
+      "observed_dates": 19
+    },
+    {
+      "month": "2024-12",
+      "price_rows": 1554,
+      "companies_covered": 74,
+      "observed_dates": 21
+    },
+    {
+      "month": "2025-01",
+      "price_rows": 1702,
+      "companies_covered": 74,
+      "observed_dates": 23
+    },
+    {
+      "month": "2025-02",
+      "price_rows": 1406,
+      "companies_covered": 74,
+      "observed_dates": 19
+    },
+    {
+      "month": "2025-03",
+      "price_rows": 1406,
+      "companies_covered": 74,
+      "observed_dates": 19
+    },
+    {
+      "month": "2025-04",
+      "price_rows": 1406,
+      "companies_covered": 74,
+      "observed_dates": 19
+    },
+    {
+      "month": "2025-05",
+      "price_rows": 1554,
+      "companies_covered": 74,
+      "observed_dates": 21
+    },
+    {
+      "month": "2025-06",
+      "price_rows": 1554,
+      "companies_covered": 74,
+      "observed_dates": 21
+    },
+    {
+      "month": "2025-07",
+      "price_rows": 1702,
+      "companies_covered": 74,
+      "observed_dates": 23
+    },
+    {
+      "month": "2025-08",
+      "price_rows": 1406,
+      "companies_covered": 74,
+      "observed_dates": 19
+    },
+    {
+      "month": "2025-09",
+      "price_rows": 1628,
+      "companies_covered": 74,
+      "observed_dates": 22
+    },
+    {
+      "month": "2025-10",
+      "price_rows": 1554,
+      "companies_covered": 75,
+      "observed_dates": 21
+    },
+    {
+      "month": "2025-11",
+      "price_rows": 1409,
+      "companies_covered": 75,
+      "observed_dates": 19
+    },
+    {
+      "month": "2025-12",
+      "price_rows": 1650,
+      "companies_covered": 75,
+      "observed_dates": 22
+    },
+    {
+      "month": "2026-01",
+      "price_rows": 1500,
+      "companies_covered": 75,
+      "observed_dates": 20
+    },
+    {
+      "month": "2026-02",
+      "price_rows": 1499,
+      "companies_covered": 75,
+      "observed_dates": 20
+    },
+    {
+      "month": "2026-03",
+      "price_rows": 1406,
+      "companies_covered": 74,
+      "observed_dates": 19
+    },
+    {
+      "month": "2026-04",
+      "price_rows": 1480,
+      "companies_covered": 74,
+      "observed_dates": 20
+    },
+    {
+      "month": "2026-05",
+      "price_rows": 1406,
+      "companies_covered": 74,
+      "observed_dates": 19
+    },
+    {
+      "month": "2026-06",
+      "price_rows": 1554,
+      "companies_covered": 74,
+      "observed_dates": 21
+    },
+    {
+      "month": "2026-07",
+      "price_rows": 1702,
+      "companies_covered": 74,
+      "observed_dates": 23
+    },
+    {
+      "month": "2026-08",
+      "price_rows": 1554,
+      "companies_covered": 74,
+      "observed_dates": 21
+    },
+    {
+      "month": "2026-09",
+      "price_rows": 1554,
+      "companies_covered": 74,
+      "observed_dates": 21
+    },
+    {
+      "month": "2026-10",
+      "price_rows": 1480,
+      "companies_covered": 74,
+      "observed_dates": 20
+    },
+    {
+      "month": "2026-11",
+      "price_rows": 447,
+      "companies_covered": 77,
+      "observed_dates": 6
+    }
+  ]
+}

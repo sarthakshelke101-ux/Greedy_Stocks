@@ -1,0 +1,616 @@
+﻿GREEDY STOCKS - FIVE STRATEGY EXPERIMENT PREFLIGHT
+Generated: 2026-11-09 20:51:17
+Project: C:\Users\Sarthak S Shelke\GREEDY STOCKS
+
+
+
+==========================================================================================
+FILE: analytics/greedy_v2_engine.py
+==========================================================================================
+  - Equal-weight portfolio.
+  - Sequential greedy selection.
+> - Maximise historical annualised Sharpe ratio.
+  - Maximum 10 stocks.
+  - Maximum 3 stocks per sector.
+  - Risk-free rate defaults to 0%.
+  """
+  
+  import pandas as pd
+  
+> ANALYTICS_DIR = Path(__file__).resolve().parent
+  
+  if str(ANALYTICS_DIR) not in sys.path:
+      sys.path.insert(0, str(ANALYTICS_DIR))
+  
+  from portfolio_analytics import calculate_portfolio
+  
+  
+> def greedy_select_stocks(
+      train_prices: pd.DataFrame,
+      sectors: dict[str, str],
+>     target_stocks: int = 10,
+      max_per_sector: int = 3,
+      risk_free_rate: float = 0.0,
+>     fixed_symbols: list[str] | None = None,
+  ) -> dict[str, Any]:
+>     """Select stocks sequentially using training-period Sharpe ratio."""
+  
+      if not isinstance(train_prices, pd.DataFrame):
+          raise TypeError("train_prices must be a pandas DataFrame.")
+  
+      if train_prices.empty:
+          raise ValueError("At least 60 price observations are required.")
+  
+>     if not isinstance(target_stocks, int) or isinstance(target_stocks, bool):
+>         raise ValueError("target_stocks must be an integer.")
+  
+      if not isinstance(max_per_sector, int) or isinstance(max_per_sector, bool):
+          raise ValueError("max_per_sector must be an integer.")
+  
+>     if target_stocks < 1:
+>         raise ValueError("target_stocks must be at least 1.")
+  
+      if max_per_sector < 1:
+          raise ValueError("max_per_sector must be at least 1.")
+  
+>     if target_stocks > len(train_prices.columns):
+          raise ValueError("Target exceeds the available number of stocks.")
+  
+      if not math.isfinite(float(risk_free_rate)):
+          raise ValueError("risk_free_rate must be finite.")
+  
+      )
+  
+>     if target_stocks > sector_capacity:
+          raise ValueError(
+              "Target cannot be reached under the sector constraint."
+          )
+  
+      # User-selected stocks are fixed starting holdings.
+>     fixed_symbols = [
+          str(symbol).strip().upper()
+>         for symbol in (fixed_symbols or [])
+      ]
+  
+>     if len(fixed_symbols) != len(set(fixed_symbols)):
+          raise ValueError("Duplicate user-selected stocks are not allowed.")
+  
+>     unknown_symbols = [symbol for symbol in fixed_symbols if symbol not in symbols]
+      if unknown_symbols:
+          raise ValueError(
+              f"User-selected stocks are unavailable in the eligible data: {unknown_symbols}"
+          )
+  
+>     if len(fixed_symbols) > target_stocks:
+          raise ValueError(
+>             f"You selected {len(fixed_symbols)} stocks but requested "
+>             f"{target_stocks}. Increase portfolio size or remove selections."
+          )
+  
+      fixed_sector_counts: dict[str, int] = {}
+>     for symbol in fixed_symbols:
+          sector = sectors[symbol]
+          fixed_sector_counts[sector] = fixed_sector_counts.get(sector, 0) + 1
+  
+      conflicts = {
+          sector: count
+          )
+  
+>     selected: list[str] = list(fixed_symbols)
+      selection_log: list[dict[str, Any]] = []
+  
+      print("\nGREEDY STOCKS â€” V2 SELECTION ENGINE")
+      print("=" * 65)
+      print("Available candidates:", len(symbols))
+>     print("Target portfolio size:", target_stocks)
+      print("Maximum stocks per sector:", max_per_sector)
+      print("Risk-free rate:", risk_free_rate)
+      print("Training observations:", len(prices))
+      print("Training dates:", prices.index.min().date(), "to", prices.index.max().date())
+  
+      # Sequential greedy selection.
+>     for step in range(len(selected) + 1, target_stocks + 1):
+  
+          candidates: list[dict[str, Any]] = []
+  
+          for symbol in symbols:
+  
+                  symbols=trial_symbols,
+                  risk_free_rate=risk_free_rate,
+>                 max_stocks=target_stocks,
+                  max_per_sector=max_per_sector,
+              )
+  
+>             sharpe = result["metrics"].get("sharpe_ratio")
+  
+>             if sharpe is None or pd.isna(sharpe):
+                  continue
+  
+>             sharpe = float(sharpe)
+  
+>             if not math.isfinite(sharpe):
+                  continue
+  
+              candidates.append({
+                  "symbol": symbol,
+                  "sector": sectors[symbol],
+>                 "portfolio_sharpe": sharpe,
+                  "portfolio_size": len(trial_symbols),
+              })
+  
+          if not candidates:
+              raise ValueError(
+          candidates.sort(
+              key=lambda item: (
+>                 -item["portfolio_sharpe"],
+                  item["symbol"],
+              )
+          )
+  
+          winner = candidates[0]
+  
+>         previous_sharpe = (
+>             selection_log[-1]["portfolio_sharpe"]
+              if selection_log
+              else None
+          )
+  
+          selected.append(winner["symbol"])
+              "sector": winner["sector"],
+              "portfolio_size": len(selected),
+>             "portfolio_sharpe": winner["portfolio_sharpe"],
+>             "previous_portfolio_sharpe": previous_sharpe,
+>             "marginal_sharpe_change": (
+>                 winner["portfolio_sharpe"] - previous_sharpe
+>                 if previous_sharpe is not None
+                  else None
+              ),
+              "candidates_evaluated": len(candidates),
+          })
+  
+              f"Step {step:02d}: {winner['symbol']:<15} "
+              f"Sector: {winner['sector']:<25} "
+>             f"Sharpe: {winner['portfolio_sharpe']:.4f}"
+          )
+  
+      # Calculate final portfolio metrics.
+      final_result = calculate_portfolio(
+          prices=prices,
+          symbols=selected,
+          risk_free_rate=risk_free_rate,
+>         max_stocks=target_stocks,
+          max_per_sector=max_per_sector,
+      )
+  
+      print("\nSELECTION COMPLETE")
+      print("-" * 65)
+      }))
+      print("Selected symbols:", ", ".join(selected))
+>     print("Final Sharpe:", final_result["metrics"].get("sharpe_ratio"))
+  
+      return {
+          "selected_symbols": selected,
+          "selection_log": pd.DataFrame(selection_log),
+          "portfolio_result": final_result,
+          "assumptions": {
+>             "selection_method": "SEQUENTIAL_GREEDY_SHARPE",
+              "price_basis": "SPLIT_BONUS_ADJUSTED",
+              "weighting": "EQUAL_WEIGHT",
+              "daily_rebalancing": True,
+              "risk_free_rate": risk_free_rate,
+>             "target_stocks": target_stocks,
+>             "user_selected_symbols": fixed_symbols,
+              "greedy_selected_symbols": [
+>                 x for x in selected if x not in fixed_symbols
+              ],
+              "max_per_sector": max_per_sector,
+              "selection_uses_training_data_only": True,
+              "globally_optimal": False,
+          },
+
+
+==========================================================================================
+FILE: analytics/greedy_v2_data.py
+==========================================================================================
+  
+  
+> MINIMUM_OBSERVATIONS = 252
+> START_DATE = "2016-11-08"
+> END_DATE = date.today().isoformat()
+  
+  
+> class GreedyV2Dataset:
+      def __init__(
+          self,
+          constituents,
+          sectors,
+          raw_prices,
+  
+  
+> def _normalise_price_series(series, name):
+      result = pd.to_numeric(series, errors="coerce").copy()
+  
+      if not isinstance(result.index, pd.DatetimeIndex):
+          result.index = pd.to_datetime(result.index, errors="raise")
+  
+  
+  
+> def _load_benchmark(start_date, end_date):
+      benchmark = get_index_closes(start_date, end_date)
+  
+      if not isinstance(benchmark, pd.Series):
+          raise TypeError("get_index_closes must return a pandas Series.")
+  
+  
+  
+> def prepare_greedy_v2_dataset(
+      start_date=START_DATE,
+      end_date=END_DATE,
+  ):
+      print("\nGREEDY STOCKS â€” V2 DATA PREPARATION")
+      print("=" * 65)
+
+
+==========================================================================================
+FILE: analytics/run_greedy_v2_experiment.py
+==========================================================================================
+  
+  
+> ROOT = Path(__file__).resolve().parents[1]
+> OUTPUT_DIR = ROOT / "database" / "processed" / "analytics"
+  
+> TARGET_STOCKS = 10
+> MAX_PER_SECTOR = 3
+> RISK_FREE_RATE = 0.0
+  
+> PRICE_BASIS = "SPLIT_BONUS_ADJUSTED"
+> RETURN_TYPE = "PRICE_RETURN"
+  
+  
+> def json_safe(value):
+      """Convert supported objects into JSON-compatible values."""
+  
+      if isinstance(value, dict):
+          return {
+              str(key): json_safe(item)
+  
+  
+> def scalar_metrics(portfolio):
+      """Return scalar financial metrics without pandas objects."""
+  
+      metrics = portfolio["metrics"]
+      output = {}
+  
+  
+  
+> def evaluate_period(name, prices, benchmark, sectors, symbols):
+      """Evaluate a fixed stock selection on one historical period."""
+  
+      portfolio = calculate_portfolio(
+          prices=prices,
+          sectors=sectors,
+          symbols=symbols,
+          risk_free_rate=RISK_FREE_RATE,
+>         max_stocks=TARGET_STOCKS,
+          max_per_sector=MAX_PER_SECTOR,
+          price_basis=PRICE_BASIS,
+          return_type=RETURN_TYPE,
+      )
+  
+  
+  
+> def main():
+      print("\nGREEDY STOCKS â€” V2 REAL-WORLD EXPERIMENT")
+      print("=" * 65)
+  
+      # ---------------------------------------------------------
+      # 1. Load historical dataset
+          raise ValueError("Date alignment failed after intersection.")
+  
+>     if prices.shape[1] < TARGET_STOCKS:
+          raise ValueError(
+              f"Only {prices.shape[1]} eligible companies; "
+>             f"portfolio requires {TARGET_STOCKS}."
+          )
+  
+      if prices.empty:
+          raise ValueError("Historical price dataset is empty.")
+  
+          train_prices=splits.train,
+          sectors=sectors,
+>         target_stocks=TARGET_STOCKS,
+          max_per_sector=MAX_PER_SECTOR,
+          risk_free_rate=RISK_FREE_RATE,
+      )
+  
+      selected_symbols = selection.get("selected_symbols")
+      selected_symbols = list(selected_symbols)
+  
+>     if len(selected_symbols) != TARGET_STOCKS:
+          raise ValueError(
+>             f"Expected {TARGET_STOCKS} selected stocks, "
+              f"received {len(selected_symbols)}."
+          )
+  
+      if len(set(selected_symbols)) != len(selected_symbols):
+          raise ValueError(
+          symbols=selected_symbols,
+          risk_free_rate=RISK_FREE_RATE,
+>         max_stocks=TARGET_STOCKS,
+          max_per_sector=MAX_PER_SECTOR,
+          price_basis=PRICE_BASIS,
+          return_type=RETURN_TYPE,
+      )
+  
+  
+      registry_config = {
+>         "target_stocks": TARGET_STOCKS,
+          "max_per_sector": MAX_PER_SECTOR,
+          "risk_free_rate": RISK_FREE_RATE,
+          "price_basis": PRICE_BASIS,
+          "return_type": RETURN_TYPE,
+          "selected_symbols": list(selected_symbols),
+              "observations": len(registry_returns),
+              "membership_basis": "LATEST_MONTHLY_SNAPSHOT",
+>             "transaction_costs_included": False,
+              "source_runner": "run_greedy_v2_experiment.py",
+              "benchmark_only_dates_excluded": [
+                  str(d.date()) for d in benchmark_only_dates
+              ],
+              "stock_only_dates_excluded": [
+  
+          "selection_constraints": {
+>             "target_stocks": TARGET_STOCKS,
+              "max_per_sector": MAX_PER_SECTOR,
+              "risk_free_rate": RISK_FREE_RATE,
+          },
+  
+          "data_metadata": dataset.metadata,
+              "benchmark": "NIFTY_50_PRICE_RETURN",
+              "membership_basis": "LATEST_MONTHLY_SNAPSHOT",
+>             "transaction_costs_included": False,
+              "database_writes": False,
+          },
+  
+          "period_results": {
+              "training": training_result,
+          "Historical experiment, not an investment recommendation."
+      )
+>     print("No dividends or transaction costs included.")
+      print("Corporate-action coverage is partial.")
+      print(
+          "Latest constituent snapshot creates survivorship-bias risk."
+      )
+      print(
+
+
+==========================================================================================
+FILE: analytics/database_adapter.py
+==========================================================================================
+  
+  
+> INDEX_SYMBOL = "NIFTY 50"
+  
+  
+> def get_latest_constituents() -> pd.DataFrame:
+      """Return companies from the latest available NIFTY 50 snapshot.
+  
+      These are monthly snapshot observations, not verified daily
+      effective-membership intervals.
+      """
+  
+  
+> def get_company_prices(
+      company_id: int,
+      start_date: str | None = None,
+      end_date: str | None = None,
+  ) -> pd.Series:
+      """Retrieve raw closing prices for one company.
+  
+  
+> def calculate_latest_snapshot_metrics(
+      start_date: str | None = None,
+      end_date: str | None = None,
+      risk_free_rate: float = 0.0,
+  ) -> pd.DataFrame:
+      """Calculate raw-price metrics for the latest snapshot's companies.
+          metrics[
+              ["symbol", "period_return_pct", "cagr_pct",
+>              "annualized_volatility_pct", "maximum_drawdown_pct",
+>              "sharpe_ratio"]
+          ].head(10).to_string(index=False)
+      )
+  
+      print("\nPrice basis: RAW_CLOSE_UNADJUSTED")
+      print("Universe: LATEST MONTHLY NIFTY 50 SNAPSHOT")
+  
+  
+> def get_all_companies_with_prices(min_observations: int = 252) -> pd.DataFrame:
+      """Return active and inactive companies with sufficient actual price history."""
+      if min_observations < 1:
+          raise ValueError("min_observations must be positive.")
+  
+      query = text("""
+
+
+==========================================================================================
+FILE: analytics/test_greedy_v2_engine.py
+==========================================================================================
+  
+  
+> class GreedyV2EngineTests(unittest.TestCase):
+  
+      def setUp(self):
+          dates = pd.bdate_range("2025-01-01", periods=100)
+  
+          rng = np.random.default_rng(42)
+              self.prices,
+              self.sectors,
+>             target_stocks=3,
+          )
+  
+          self.assertEqual(len(result["selected_symbols"]), 3)
+  
+      def test_sector_limit_is_respected(self):
+              self.prices,
+              self.sectors,
+>             target_stocks=4,
+              max_per_sector=2,
+          )
+  
+          selected = result["selected_symbols"]
+  
+              self.prices,
+              self.sectors,
+>             target_stocks=4,
+          )
+  
+          selected = result["selected_symbols"]
+  
+          self.assertEqual(len(selected), len(set(selected)))
+              self.prices,
+              self.sectors,
+>             target_stocks=4,
+          )
+  
+          self.assertEqual(len(result["selection_log"]), 4)
+  
+      def test_selection_log_steps_are_sequential(self):
+              self.prices,
+              self.sectors,
+>             target_stocks=4,
+          )
+  
+          self.assertEqual(
+              result["selection_log"]["step"].tolist(),
+              [1, 2, 3, 4],
+              self.prices,
+              self.sectors,
+>             target_stocks=3,
+          )
+  
+          self.assertEqual(
+              result["assumptions"]["weighting"],
+              "EQUAL_WEIGHT",
+              self.prices,
+              self.sectors,
+>             target_stocks=3,
+          )
+  
+          self.assertTrue(
+              result["assumptions"]["selection_uses_training_data_only"]
+          )
+                  prices,
+                  self.sectors,
+>                 target_stocks=3,
+              )
+  
+      def test_non_positive_prices_are_rejected(self):
+          prices = self.prices.copy()
+          prices.iloc[5, 0] = 0
+                  prices,
+                  self.sectors,
+>                 target_stocks=3,
+              )
+  
+      def test_duplicate_dates_are_rejected(self):
+          prices = self.prices.copy()
+          prices.index = list(prices.index[:-1]) + [prices.index[-2]]
+                  prices,
+                  self.sectors,
+>                 target_stocks=3,
+              )
+  
+      def test_insufficient_history_is_rejected(self):
+          prices = self.prices.iloc[:30]
+  
+                  prices,
+                  self.sectors,
+>                 target_stocks=3,
+              )
+  
+      def test_missing_sector_is_rejected(self):
+          sectors = self.sectors.copy()
+          del sectors["AAA"]
+                  self.prices,
+                  sectors,
+>                 target_stocks=3,
+              )
+  
+      def test_impossible_sector_constraint_is_rejected(self):
+          with self.assertRaises(ValueError):
+              greedy_select_stocks(
+                  self.prices,
+                  self.sectors,
+>                 target_stocks=5,
+                  max_per_sector=1,
+              )
+  
+      def test_invalid_target_is_rejected(self):
+          with self.assertRaises(ValueError):
+                  self.prices,
+                  self.sectors,
+>                 target_stocks=0,
+              )
+  
+      def test_risk_free_rate_is_validated(self):
+          with self.assertRaises(ValueError):
+              greedy_select_stocks(
+                  self.prices,
+                  self.sectors,
+>                 target_stocks=3,
+                  risk_free_rate=-0.01,
+              )
+  
+  
+  if __name__ == "__main__":
+
+========== EXISTING EXPERIMENT OUTPUT ==========
+EXISTS: database/processed/analytics/greedy_v2_experiment.json
+{
+  "experiment": "GREEDY_V2_CHRONOLOGICAL",
+  "generated_at_utc": "2026-11-09T14:45:00.796091+00:00",
+  "selected_symbols": [
+    "TITAN",
+    "BEL",
+    "SBIN",
+    "BRITANNIA",
+    "HEROMOTOCO",
+    "SBILIFE",
+    "VEDL",
+    "EICHERMOT",
+    "SHRIRAMFIN",
+    "BSE"
+  ],
+  "sector_allocation": {
+    "Gems, Jewellery And Watches": 1,
+    "Aerospace & Defense": 1,
+    "Public Sector Bank": 1,
+    "Unclassified": 2,
+    "MOTOR CYCLES/SCOOTERS": 1,
+    "Life Insurance": 1,
+    "2/3 Wheelers": 1,
+    "Non Banking Financial Company (NBFC)": 1,
+    "Exchange and Data Platform": 1
+  },
+  "selection_constraints": {
+    "target_stocks": 10,
+    "max_per_sector": 3,
+    "risk_free_rate": 0.0
+  },
+  "data_metadata": {
+    "requested_start_date": "2025-04-01",
+    "requested_end_date": "2026-11-05",
+    "actual_start_date": "2025-04-01",
+EXISTS: database/processed/analytics/greedy_v2_selection_log.csv
+step,symbol,sector,portfolio_size,portfolio_sharpe,previous_portfolio_sharpe,marginal_sharpe_change,candidates_evaluated
+1,TITAN,"Gems, Jewellery And Watches",1,1.824224362517824,,,72
+2,BEL,Aerospace & Defense,2,2.267539327817739,1.824224362517824,0.4433149652999149,71
+3,SBIN,Public Sector Bank,3,2.4726056266722543,2.267539327817739,0.20506629885451533,70
+4,BRITANNIA,Unclassified,4,2.5455729389536694,2.4726056266722543,0.07296731228141518,69
+5,HEROMOTOCO,MOTOR CYCLES/SCOOTERS,5,2.573708827324663,2.5455729389536694,0.028135888370993456,68
+6,SBILIFE,Life Insurance,6,2.591938433754288,2.573708827324663,0.01822960642962501,67
+7,VEDL,Unclassified,7,2.5792625879452586,2.591938433754288,-0.012675845809029251,66
+8,EICHERMOT,2/3 Wheelers,8,2.5278867255424307,2.5792625879452586,-0.05137586240282799,65
+9,SHRIRAMFIN,Non Banking Financial Company (NBFC),9,2.4870739773841586,2.5278867255424307,-0.04081274815827207,64
+10,BSE,Exchange and Data Platform,10,2.455863264773941,2.4870739773841586,-0.031210712610217684,63

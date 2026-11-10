@@ -1,0 +1,303 @@
+PHASE 4 DATABASE SNAPSHOT
+===========================================================================
+Database dialect: mysql
+Tables discovered: 18
+
+===========================================================================
+TABLE: app_users
+COLUMNS:
+  id | type=BIGINT | nullable=False
+  username | type=VARCHAR(100) | nullable=True
+  email | type=VARCHAR(255) | nullable=True
+  password_hash | type=VARCHAR(255) | nullable=True
+  preferred_language | type=ENUM | nullable=True
+  experience_level | type=ENUM | nullable=True
+  created_at | type=TIMESTAMP | nullable=True
+  updated_at | type=TIMESTAMP | nullable=True
+ROW COUNT: 1
+DATE RANGE [created_at]: 2026-11-07 16:37:05 -> 2026-11-07 16:37:05
+DATE RANGE [updated_at]: 2026-11-07 16:37:05 -> 2026-11-07 16:37:05
+
+===========================================================================
+TABLE: companies
+COLUMNS:
+  id | type=INTEGER | nullable=False
+  symbol | type=VARCHAR(30) | nullable=False
+  company_name | type=VARCHAR(255) | nullable=False
+  isin | type=VARCHAR(20) | nullable=True
+  sector_id | type=INTEGER | nullable=True
+  exchange | type=VARCHAR(10) | nullable=True
+  is_active | type=TINYINT | nullable=True
+  created_at | type=TIMESTAMP | nullable=True
+  updated_at | type=TIMESTAMP | nullable=True
+ROW COUNT: 80
+DATE RANGE [created_at]: 2026-11-06 23:41:52 -> 2026-11-09 00:41:46
+DATE RANGE [updated_at]: 2026-11-06 23:41:52 -> 2026-11-09 00:41:46
+
+===========================================================================
+TABLE: company_identifiers
+COLUMNS:
+  id | type=BIGINT | nullable=False
+  company_id | type=INTEGER | nullable=False
+  identifier_type | type=VARCHAR(30) | nullable=False
+  identifier_value | type=VARCHAR(50) | nullable=False
+  valid_from | type=DATE | nullable=False
+  valid_to | type=DATE | nullable=True
+  source_name | type=VARCHAR(150) | nullable=True
+  source_reference | type=VARCHAR(500) | nullable=True
+  created_at | type=TIMESTAMP | nullable=True
+ROW COUNT: 39
+DATE RANGE [valid_from]: 2016-11-08 -> 2026-01-14
+DATE RANGE [valid_to]: 2017-09-21 -> 2026-11-05
+DATE RANGE [created_at]: 2026-11-06 23:56:50 -> 2026-11-09 00:42:00
+
+===========================================================================
+TABLE: conversations
+COLUMNS:
+  id | type=BIGINT | nullable=False
+  user_id | type=BIGINT | nullable=False
+  title | type=VARCHAR(255) | nullable=True
+  is_pinned | type=TINYINT | nullable=True
+  created_at | type=TIMESTAMP | nullable=True
+  updated_at | type=TIMESTAMP | nullable=True
+ROW COUNT: 28
+DATE RANGE [created_at]: 2026-11-07 16:37:05 -> 2026-11-09 23:40:22
+DATE RANGE [updated_at]: 2026-11-07 16:37:05 -> 2026-11-09 23:41:06
+
+===========================================================================
+TABLE: corporate_actions
+COLUMNS:
+  id | type=BIGINT | nullable=False
+  company_id | type=INTEGER | nullable=False
+  action_type | type=ENUM | nullable=False
+  announcement_date | type=DATE | nullable=True
+  ex_date | type=DATE | nullable=True
+  record_date | type=DATE | nullable=True
+  effective_date | type=DATE | nullable=True
+  description | type=TEXT | nullable=True
+  ratio | type=VARCHAR(100) | nullable=True
+  dividend_amount | type=DECIMAL(18, 4) | nullable=True
+  source_name | type=VARCHAR(150) | nullable=True
+  source_reference | type=VARCHAR(500) | nullable=True
+  created_at | type=TIMESTAMP | nullable=True
+ROW COUNT: 7
+DATE RANGE [announcement_date]: 2025-05-02 -> 2026-04-22
+DATE RANGE [ex_date]: 2025-05-23 -> 2026-06-04
+DATE RANGE [record_date]: 2025-05-23 -> 2026-06-04
+DATE RANGE [effective_date]: 2025-05-23 -> 2026-06-04
+DATE RANGE [created_at]: 2026-11-07 00:27:01 -> 2026-11-07 00:27:01
+
+===========================================================================
+TABLE: data_import_logs
+COLUMNS:
+  id | type=BIGINT | nullable=False
+  source_id | type=INTEGER | nullable=True
+  file_name | type=VARCHAR(500) | nullable=True
+  import_type | type=VARCHAR(80) | nullable=True
+  records_received | type=INTEGER | nullable=True
+  records_imported | type=INTEGER | nullable=True
+  records_rejected | type=INTEGER | nullable=True
+  status | type=ENUM | nullable=True
+  error_message | type=TEXT | nullable=True
+  started_at | type=TIMESTAMP | nullable=True
+  completed_at | type=TIMESTAMP | nullable=True
+ROW COUNT: 1
+DATE RANGE [started_at]: 2026-11-07 00:10:36 -> 2026-11-07 00:10:36
+DATE RANGE [completed_at]: 2026-11-07 00:10:36 -> 2026-11-07 00:10:36
+
+===========================================================================
+TABLE: data_sources
+COLUMNS:
+  id | type=INTEGER | nullable=False
+  source_name | type=VARCHAR(150) | nullable=False
+  source_type | type=VARCHAR(80) | nullable=True
+  source_url | type=VARCHAR(1000) | nullable=True
+  is_active | type=TINYINT | nullable=True
+  created_at | type=TIMESTAMP | nullable=True
+ROW COUNT: 0
+DATE RANGE [created_at]: None -> None
+
+===========================================================================
+TABLE: index_constituent_observation_spans
+COLUMNS:
+  id | type=BIGINT | nullable=False
+  index_symbol | type=VARCHAR(30) | nullable=False
+  company_id | type=INTEGER | nullable=False
+  symbol | type=VARCHAR(30) | nullable=False
+  security_name | type=VARCHAR(255) | nullable=False
+  first_observed_month | type=DATE | nullable=False
+  last_observed_month | type=DATE | nullable=False
+  observed_month_count | type=SMALLINT | nullable=False
+  internal_missing_month_count | type=SMALLINT | nullable=False
+  internal_missing_months | type=TEXT | nullable=True
+  related_event_count | type=SMALLINT | nullable=False
+  related_events | type=TEXT | nullable=True
+  observation_status | type=VARCHAR(40) | nullable=False
+  start_date_status | type=VARCHAR(60) | nullable=False
+  end_date_status | type=VARCHAR(60) | nullable=False
+  source_name | type=VARCHAR(150) | nullable=False
+  source_reference | type=VARCHAR(500) | nullable=True
+  created_at | type=TIMESTAMP | nullable=True
+  updated_at | type=TIMESTAMP | nullable=True
+ROW COUNT: 54
+DATE RANGE [first_observed_month]: 2025-04-01 -> 2026-09-01
+DATE RANGE [last_observed_month]: 2025-08-01 -> 2026-10-01
+DATE RANGE [start_date_status]: OBSERVATION_BOUNDARY_ONLY -> OBSERVATION_BOUNDARY_ONLY
+DATE RANGE [end_date_status]: OBSERVATION_BOUNDARY_ONLY -> OBSERVATION_BOUNDARY_ONLY
+DATE RANGE [created_at]: 2026-11-06 23:58:54 -> 2026-11-06 23:58:54
+DATE RANGE [updated_at]: 2026-11-06 23:58:54 -> 2026-11-06 23:58:54
+
+===========================================================================
+TABLE: index_constituent_snapshots
+COLUMNS:
+  id | type=BIGINT | nullable=False
+  index_symbol | type=VARCHAR(30) | nullable=False
+  report_month | type=DATE | nullable=False
+  symbol | type=VARCHAR(30) | nullable=False
+  security_name | type=VARCHAR(255) | nullable=False
+  industry | type=VARCHAR(255) | nullable=True
+  equity_capital | type=DECIMAL(24, 4) | nullable=True
+  index_market_cap | type=DECIMAL(24, 8) | nullable=True
+  weightage | type=DECIMAL(12, 8) | nullable=True
+  beta | type=DECIMAL(12, 8) | nullable=True
+  r2 | type=DECIMAL(12, 8) | nullable=True
+  volatility | type=DECIMAL(16, 8) | nullable=True
+  monthly_return | type=DECIMAL(16, 8) | nullable=True
+  avg_impact_cost | type=DECIMAL(16, 8) | nullable=True
+  source_archive | type=VARCHAR(255) | nullable=False
+  source_csv | type=VARCHAR(255) | nullable=False
+  created_at | type=TIMESTAMP | nullable=True
+ROW COUNT: 950
+DATE RANGE [report_month]: 2025-04-01 -> 2026-10-01
+DATE RANGE [created_at]: 2026-11-06 23:18:29 -> 2026-11-06 23:18:29
+
+===========================================================================
+TABLE: index_constituents
+COLUMNS:
+  id | type=BIGINT | nullable=False
+  index_symbol | type=VARCHAR(30) | nullable=False
+  company_id | type=INTEGER | nullable=False
+  effective_from | type=DATE | nullable=False
+  effective_to | type=DATE | nullable=True
+  source_name | type=VARCHAR(150) | nullable=True
+  created_at | type=TIMESTAMP | nullable=True
+ROW COUNT: 79
+DATE RANGE [effective_from]: 2016-11-08 -> 2026-09-30
+DATE RANGE [effective_to]: 2017-03-30 -> 2026-09-29
+DATE RANGE [created_at]: 2026-11-09 13:15:59 -> 2026-11-09 13:15:59
+
+===========================================================================
+TABLE: index_membership_actions
+COLUMNS:
+  id | type=BIGINT | nullable=False
+  index_symbol | type=VARCHAR(30) | nullable=False
+  event_date | type=DATE | nullable=False
+  company_id | type=INTEGER | nullable=False
+  symbol | type=VARCHAR(30) | nullable=False
+  action | type=VARCHAR(10) | nullable=False
+  source_reference | type=VARCHAR(500) | nullable=False
+  verification_status | type=VARCHAR(50) | nullable=False
+  created_at | type=TIMESTAMP | nullable=True
+ROW COUNT: 57
+DATE RANGE [event_date]: 2017-03-31 -> 2026-09-30
+DATE RANGE [created_at]: 2026-11-09 13:22:54 -> 2026-11-09 13:22:54
+
+===========================================================================
+TABLE: index_membership_events
+COLUMNS:
+  id | type=BIGINT | nullable=False
+  index_symbol | type=VARCHAR(30) | nullable=False
+  event_date | type=DATE | nullable=False
+  event_type | type=VARCHAR(40) | nullable=False
+  old_company_id | type=INTEGER | nullable=False
+  new_company_id | type=INTEGER | nullable=False
+  old_symbol | type=VARCHAR(30) | nullable=False
+  new_symbol | type=VARCHAR(30) | nullable=False
+  company_identity | type=VARCHAR(255) | nullable=True
+  source_reference | type=VARCHAR(500) | nullable=False
+  verification_status | type=VARCHAR(50) | nullable=False
+  created_at | type=TIMESTAMP | nullable=True
+ROW COUNT: 4
+DATE RANGE [event_date]: 2025-09-30 -> 2026-09-30
+DATE RANGE [created_at]: 2026-11-06 23:50:04 -> 2026-11-06 23:50:04
+
+===========================================================================
+TABLE: index_prices
+COLUMNS:
+  id | type=BIGINT | nullable=False
+  index_symbol | type=VARCHAR(30) | nullable=False
+  trade_date | type=DATE | nullable=False
+  open_value | type=DECIMAL(18, 4) | nullable=True
+  high_value | type=DECIMAL(18, 4) | nullable=True
+  low_value | type=DECIMAL(18, 4) | nullable=True
+  close_value | type=DECIMAL(18, 4) | nullable=True
+  data_source | type=VARCHAR(100) | nullable=True
+  created_at | type=TIMESTAMP | nullable=True
+ROW COUNT: 2,478
+DATE RANGE [trade_date]: 2016-11-08 -> 2026-11-06
+DATE RANGE [created_at]: 2026-11-07 11:42:46 -> 2026-11-09 01:33:15
+
+===========================================================================
+TABLE: messages
+COLUMNS:
+  id | type=BIGINT | nullable=False
+  conversation_id | type=BIGINT | nullable=False
+  role | type=ENUM | nullable=False
+  content | type=LONGTEXT | nullable=False
+  created_at | type=TIMESTAMP | nullable=True
+ROW COUNT: 218
+DATE RANGE [created_at]: 2026-11-07 16:37:05 -> 2026-11-09 23:41:06
+
+===========================================================================
+TABLE: sectors
+COLUMNS:
+  id | type=INTEGER | nullable=False
+  name | type=VARCHAR(120) | nullable=False
+  description | type=TEXT | nullable=True
+  created_at | type=TIMESTAMP | nullable=True
+ROW COUNT: 36
+DATE RANGE [created_at]: 2026-11-06 23:41:52 -> 2026-11-08 12:02:15
+
+===========================================================================
+TABLE: stock_prices
+COLUMNS:
+  id | type=BIGINT | nullable=False
+  company_id | type=INTEGER | nullable=False
+  trade_date | type=DATE | nullable=False
+  open_price | type=DECIMAL(18, 4) | nullable=True
+  high_price | type=DECIMAL(18, 4) | nullable=True
+  low_price | type=DECIMAL(18, 4) | nullable=True
+  close_price | type=DECIMAL(18, 4) | nullable=True
+  previous_close | type=DECIMAL(18, 4) | nullable=True
+  total_traded_volume | type=BIGINT | nullable=True
+  total_traded_value | type=DECIMAL(22, 4) | nullable=True
+  total_trades | type=BIGINT | nullable=True
+  price_source | type=VARCHAR(100) | nullable=True
+  created_at | type=TIMESTAMP | nullable=True
+ROW COUNT: 181,256
+DATE RANGE [trade_date]: 2016-11-08 -> 2026-11-09
+DATE RANGE [created_at]: 2026-11-07 00:00:47 -> 2026-11-09 18:30:33
+
+===========================================================================
+TABLE: user_preferences
+COLUMNS:
+  id | type=BIGINT | nullable=False
+  user_id | type=BIGINT | nullable=False
+  theme | type=VARCHAR(30) | nullable=True
+  onboarding_completed | type=TINYINT | nullable=True
+  notifications_enabled | type=TINYINT | nullable=True
+  created_at | type=TIMESTAMP | nullable=True
+ROW COUNT: 0
+DATE RANGE [created_at]: None -> None
+
+===========================================================================
+TABLE: validation_logs
+COLUMNS:
+  id | type=BIGINT | nullable=False
+  import_id | type=BIGINT | nullable=True
+  severity | type=ENUM | nullable=False
+  validation_rule | type=VARCHAR(150) | nullable=False
+  description | type=TEXT | nullable=True
+  created_at | type=TIMESTAMP | nullable=True
+ROW COUNT: 16
+DATE RANGE [created_at]: 2026-11-07 00:10:36 -> 2026-11-07 00:10:36

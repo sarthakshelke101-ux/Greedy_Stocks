@@ -1,0 +1,348 @@
+﻿
+> backend\chat_routes.py:214:def detect_period(question: str) -> str:
+  backend\chat_routes.py:215:    q = question.lower()
+  backend\chat_routes.py:216:
+  backend\chat_routes.py:217:    if re.search(r"\b(1y|1 year|one year|12 months)\b", q):
+  backend\chat_routes.py:218:        return "1Y"
+  backend\chat_routes.py:219:
+  backend\chat_routes.py:220:    if re.search(r"\b(6m|6 months|six months)\b", q):
+  backend\chat_routes.py:221:        return "6M"
+  backend\chat_routes.py:222:
+  backend\chat_routes.py:223:    if re.search(r"\b(1m|1 month|one month|30 days)\b", q):
+  backend\chat_routes.py:224:        return "1M"
+  backend\chat_routes.py:225:
+  backend\chat_routes.py:226:    return "3M"
+  backend\chat_routes.py:227:
+  backend\chat_routes.py:228:
+  backend\chat_routes.py:229:
+> backend\chat_routes.py:230:def detect_intent(question: str) -> str:
+  backend\chat_routes.py:231:    q = question.lower()
+  backend\chat_routes.py:232:
+  backend\chat_routes.py:233:    # 1. Fundamental research takes priority when explicitly requested.
+  backend\chat_routes.py:234:    if any(word in q for word in [
+  backend\chat_routes.py:235:        "undervalued", "overvalued", "valuation",
+  backend\chat_routes.py:236:        "fundamental", "fundamentals", "pe ratio",
+  backend\chat_routes.py:237:        "p/e ratio", "balance sheet", "earnings",
+  backend\chat_routes.py:238:    ]):
+  backend\chat_routes.py:239:        return "FUNDAMENTAL_RESEARCH"
+  backend\chat_routes.py:240:
+  backend\chat_routes.py:241:    # 2. Explicit Greedy Algorithm requests.
+  backend\chat_routes.py:242:    if any(word in q for word in [
+  backend\chat_routes.py:243:        "greedy algorithm", "greedy picks",
+  backend\chat_routes.py:244:        "greedy selection", "algorithm experiment",
+  backend\chat_routes.py:245:        "greedy portfolio",
+  backend\chat_routes.py:246:    ]):
+  backend\chat_routes.py:247:        return "GREEDY_PICKS"
+  backend\chat_routes.py:248:
+  backend\chat_routes.py:249:    # 3. Sector performance.
+  backend\chat_routes.py:250:    if any(word in q for word in [
+  backend\chat_routes.py:251:        "sector performance", "best performing sectors",
+  backend\chat_routes.py:252:        "top performing sectors", "sector returns",
+  backend\chat_routes.py:253:        "which sectors performed",
+  backend\chat_routes.py:254:    ]):
+  backend\chat_routes.py:255:        return "SECTOR_PERFORMANCE"
+  backend\chat_routes.py:256:
+  backend\chat_routes.py:257:    # 4. Performance requests take priority over supporting
+  backend\chat_routes.py:258:    #    mentions of risk, volatility or drawdown.
+  backend\chat_routes.py:259:    if any(word in q for word in [
+  backend\chat_routes.py:260:        "best performing", "top performing",
+  backend\chat_routes.py:261:        "performed best", "top performers",
+  backend\chat_routes.py:262:        "best performers", "top stocks",
+  backend\chat_routes.py:263:        "best stocks", "highest returns",
+  backend\chat_routes.py:264:        "highest return", "performance",
+  backend\chat_routes.py:265:        "performers", "historical returns",
+  backend\chat_routes.py:266:        "stock returns", "gainers",
+  backend\chat_routes.py:267:        "most profitable",
+  backend\chat_routes.py:268:    ]):
+  backend\chat_routes.py:269:        return "PERFORMANCE_STANDOUTS"
+  backend\chat_routes.py:270:
+  backend\chat_routes.py:271:    # 5. Pure risk and stability requests.
+  backend\chat_routes.py:272:    if any(word in q for word in [
+  backend\chat_routes.py:273:        "volatility", "drawdown", "sharpe",
+  backend\chat_routes.py:274:        "risk", "stable", "stability",
+  backend\chat_routes.py:275:        "least volatile", "lowest volatility",
+  backend\chat_routes.py:276:    ]):
+  backend\chat_routes.py:277:        return "RISK_AND_STABILITY"
+  backend\chat_routes.py:278:
+  backend\chat_routes.py:279:    # 6. Financial education.
+  backend\chat_routes.py:280:    if any(word in q for word in [
+  backend\chat_routes.py:281:        "nifty 50", "what is nifty",
+  backend\chat_routes.py:282:        "explain nifty", "stock market basics",
+  backend\chat_routes.py:283:    ]):
+  backend\chat_routes.py:284:        return "EDUCATION"
+  backend\chat_routes.py:285:
+  backend\chat_routes.py:286:    return "GENERAL"
+  backend\chat_routes.py:287:
+  backend\chat_routes.py:288:
+  backend\chat_routes.py:289:
+  backend\chat_routes.py:290:# --------------------------------------------------
+  backend\chat_routes.py:291:# VERIFIED FINANCIAL CONTEXT
+  backend\chat_routes.py:292:# --------------------------------------------------
+  backend\chat_routes.py:293:
+> backend\chat_routes.py:294:def format_insights(ideas, metadata, category):
+  backend\chat_routes.py:295:    selected = [
+  backend\chat_routes.py:296:        idea for idea in ideas
+  backend\chat_routes.py:297:        if idea.get("category") == category
+  backend\chat_routes.py:298:        and idea.get("status") == "AVAILABLE"
+  backend\chat_routes.py:299:    ]
+  backend\chat_routes.py:300:
+  backend\chat_routes.py:301:    if not selected:
+  backend\chat_routes.py:302:        return (
+  backend\chat_routes.py:303:            "No sufficient verified financial insight "
+  backend\chat_routes.py:304:            "is available for this category in the current report."
+  backend\chat_routes.py:305:        )
+  backend\chat_routes.py:306:
+  backend\chat_routes.py:307:    lines = []
+  backend\chat_routes.py:308:
+  backend\chat_routes.py:309:    for index, idea in enumerate(selected, start=1):
+  backend\chat_routes.py:310:        evidence = idea.get("evidence") or {}
+  backend\chat_routes.py:311:
+  backend\chat_routes.py:312:        lines.append(
+  backend\chat_routes.py:313:            f"{index}. {idea.get('title', 'Historical insight')}"
+  backend\chat_routes.py:314:        )
+  backend\chat_routes.py:315:
+  backend\chat_routes.py:316:        lines.append(
+  backend\chat_routes.py:317:            f"What: {idea.get('what', 'Not available')}"
+  backend\chat_routes.py:318:        )
+  backend\chat_routes.py:319:
+  backend\chat_routes.py:320:        if idea.get("why"):
+  backend\chat_routes.py:321:            lines.append(f"Why: {idea['why']}")
+  backend\chat_routes.py:322:
+  backend\chat_routes.py:323:        fields = [
+  backend\chat_routes.py:324:            ("period_return_pct", "Historical return", "%"),
+  backend\chat_routes.py:325:            ("annualized_volatility_pct", "Annualised volatility", "%"),
+  backend\chat_routes.py:326:            ("maximum_drawdown_pct", "Maximum drawdown", "%"),
+  backend\chat_routes.py:327:            ("sharpe_ratio", "Sharpe ratio", ""),
+  backend\chat_routes.py:328:            ("observations", "Return observations", ""),
+  backend\chat_routes.py:329:        ]
+  backend\chat_routes.py:330:
+  backend\chat_routes.py:331:        for key, label, suffix in fields:
+  backend\chat_routes.py:332:            value = evidence.get(key)
+  backend\chat_routes.py:333:
+  backend\chat_routes.py:334:            if value is not None:
+  backend\chat_routes.py:335:                lines.append(f"{label}: {value}{suffix}")
+  backend\chat_routes.py:336:
+  backend\chat_routes.py:337:        if idea.get("risk"):
+  backend\chat_routes.py:338:            lines.append(f"Risk: {idea['risk']}")
+  backend\chat_routes.py:339:
+  backend\chat_routes.py:340:        lines.append("")
+  backend\chat_routes.py:341:
+  backend\chat_routes.py:342:    lines.extend([
+  backend\chat_routes.py:343:        "DATA METHODOLOGY",
+  backend\chat_routes.py:344:        f"Index: {metadata.get('index')}",
+  backend\chat_routes.py:345:        f"Period: {metadata.get('period')}",
+  backend\chat_routes.py:346:        f"Data as of: {metadata.get('data_as_of')}",
+  backend\chat_routes.py:347:        f"Snapshot month: {metadata.get('snapshot_month')}",
+  backend\chat_routes.py:348:        f"Price basis: {metadata.get('price_basis')}",
+  backend\chat_routes.py:349:        (
+  backend\chat_routes.py:350:            "Corporate-action coverage: "
+  backend\chat_routes.py:351:            f"{metadata.get('corporate_action_coverage')}"
+  backend\chat_routes.py:352:        ),
+  backend\chat_routes.py:353:        f"Dividend adjusted: {metadata.get('dividend_adjusted')}",
+  backend\chat_routes.py:354:        "",
+  backend\chat_routes.py:355:        "IMPORTANT DISCLOSURES",
+  backend\chat_routes.py:356:        "These are historical observations, not forecasts.",
+  backend\chat_routes.py:357:        "The universe uses the latest monthly NIFTY 50 snapshot.",
+  backend\chat_routes.py:358:        "Historical daily membership is not reconstructed.",
+  backend\chat_routes.py:359:        "Corporate-action coverage is partial.",
+> backend\chat_routes.py:367:def build_financial_context(question):
+  backend\chat_routes.py:368:    intent = detect_intent(question)
+  backend\chat_routes.py:369:
+  backend\chat_routes.py:370:    if intent == "FUNDAMENTAL_RESEARCH":
+  backend\chat_routes.py:371:        return (
+  backend\chat_routes.py:372:            "QUESTION CATEGORY: FUNDAMENTAL RESEARCH\n\n"
+  backend\chat_routes.py:373:            "VERIFIED DATA STATUS:\n"
+  backend\chat_routes.py:374:            "Company fundamentals and valuation data are not yet "
+  backend\chat_routes.py:375:            "integrated into GREEDY STOCKS.\n"
+  backend\chat_routes.py:376:            "Historical share-price performance cannot establish "
+  backend\chat_routes.py:377:            "whether a company is undervalued or overvalued.\n"
+  backend\chat_routes.py:378:            "Do not invent financial statements, revenue, profit, "
+  backend\chat_routes.py:379:            "debt, cash flow or valuation ratios.\n"
+  backend\chat_routes.py:380:            "You may explain what data would be needed for "
+  backend\chat_routes.py:381:            "a proper fundamental analysis."
+  backend\chat_routes.py:382:        )
+  backend\chat_routes.py:383:
+  backend\chat_routes.py:384:    if intent == "EDUCATION":
+  backend\chat_routes.py:385:        return (
+  backend\chat_routes.py:386:            "QUESTION CATEGORY: FINANCIAL EDUCATION\n"
+  backend\chat_routes.py:387:            "Explain NIFTY 50 and basic stock market concepts "
+  backend\chat_routes.py:388:            "at a beginner-friendly level.\n"
+  backend\chat_routes.py:389:            "Do not invent current market figures."
+  backend\chat_routes.py:390:        )
+  backend\chat_routes.py:391:
+  backend\chat_routes.py:392:    if intent == "GENERAL":
+  backend\chat_routes.py:393:        return (
+  backend\chat_routes.py:394:            "QUESTION CATEGORY: GENERAL GREEDY STOCKS HELP\n"
+  backend\chat_routes.py:395:            "GREEDY STOCKS currently supports:\n"
+  backend\chat_routes.py:396:            "- Historical NIFTY 50 stock performance.\n"
+  backend\chat_routes.py:397:            "- Historical volatility and drawdown.\n"
+  backend\chat_routes.py:398:            "- NIFTY 50 sector performance.\n"
+  backend\chat_routes.py:399:            "- Historical Greedy Algorithm experiments.\n"
+  backend\chat_routes.py:400:            "- Financial education and beginner explanations.\n"
+  backend\chat_routes.py:401:            "Fundamental valuation data is not yet integrated."
+  backend\chat_routes.py:402:        )
+  backend\chat_routes.py:403:
+  backend\chat_routes.py:404:    period = detect_period(question)
+  backend\chat_routes.py:405:
+  backend\chat_routes.py:406:    try:
+  backend\chat_routes.py:407:        report = generate_market_ideas(
+  backend\chat_routes.py:408:            period=period,
+  backend\chat_routes.py:409:            top_n=5,
+  backend\chat_routes.py:410:        )
+  backend\chat_routes.py:411:
+  backend\chat_routes.py:412:        metadata = report["metadata"]
+  backend\chat_routes.py:413:        ideas = report["ideas"]
+  backend\chat_routes.py:414:
+  backend\chat_routes.py:415:        verified_context = format_insights(
+  backend\chat_routes.py:416:            ideas=ideas,
+  backend\chat_routes.py:417:            metadata=metadata,
+  backend\chat_routes.py:418:            category=intent,
+  backend\chat_routes.py:419:        )
+  backend\chat_routes.py:420:
+  backend\chat_routes.py:421:        return (
+  backend\chat_routes.py:422:            f"QUESTION CATEGORY: {intent}\n"
+  backend\chat_routes.py:423:            f"REQUESTED PERIOD: {period}\n\n"
+  backend\chat_routes.py:424:            "THE FOLLOWING IS VERIFIED APPLICATION DATA. "
+  backend\chat_routes.py:425:            "Do not modify or invent its figures.\n\n"
+  backend\chat_routes.py:426:            f"{verified_context}"
+  backend\chat_routes.py:427:        )
+  backend\chat_routes.py:428:
+  backend\chat_routes.py:429:    except Exception:
+  backend\chat_routes.py:430:        logger.exception(
+  backend\chat_routes.py:431:            "Financial intelligence generation failed."
+  backend\chat_routes.py:432:        )
+> backend\chat_routes.py:446:def generate_gemini_answer(question, financial_context, history):
+  backend\chat_routes.py:447:    api_key = os.getenv("GEMINI_API_KEY")
+  backend\chat_routes.py:448:
+  backend\chat_routes.py:449:    if not api_key:
+  backend\chat_routes.py:450:        logger.warning("GEMINI_API_KEY is not configured.")
+  backend\chat_routes.py:451:        return None
+  backend\chat_routes.py:452:
+  backend\chat_routes.py:453:    try:
+  backend\chat_routes.py:454:        from google import genai
+  backend\chat_routes.py:455:
+  backend\chat_routes.py:456:        client = genai.Client(api_key=api_key)
+  backend\chat_routes.py:457:
+  backend\chat_routes.py:458:        calculation_context = build_calculation_context(
+  backend\chat_routes.py:459:            client=client,
+  backend\chat_routes.py:460:            model=GEMINI_MODEL,
+  backend\chat_routes.py:461:            question=question,
+  backend\chat_routes.py:462:        )
+  backend\chat_routes.py:463:
+  backend\chat_routes.py:464:        greedy_knowledge_context = build_greedy_knowledge_context(
+  backend\chat_routes.py:465:            question=question,
+  backend\chat_routes.py:466:        )
+  backend\chat_routes.py:467:
+  backend\chat_routes.py:468:        historical_company_context = (
+  backend\chat_routes.py:469:            build_historical_intelligence_context(
+  backend\chat_routes.py:470:                client=client,
+  backend\chat_routes.py:471:                model=GEMINI_MODEL,
+  backend\chat_routes.py:472:                question=question,
+  backend\chat_routes.py:473:            )
+  backend\chat_routes.py:474:            if re.search(
+  backend\chat_routes.py:475:                r"\b(analy[sz]e|analysis of|historical performance of|historical returns of|returns? of|sharpe(?: ratio)? of|volatility 
+of|drawdown of)\b",
+  backend\chat_routes.py:476:                question or "",
+  backend\chat_routes.py:477:                re.IGNORECASE,
+  backend\chat_routes.py:478:            )
+  backend\chat_routes.py:479:            else "No company-specific historical analysis requested."
+  backend\chat_routes.py:480:        )
+  backend\chat_routes.py:481:
+  backend\chat_routes.py:482:        greedy_v2_evidence_context = build_greedy_v2_evidence_context(question)
+  backend\chat_routes.py:483:
+  backend\chat_routes.py:484:
+  backend\chat_routes.py:485:
+  backend\chat_routes.py:486:        conversation_text = ""
+  backend\chat_routes.py:487:
+  backend\chat_routes.py:488:        for item in history:
+  backend\chat_routes.py:489:            role = item["role"].upper()
+  backend\chat_routes.py:490:            content = item["content"]
+  backend\chat_routes.py:491:
+  backend\chat_routes.py:492:            conversation_text += (
+  backend\chat_routes.py:493:                f"\n{role}: {content}\n"
+  backend\chat_routes.py:494:            )
+  backend\chat_routes.py:495:
+  backend\chat_routes.py:496:        prompt = f"""
+  backend\chat_routes.py:497:VERIFIED APPLICATION CONTEXT:
+  backend\chat_routes.py:498:
+  backend\chat_routes.py:499:{financial_context}
+  backend\chat_routes.py:500:
+  backend\chat_routes.py:501:COMPANY-SPECIFIC HISTORICAL INTELLIGENCE:
+  backend\chat_routes.py:502:{historical_company_context}
+  backend\chat_routes.py:503:
+  backend\chat_routes.py:504:GREEDY V2 EXPERIMENT AND WALK-FORWARD EVIDENCE:
+  backend\chat_routes.py:505:{greedy_v2_evidence_context}
+  backend\chat_routes.py:506:
+  backend\chat_routes.py:507:GREEDY SOURCE-CODE KNOWLEDGE:
+  backend\chat_routes.py:508:
+  backend\chat_routes.py:509:{greedy_knowledge_context}
+  backend\chat_routes.py:510:
+  backend\chat_routes.py:511:SOURCE KNOWLEDGE RULES:
+> backend\chat_routes.py:574:def generate_greedy_answer(question, history):
+  backend\chat_routes.py:575:    financial_context = build_financial_context(question)
+  backend\chat_routes.py:576:
+  backend\chat_routes.py:577:    # Deterministic fallback is always available.
+  backend\chat_routes.py:578:    fallback_answer = financial_context
+  backend\chat_routes.py:579:
+  backend\chat_routes.py:580:    ai_answer = generate_gemini_answer(
+  backend\chat_routes.py:581:        question=question,
+  backend\chat_routes.py:582:        financial_context=financial_context,
+  backend\chat_routes.py:583:        history=history,
+  backend\chat_routes.py:584:    )
+  backend\chat_routes.py:585:
+  backend\chat_routes.py:586:    if ai_answer:
+  backend\chat_routes.py:587:        return ai_answer
+  backend\chat_routes.py:588:
+  backend\chat_routes.py:589:    logger.warning(
+  backend\chat_routes.py:590:        "Using deterministic fallback response."
+  backend\chat_routes.py:591:    )
+  backend\chat_routes.py:592:
+  backend\chat_routes.py:593:    return (
+  backend\chat_routes.py:594:        "GREEDY AI is temporarily unavailable, so I'm "
+  backend\chat_routes.py:595:        "showing the verified application information instead.\n\n"
+  backend\chat_routes.py:596:        f"{fallback_answer}"
+  backend\chat_routes.py:597:    )
+  backend\chat_routes.py:598:
+  backend\chat_routes.py:599:
+  backend\chat_routes.py:600:# --------------------------------------------------
+  backend\chat_routes.py:601:# SEND CHAT MESSAGE
+  backend\chat_routes.py:602:# --------------------------------------------------
+  backend\chat_routes.py:603:
+  backend\chat_routes.py:604:@router.post("/chat", response_model=ChatResponse)
+  backend\chat_routes.py:605:def send_message(request: ChatRequest):
+  backend\chat_routes.py:606:    question = request.message.strip()
+  backend\chat_routes.py:607:
+  backend\chat_routes.py:608:    if not question:
+  backend\chat_routes.py:609:        raise HTTPException(
+  backend\chat_routes.py:610:            status_code=400,
+  backend\chat_routes.py:611:            detail="Message cannot be empty.",
+  backend\chat_routes.py:612:        )
+  backend\chat_routes.py:613:
+  backend\chat_routes.py:614:    try:
+  backend\chat_routes.py:615:        # Validate existing conversation and load its history.
+  backend\chat_routes.py:616:        history = get_recent_history(request.conversation_id)
+  backend\chat_routes.py:617:
+  backend\chat_routes.py:618:        # Generate the answer before opening the write transaction.
+  backend\chat_routes.py:619:        answer = generate_greedy_answer(
+  backend\chat_routes.py:620:            question=question,
+  backend\chat_routes.py:621:            history=history,
+  backend\chat_routes.py:622:        )
+  backend\chat_routes.py:623:
+  backend\chat_routes.py:624:        with engine.begin() as connection:
+  backend\chat_routes.py:625:            user_id = get_or_create_dev_user(connection)
+  backend\chat_routes.py:626:
+  backend\chat_routes.py:627:            if request.conversation_id is None:
+  backend\chat_routes.py:628:                result = connection.execute(
+  backend\chat_routes.py:629:                    text("""
+  backend\chat_routes.py:630:                        INSERT INTO conversations (
+  backend\chat_routes.py:631:                            user_id,
+  backend\chat_routes.py:632:                            title
+  backend\chat_routes.py:633:                        )
+  backend\chat_routes.py:634:                        VALUES (
+  backend\chat_routes.py:635:                            :user_id,
+  backend\chat_routes.py:636:                            :title
+  backend\chat_routes.py:637:                        )
+  backend\chat_routes.py:638:                    """),
+  backend\chat_routes.py:639:                    {
+
+

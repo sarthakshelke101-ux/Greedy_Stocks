@@ -1,0 +1,1137 @@
+{
+  "audit": "Phase 4 historical index membership schema audit",
+  "read_only": true,
+  "tables": {
+    "index_constituents": {
+      "exists": true,
+      "columns": [
+        {
+          "name": "id",
+          "type": "BIGINT",
+          "nullable": false
+        },
+        {
+          "name": "index_symbol",
+          "type": "VARCHAR(30)",
+          "nullable": false
+        },
+        {
+          "name": "company_id",
+          "type": "INTEGER",
+          "nullable": false
+        },
+        {
+          "name": "effective_from",
+          "type": "DATE",
+          "nullable": false
+        },
+        {
+          "name": "effective_to",
+          "type": "DATE",
+          "nullable": true
+        },
+        {
+          "name": "source_name",
+          "type": "VARCHAR(150)",
+          "nullable": true
+        },
+        {
+          "name": "created_at",
+          "type": "TIMESTAMP",
+          "nullable": true
+        }
+      ],
+      "primary_key": [
+        "id"
+      ],
+      "indexes": [
+        {
+          "name": "company_id",
+          "columns": [
+            "company_id"
+          ],
+          "unique": false
+        },
+        {
+          "name": "idx_constituent_dates",
+          "columns": [
+            "index_symbol",
+            "effective_from",
+            "effective_to"
+          ],
+          "unique": false
+        },
+        {
+          "name": "uq_constituent_period",
+          "columns": [
+            "index_symbol",
+            "company_id",
+            "effective_from"
+          ],
+          "unique": true
+        }
+      ],
+      "row_count": 79,
+      "sample_rows": [
+        {
+          "id": "1",
+          "index_symbol": "NIFTY 50",
+          "company_id": "106",
+          "effective_from": "2016-11-08",
+          "effective_to": "2017-09-28",
+          "source_name": "CERTIFIED_MEMBERSHIP_CSV | CLOSED",
+          "created_at": "2026-11-09T13:15:59"
+        },
+        {
+          "id": "2",
+          "index_symbol": "NIFTY 50",
+          "company_id": "1",
+          "effective_from": "2022-09-30",
+          "effective_to": null,
+          "source_name": "CERTIFIED_MEMBERSHIP_CSV | ACTIVE",
+          "created_at": "2026-11-09T13:15:59"
+        },
+        {
+          "id": "3",
+          "index_symbol": "NIFTY 50",
+          "company_id": "2",
+          "effective_from": "2016-11-08",
+          "effective_to": null,
+          "source_name": "CERTIFIED_MEMBERSHIP_CSV | ACTIVE",
+          "created_at": "2026-11-09T13:15:59"
+        },
+        {
+          "id": "4",
+          "index_symbol": "NIFTY 50",
+          "company_id": "107",
+          "effective_from": "2016-11-08",
+          "effective_to": "2018-04-01",
+          "source_name": "CERTIFIED_MEMBERSHIP_CSV | CLOSED",
+          "created_at": "2026-11-09T13:15:59"
+        },
+        {
+          "id": "5",
+          "index_symbol": "NIFTY 50",
+          "company_id": "3",
+          "effective_from": "2022-03-31",
+          "effective_to": null,
+          "source_name": "CERTIFIED_MEMBERSHIP_CSV | ACTIVE",
+          "created_at": "2026-11-09T13:15:59"
+        }
+      ]
+    },
+    "index_membership_actions": {
+      "exists": true,
+      "columns": [
+        {
+          "name": "id",
+          "type": "BIGINT",
+          "nullable": false
+        },
+        {
+          "name": "index_symbol",
+          "type": "VARCHAR(30)",
+          "nullable": false
+        },
+        {
+          "name": "event_date",
+          "type": "DATE",
+          "nullable": false
+        },
+        {
+          "name": "company_id",
+          "type": "INTEGER",
+          "nullable": false
+        },
+        {
+          "name": "symbol",
+          "type": "VARCHAR(30)",
+          "nullable": false
+        },
+        {
+          "name": "action",
+          "type": "VARCHAR(10)",
+          "nullable": false
+        },
+        {
+          "name": "source_reference",
+          "type": "VARCHAR(500)",
+          "nullable": false
+        },
+        {
+          "name": "verification_status",
+          "type": "VARCHAR(50)",
+          "nullable": false
+        },
+        {
+          "name": "created_at",
+          "type": "TIMESTAMP",
+          "nullable": true
+        }
+      ],
+      "primary_key": [
+        "id"
+      ],
+      "indexes": [
+        {
+          "name": "fk_membership_action_company",
+          "columns": [
+            "company_id"
+          ],
+          "unique": false
+        },
+        {
+          "name": "uq_membership_action",
+          "columns": [
+            "index_symbol",
+            "event_date",
+            "symbol",
+            "action"
+          ],
+          "unique": true
+        }
+      ],
+      "row_count": 57,
+      "sample_rows": [
+        {
+          "id": "1",
+          "index_symbol": "NIFTY 50",
+          "event_date": "2017-03-31",
+          "company_id": "110",
+          "symbol": "BHEL",
+          "action": "REMOVE",
+          "source_reference": "NSE_PR_2017-02-16",
+          "verification_status": "OFFICIAL_SOURCE_VERIFIED",
+          "created_at": "2026-11-09T13:22:54"
+        },
+        {
+          "id": "2",
+          "index_symbol": "NIFTY 50",
+          "event_date": "2017-03-31",
+          "company_id": "119",
+          "symbol": "IDEA",
+          "action": "REMOVE",
+          "source_reference": "NSE_PR_2017-02-16",
+          "verification_status": "OFFICIAL_SOURCE_VERIFIED",
+          "created_at": "2026-11-09T13:22:54"
+        },
+        {
+          "id": "3",
+          "index_symbol": "NIFTY 50",
+          "event_date": "2017-03-31",
+          "company_id": "118",
+          "symbol": "IBULHSGFIN",
+          "action": "ADD",
+          "source_reference": "NSE_PR_2017-02-16",
+          "verification_status": "OFFICIAL_SOURCE_VERIFIED",
+          "created_at": "2026-11-09T13:22:54"
+        },
+        {
+          "id": "4",
+          "index_symbol": "NIFTY 50",
+          "event_date": "2017-03-31",
+          "company_id": "121",
+          "symbol": "IOC",
+          "action": "ADD",
+          "source_reference": "NSE_PR_2017-02-16",
+          "verification_status": "OFFICIAL_SOURCE_VERIFIED",
+          "created_at": "2026-11-09T13:22:54"
+        },
+        {
+          "id": "5",
+          "index_symbol": "NIFTY 50",
+          "event_date": "2017-05-26",
+          "company_id": "17",
+          "symbol": "GRASIM",
+          "action": "REMOVE",
+          "source_reference": "NSE_PR_2017-04-27",
+          "verification_status": "OFFICIAL_SOURCE_VERIFIED",
+          "created_at": "2026-11-09T13:22:54"
+        }
+      ]
+    },
+    "index_membership_events": {
+      "exists": true,
+      "columns": [
+        {
+          "name": "id",
+          "type": "BIGINT",
+          "nullable": false
+        },
+        {
+          "name": "index_symbol",
+          "type": "VARCHAR(30)",
+          "nullable": false
+        },
+        {
+          "name": "event_date",
+          "type": "DATE",
+          "nullable": false
+        },
+        {
+          "name": "event_type",
+          "type": "VARCHAR(40)",
+          "nullable": false
+        },
+        {
+          "name": "old_company_id",
+          "type": "INTEGER",
+          "nullable": false
+        },
+        {
+          "name": "new_company_id",
+          "type": "INTEGER",
+          "nullable": false
+        },
+        {
+          "name": "old_symbol",
+          "type": "VARCHAR(30)",
+          "nullable": false
+        },
+        {
+          "name": "new_symbol",
+          "type": "VARCHAR(30)",
+          "nullable": false
+        },
+        {
+          "name": "company_identity",
+          "type": "VARCHAR(255)",
+          "nullable": true
+        },
+        {
+          "name": "source_reference",
+          "type": "VARCHAR(500)",
+          "nullable": false
+        },
+        {
+          "name": "verification_status",
+          "type": "VARCHAR(50)",
+          "nullable": false
+        },
+        {
+          "name": "created_at",
+          "type": "TIMESTAMP",
+          "nullable": true
+        }
+      ],
+      "primary_key": [
+        "id"
+      ],
+      "indexes": [
+        {
+          "name": "idx_membership_event_date",
+          "columns": [
+            "index_symbol",
+            "event_date"
+          ],
+          "unique": false
+        },
+        {
+          "name": "idx_membership_new_company",
+          "columns": [
+            "new_company_id"
+          ],
+          "unique": false
+        },
+        {
+          "name": "idx_membership_old_company",
+          "columns": [
+            "old_company_id"
+          ],
+          "unique": false
+        },
+        {
+          "name": "uq_membership_event",
+          "columns": [
+            "index_symbol",
+            "event_date",
+            "event_type",
+            "old_symbol",
+            "new_symbol"
+          ],
+          "unique": true
+        }
+      ],
+      "row_count": 4,
+      "sample_rows": [
+        {
+          "id": "1",
+          "index_symbol": "NIFTY 50",
+          "event_date": "2025-10-24",
+          "event_type": "SYMBOL_CHANGE",
+          "old_company_id": "50",
+          "new_company_id": "51",
+          "old_symbol": "TATAMOTORS",
+          "new_symbol": "TMPV",
+          "company_identity": "Tata Motors Passenger Vehicles Limited",
+          "source_reference": "NSE circular NSE/FAOP/70882",
+          "verification_status": "RECONCILED_SOURCE_REGISTER",
+          "created_at": "2026-11-06T23:50:04"
+        },
+        {
+          "id": "2",
+          "index_symbol": "NIFTY 50",
+          "event_date": "2025-09-30",
+          "event_type": "INDEX_REPLACEMENT",
+          "old_company_id": "21",
+          "new_company_id": "25",
+          "old_symbol": "HEROMOTOCO",
+          "new_symbol": "INDIGO",
+          "company_identity": "Separate company replacement",
+          "source_reference": "NSE Indices press release, 22 Aug 2025",
+          "verification_status": "RECONCILED_SOURCE_REGISTER",
+          "created_at": "2026-11-06T23:50:04"
+        },
+        {
+          "id": "3",
+          "index_symbol": "NIFTY 50",
+          "event_date": "2025-09-30",
+          "event_type": "INDEX_REPLACEMENT",
+          "old_company_id": "26",
+          "new_company_id": "35",
+          "old_symbol": "INDUSINDBK",
+          "new_symbol": "MAXHEALTH",
+          "company_identity": "Separate company replacement",
+          "source_reference": "NSE Indices press release, 22 Aug 2025",
+          "verification_status": "RECONCILED_SOURCE_REGISTER",
+          "created_at": "2026-11-06T23:50:04"
+        },
+        {
+          "id": "4",
+          "index_symbol": "NIFTY 50",
+          "event_date": "2026-09-30",
+          "event_type": "INDEX_REPLACEMENT",
+          "old_company_id": "54",
+          "new_company_id": "11",
+          "old_symbol": "WIPRO",
+          "new_symbol": "BSE",
+          "company_identity": "Separate company replacement",
+          "source_reference": "NSE Indices press release, 10 Aug 2026",
+          "verification_status": "RECONCILED_SOURCE_REGISTER",
+          "created_at": "2026-11-06T23:50:04"
+        }
+      ]
+    },
+    "index_constituent_snapshots": {
+      "exists": true,
+      "columns": [
+        {
+          "name": "id",
+          "type": "BIGINT",
+          "nullable": false
+        },
+        {
+          "name": "index_symbol",
+          "type": "VARCHAR(30)",
+          "nullable": false
+        },
+        {
+          "name": "report_month",
+          "type": "DATE",
+          "nullable": false
+        },
+        {
+          "name": "symbol",
+          "type": "VARCHAR(30)",
+          "nullable": false
+        },
+        {
+          "name": "security_name",
+          "type": "VARCHAR(255)",
+          "nullable": false
+        },
+        {
+          "name": "industry",
+          "type": "VARCHAR(255)",
+          "nullable": true
+        },
+        {
+          "name": "equity_capital",
+          "type": "DECIMAL(24, 4)",
+          "nullable": true
+        },
+        {
+          "name": "index_market_cap",
+          "type": "DECIMAL(24, 8)",
+          "nullable": true
+        },
+        {
+          "name": "weightage",
+          "type": "DECIMAL(12, 8)",
+          "nullable": true
+        },
+        {
+          "name": "beta",
+          "type": "DECIMAL(12, 8)",
+          "nullable": true
+        },
+        {
+          "name": "r2",
+          "type": "DECIMAL(12, 8)",
+          "nullable": true
+        },
+        {
+          "name": "volatility",
+          "type": "DECIMAL(16, 8)",
+          "nullable": true
+        },
+        {
+          "name": "monthly_return",
+          "type": "DECIMAL(16, 8)",
+          "nullable": true
+        },
+        {
+          "name": "avg_impact_cost",
+          "type": "DECIMAL(16, 8)",
+          "nullable": true
+        },
+        {
+          "name": "source_archive",
+          "type": "VARCHAR(255)",
+          "nullable": false
+        },
+        {
+          "name": "source_csv",
+          "type": "VARCHAR(255)",
+          "nullable": false
+        },
+        {
+          "name": "created_at",
+          "type": "TIMESTAMP",
+          "nullable": true
+        }
+      ],
+      "primary_key": [
+        "id"
+      ],
+      "indexes": [
+        {
+          "name": "idx_snapshot_month",
+          "columns": [
+            "report_month"
+          ],
+          "unique": false
+        },
+        {
+          "name": "idx_snapshot_symbol_month",
+          "columns": [
+            "symbol",
+            "report_month"
+          ],
+          "unique": false
+        },
+        {
+          "name": "uq_snapshot_month_symbol",
+          "columns": [
+            "index_symbol",
+            "report_month",
+            "symbol"
+          ],
+          "unique": true
+        }
+      ],
+      "row_count": 950,
+      "sample_rows": [
+        {
+          "id": "1",
+          "index_symbol": "NIFTY 50",
+          "report_month": "2025-04-01",
+          "symbol": "ADANIENT",
+          "security_name": "Adani Enterprises Ltd.",
+          "industry": "TRADING - MINERALS/ MINING",
+          "equity_capital": "1154180729.0000",
+          "index_market_cap": "59777.22000000",
+          "weightage": "0.54000000",
+          "beta": "1.89000000",
+          "r2": "0.37000000",
+          "volatility": "2.39000000",
+          "monthly_return": "-0.63000000",
+          "avg_impact_cost": "0.02000000",
+          "source_archive": "mcwb_apr25.zip",
+          "source_csv": "nifty50_mcwb.csv",
+          "created_at": "2026-11-06T23:18:29"
+        },
+        {
+          "id": "2",
+          "index_symbol": "NIFTY 50",
+          "report_month": "2025-04-01",
+          "symbol": "ADANIPORTS",
+          "security_name": "Adani Ports and Special Economic Zone Ltd.",
+          "industry": "PORT",
+          "equity_capital": "4320277890.0000",
+          "index_market_cap": "89529.72000000",
+          "weightage": "0.82000000",
+          "beta": "1.99000000",
+          "r2": "0.53000000",
+          "volatility": "2.11000000",
+          "monthly_return": "2.84000000",
+          "avg_impact_cost": "0.03000000",
+          "source_archive": "mcwb_apr25.zip",
+          "source_csv": "nifty50_mcwb.csv",
+          "created_at": "2026-11-06T23:18:29"
+        },
+        {
+          "id": "3",
+          "index_symbol": "NIFTY 50",
+          "report_month": "2025-04-01",
+          "symbol": "APOLLOHOSP",
+          "security_name": "Apollo Hospitals Enterprise Ltd.",
+          "industry": "HOSPITAL",
+          "equity_capital": "718923285.0000",
+          "index_market_cap": "70295.82000000",
+          "weightage": "0.64000000",
+          "beta": "0.53000000",
+          "r2": "0.14000000",
+          "volatility": "1.14000000",
+          "monthly_return": "5.45000000",
+          "avg_impact_cost": "0.01000000",
+          "source_archive": "mcwb_apr25.zip",
+          "source_csv": "nifty50_mcwb.csv",
+          "created_at": "2026-11-06T23:18:29"
+        },
+        {
+          "id": "4",
+          "index_symbol": "NIFTY 50",
+          "report_month": "2025-04-01",
+          "symbol": "ASIANPAINT",
+          "security_name": "Asian Paints Ltd.",
+          "industry": "PAINTS",
+          "equity_capital": "959197790.0000",
+          "index_market_cap": "109425.00000000",
+          "weightage": "1.00000000",
+          "beta": "0.53000000",
+          "r2": "0.13000000",
+          "volatility": "1.00000000",
+          "monthly_return": "3.63000000",
+          "avg_impact_cost": "0.02000000",
+          "source_archive": "mcwb_apr25.zip",
+          "source_csv": "nifty50_mcwb.csv",
+          "created_at": "2026-11-06T23:18:29"
+        },
+        {
+          "id": "5",
+          "index_symbol": "NIFTY 50",
+          "report_month": "2025-04-01",
+          "symbol": "AXISBANK",
+          "security_name": "Axis Bank Ltd.",
+          "industry": "PRIVATE SECTOR BANK",
+          "equity_capital": "6193408822.0000",
+          "index_market_cap": "337699.23000000",
+          "weightage": "3.08000000",
+          "beta": "1.10000000",
+          "r2": "0.44000000",
+          "volatility": "2.17000000",
+          "monthly_return": "7.53000000",
+          "avg_impact_cost": "0.02000000",
+          "source_archive": "mcwb_apr25.zip",
+          "source_csv": "nifty50_mcwb.csv",
+          "created_at": "2026-11-06T23:18:29"
+        }
+      ]
+    },
+    "index_constituent_observation_spans": {
+      "exists": true,
+      "columns": [
+        {
+          "name": "id",
+          "type": "BIGINT",
+          "nullable": false
+        },
+        {
+          "name": "index_symbol",
+          "type": "VARCHAR(30)",
+          "nullable": false
+        },
+        {
+          "name": "company_id",
+          "type": "INTEGER",
+          "nullable": false
+        },
+        {
+          "name": "symbol",
+          "type": "VARCHAR(30)",
+          "nullable": false
+        },
+        {
+          "name": "security_name",
+          "type": "VARCHAR(255)",
+          "nullable": false
+        },
+        {
+          "name": "first_observed_month",
+          "type": "DATE",
+          "nullable": false
+        },
+        {
+          "name": "last_observed_month",
+          "type": "DATE",
+          "nullable": false
+        },
+        {
+          "name": "observed_month_count",
+          "type": "SMALLINT",
+          "nullable": false
+        },
+        {
+          "name": "internal_missing_month_count",
+          "type": "SMALLINT",
+          "nullable": false
+        },
+        {
+          "name": "internal_missing_months",
+          "type": "TEXT",
+          "nullable": true
+        },
+        {
+          "name": "related_event_count",
+          "type": "SMALLINT",
+          "nullable": false
+        },
+        {
+          "name": "related_events",
+          "type": "TEXT",
+          "nullable": true
+        },
+        {
+          "name": "observation_status",
+          "type": "VARCHAR(40)",
+          "nullable": false
+        },
+        {
+          "name": "start_date_status",
+          "type": "VARCHAR(60)",
+          "nullable": false
+        },
+        {
+          "name": "end_date_status",
+          "type": "VARCHAR(60)",
+          "nullable": false
+        },
+        {
+          "name": "source_name",
+          "type": "VARCHAR(150)",
+          "nullable": false
+        },
+        {
+          "name": "source_reference",
+          "type": "VARCHAR(500)",
+          "nullable": true
+        },
+        {
+          "name": "created_at",
+          "type": "TIMESTAMP",
+          "nullable": true
+        },
+        {
+          "name": "updated_at",
+          "type": "TIMESTAMP",
+          "nullable": true
+        }
+      ],
+      "primary_key": [
+        "id"
+      ],
+      "indexes": [
+        {
+          "name": "fk_observation_span_company",
+          "columns": [
+            "company_id"
+          ],
+          "unique": false
+        },
+        {
+          "name": "idx_observation_months",
+          "columns": [
+            "index_symbol",
+            "first_observed_month",
+            "last_observed_month"
+          ],
+          "unique": false
+        },
+        {
+          "name": "idx_observation_symbol",
+          "columns": [
+            "symbol"
+          ],
+          "unique": false
+        },
+        {
+          "name": "uq_observation_span",
+          "columns": [
+            "index_symbol",
+            "company_id"
+          ],
+          "unique": true
+        }
+      ],
+      "row_count": 54,
+      "sample_rows": [
+        {
+          "id": "1",
+          "index_symbol": "NIFTY 50",
+          "company_id": "1",
+          "symbol": "ADANIENT",
+          "security_name": "Adani Enterprises Ltd.",
+          "first_observed_month": "2025-04-01",
+          "last_observed_month": "2026-10-01",
+          "observed_month_count": "19",
+          "internal_missing_month_count": "0",
+          "internal_missing_months": null,
+          "related_event_count": "0",
+          "related_events": null,
+          "observation_status": "CONTIGUOUS",
+          "start_date_status": "OBSERVATION_BOUNDARY_ONLY",
+          "end_date_status": "OBSERVATION_BOUNDARY_ONLY",
+          "source_name": "NIFTY 50 Monthly Constituent Reports",
+          "source_reference": "database/processed/constituents/nifty50_membership_observation_audit_v2.csv",
+          "created_at": "2026-11-06T23:58:54",
+          "updated_at": "2026-11-06T23:58:54"
+        },
+        {
+          "id": "2",
+          "index_symbol": "NIFTY 50",
+          "company_id": "2",
+          "symbol": "ADANIPORTS",
+          "security_name": "Adani Ports and Special Economic Zone Ltd.",
+          "first_observed_month": "2025-04-01",
+          "last_observed_month": "2026-10-01",
+          "observed_month_count": "19",
+          "internal_missing_month_count": "0",
+          "internal_missing_months": null,
+          "related_event_count": "0",
+          "related_events": null,
+          "observation_status": "CONTIGUOUS",
+          "start_date_status": "OBSERVATION_BOUNDARY_ONLY",
+          "end_date_status": "OBSERVATION_BOUNDARY_ONLY",
+          "source_name": "NIFTY 50 Monthly Constituent Reports",
+          "source_reference": "database/processed/constituents/nifty50_membership_observation_audit_v2.csv",
+          "created_at": "2026-11-06T23:58:54",
+          "updated_at": "2026-11-06T23:58:54"
+        },
+        {
+          "id": "3",
+          "index_symbol": "NIFTY 50",
+          "company_id": "3",
+          "symbol": "APOLLOHOSP",
+          "security_name": "Apollo Hospitals Enterprise Ltd.",
+          "first_observed_month": "2025-04-01",
+          "last_observed_month": "2026-10-01",
+          "observed_month_count": "19",
+          "internal_missing_month_count": "0",
+          "internal_missing_months": null,
+          "related_event_count": "0",
+          "related_events": null,
+          "observation_status": "CONTIGUOUS",
+          "start_date_status": "OBSERVATION_BOUNDARY_ONLY",
+          "end_date_status": "OBSERVATION_BOUNDARY_ONLY",
+          "source_name": "NIFTY 50 Monthly Constituent Reports",
+          "source_reference": "database/processed/constituents/nifty50_membership_observation_audit_v2.csv",
+          "created_at": "2026-11-06T23:58:54",
+          "updated_at": "2026-11-06T23:58:54"
+        },
+        {
+          "id": "4",
+          "index_symbol": "NIFTY 50",
+          "company_id": "4",
+          "symbol": "ASIANPAINT",
+          "security_name": "Asian Paints Ltd.",
+          "first_observed_month": "2025-04-01",
+          "last_observed_month": "2026-10-01",
+          "observed_month_count": "19",
+          "internal_missing_month_count": "0",
+          "internal_missing_months": null,
+          "related_event_count": "0",
+          "related_events": null,
+          "observation_status": "CONTIGUOUS",
+          "start_date_status": "OBSERVATION_BOUNDARY_ONLY",
+          "end_date_status": "OBSERVATION_BOUNDARY_ONLY",
+          "source_name": "NIFTY 50 Monthly Constituent Reports",
+          "source_reference": "database/processed/constituents/nifty50_membership_observation_audit_v2.csv",
+          "created_at": "2026-11-06T23:58:54",
+          "updated_at": "2026-11-06T23:58:54"
+        },
+        {
+          "id": "5",
+          "index_symbol": "NIFTY 50",
+          "company_id": "5",
+          "symbol": "AXISBANK",
+          "security_name": "Axis Bank Ltd.",
+          "first_observed_month": "2025-04-01",
+          "last_observed_month": "2026-10-01",
+          "observed_month_count": "19",
+          "internal_missing_month_count": "0",
+          "internal_missing_months": null,
+          "related_event_count": "0",
+          "related_events": null,
+          "observation_status": "CONTIGUOUS",
+          "start_date_status": "OBSERVATION_BOUNDARY_ONLY",
+          "end_date_status": "OBSERVATION_BOUNDARY_ONLY",
+          "source_name": "NIFTY 50 Monthly Constituent Reports",
+          "source_reference": "database/processed/constituents/nifty50_membership_observation_audit_v2.csv",
+          "created_at": "2026-11-06T23:58:54",
+          "updated_at": "2026-11-06T23:58:54"
+        }
+      ]
+    },
+    "companies": {
+      "exists": true,
+      "columns": [
+        {
+          "name": "id",
+          "type": "INTEGER",
+          "nullable": false
+        },
+        {
+          "name": "symbol",
+          "type": "VARCHAR(30)",
+          "nullable": false
+        },
+        {
+          "name": "company_name",
+          "type": "VARCHAR(255)",
+          "nullable": false
+        },
+        {
+          "name": "isin",
+          "type": "VARCHAR(20)",
+          "nullable": true
+        },
+        {
+          "name": "sector_id",
+          "type": "INTEGER",
+          "nullable": true
+        },
+        {
+          "name": "exchange",
+          "type": "VARCHAR(10)",
+          "nullable": true
+        },
+        {
+          "name": "is_active",
+          "type": "TINYINT",
+          "nullable": true
+        },
+        {
+          "name": "created_at",
+          "type": "TIMESTAMP",
+          "nullable": true
+        },
+        {
+          "name": "updated_at",
+          "type": "TIMESTAMP",
+          "nullable": true
+        }
+      ],
+      "primary_key": [
+        "id"
+      ],
+      "indexes": [
+        {
+          "name": "idx_companies_sector",
+          "columns": [
+            "sector_id"
+          ],
+          "unique": false
+        },
+        {
+          "name": "symbol",
+          "columns": [
+            "symbol"
+          ],
+          "unique": true
+        }
+      ],
+      "row_count": 80,
+      "sample_rows": [
+        {
+          "id": "1",
+          "symbol": "ADANIENT",
+          "company_name": "Adani Enterprises Ltd.",
+          "isin": null,
+          "sector_id": "35",
+          "exchange": "NSE",
+          "is_active": "1",
+          "created_at": "2026-11-06T23:41:52",
+          "updated_at": "2026-11-06T23:41:52"
+        },
+        {
+          "id": "2",
+          "symbol": "ADANIPORTS",
+          "company_name": "Adani Ports and Special Economic Zone Ltd.",
+          "isin": null,
+          "sector_id": "26",
+          "exchange": "NSE",
+          "is_active": "1",
+          "created_at": "2026-11-06T23:41:52",
+          "updated_at": "2026-11-06T23:41:52"
+        },
+        {
+          "id": "3",
+          "symbol": "APOLLOHOSP",
+          "company_name": "Apollo Hospitals Enterprise Ltd.",
+          "isin": null,
+          "sector_id": "14",
+          "exchange": "NSE",
+          "is_active": "1",
+          "created_at": "2026-11-06T23:41:52",
+          "updated_at": "2026-11-06T23:41:52"
+        },
+        {
+          "id": "4",
+          "symbol": "ASIANPAINT",
+          "company_name": "Asian Paints Ltd.",
+          "isin": null,
+          "sector_id": "23",
+          "exchange": "NSE",
+          "is_active": "1",
+          "created_at": "2026-11-06T23:41:52",
+          "updated_at": "2026-11-06T23:41:52"
+        },
+        {
+          "id": "5",
+          "symbol": "AXISBANK",
+          "company_name": "Axis Bank Ltd.",
+          "isin": null,
+          "sector_id": "29",
+          "exchange": "NSE",
+          "is_active": "1",
+          "created_at": "2026-11-06T23:41:52",
+          "updated_at": "2026-11-06T23:41:52"
+        }
+      ]
+    },
+    "company_identifiers": {
+      "exists": true,
+      "columns": [
+        {
+          "name": "id",
+          "type": "BIGINT",
+          "nullable": false
+        },
+        {
+          "name": "company_id",
+          "type": "INTEGER",
+          "nullable": false
+        },
+        {
+          "name": "identifier_type",
+          "type": "VARCHAR(30)",
+          "nullable": false
+        },
+        {
+          "name": "identifier_value",
+          "type": "VARCHAR(50)",
+          "nullable": false
+        },
+        {
+          "name": "valid_from",
+          "type": "DATE",
+          "nullable": false
+        },
+        {
+          "name": "valid_to",
+          "type": "DATE",
+          "nullable": true
+        },
+        {
+          "name": "source_name",
+          "type": "VARCHAR(150)",
+          "nullable": true
+        },
+        {
+          "name": "source_reference",
+          "type": "VARCHAR(500)",
+          "nullable": true
+        },
+        {
+          "name": "created_at",
+          "type": "TIMESTAMP",
+          "nullable": true
+        }
+      ],
+      "primary_key": [
+        "id"
+      ],
+      "indexes": [
+        {
+          "name": "idx_identifier_lookup",
+          "columns": [
+            "identifier_type",
+            "identifier_value",
+            "valid_from",
+            "valid_to"
+          ],
+          "unique": false
+        },
+        {
+          "name": "uq_company_identifier_period",
+          "columns": [
+            "company_id",
+            "identifier_type",
+            "identifier_value",
+            "valid_from"
+          ],
+          "unique": true
+        }
+      ],
+      "row_count": 39,
+      "sample_rows": [
+        {
+          "id": "1",
+          "company_id": "8",
+          "identifier_type": "ISIN",
+          "identifier_value": "INE296A01024",
+          "valid_from": "2025-04-01",
+          "valid_to": "2025-06-13",
+          "source_name": "NSE CM-UDiFF Common Bhavcopy Final",
+          "source_reference": "nifty50_isin_series_details.csv; EQ-series observations; validity boundaries represent first and last observed trading dates; symbol=BAJFINANCE; observations=49",
+          "created_at": "2026-11-06T23:56:50"
+        },
+        {
+          "id": "2",
+          "company_id": "8",
+          "identifier_type": "ISIN",
+          "identifier_value": "INE296A01032",
+          "valid_from": "2025-06-16",
+          "valid_to": "2026-11-05",
+          "source_name": "NSE CM-UDiFF Common Bhavcopy Final",
+          "source_reference": "nifty50_isin_series_details.csv; EQ-series observations; validity boundaries represent first and last observed trading dates; symbol=BAJFINANCE; observations=320",
+          "created_at": "2026-11-06T23:56:50"
+        },
+        {
+          "id": "3",
+          "company_id": "31",
+          "identifier_type": "ISIN",
+          "identifier_value": "INE237A01028",
+          "valid_from": "2025-04-01",
+          "valid_to": "2026-01-13",
+          "source_name": "NSE CM-UDiFF Common Bhavcopy Final",
+          "source_reference": "nifty50_isin_series_details.csv; EQ-series observations; validity boundaries represent first and last observed trading dates; symbol=KOTAKBANK; observations=180",
+          "created_at": "2026-11-06T23:56:50"
+        },
+        {
+          "id": "4",
+          "company_id": "31",
+          "identifier_type": "ISIN",
+          "identifier_value": "INE237A01036",
+          "valid_from": "2026-01-14",
+          "valid_to": "2026-11-05",
+          "source_name": "NSE CM-UDiFF Common Bhavcopy Final",
+          "source_reference": "nifty50_isin_series_details.csv; EQ-series observations; validity boundaries represent first and last observed trading dates; symbol=KOTAKBANK; observations=189",
+          "created_at": "2026-11-06T23:56:50"
+        },
+        {
+          "id": "5",
+          "company_id": "50",
+          "identifier_type": "ISIN",
+          "identifier_value": "INE155A01022",
+          "valid_from": "2025-04-01",
+          "valid_to": "2025-10-23",
+          "source_name": "NSE CM-UDiFF Common Bhavcopy Final",
+          "source_reference": "nifty50_isin_series_details.csv; EQ-series observations; validity boundaries represent first and last observed trading dates; symbol=TATAMOTORS; observations=130",
+          "created_at": "2026-11-06T23:56:50"
+        }
+      ]
+    }
+  }
+}

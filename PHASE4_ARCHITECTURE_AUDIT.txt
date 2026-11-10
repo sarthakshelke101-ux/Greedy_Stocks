@@ -1,0 +1,2086 @@
+PHASE 4 ? HISTORICAL DATA ARCHITECTURE AUDIT
+======================================================================
+Files scanned: 134
+
+
+### analytics\_bootstrap.py (10 lines)
+1: import sys
+2: from pathlib import Path
+
+### analytics\adjusted_price_adapter.py (172 lines)
+2: """Read-only database adapter for split/bonus-adjusted prices.
+5: Dividends, rights, mergers and demergers are not adjusted.
+8: from __future__ import annotations
+10: import pandas as pd
+11: from sqlalchemy import text
+13: from backend.database import engine
+14: from analytics.adjusted_prices import build_adjusted_prices
+30: FROM corporate_actions
+32: AND action_type IN ('STOCK_SPLIT', 'BONUS')
+49: def get_adjusted_company_prices(
+54: """Return raw and split/bonus-adjusted historical prices.
+62: FROM stock_prices
+83: "adjusted_close",
+87: result.attrs["price_basis"] = "SPLIT_BONUS_ADJUSTED"
+88: result.attrs["dividend_adjusted"] = False
+89: result.attrs["corporate_action_coverage"] = "PARTIAL"
+104: adjusted = build_adjusted_prices(
+117: adjusted = adjusted[
+... 11 additional matches omitted
+
+### analytics\adjusted_prices.py (184 lines)
+1: """Corporate-action adjusted historical price calculations.
+4: Verified split and bonus adjustments are applied to pre-ex-date prices only.
+5: This is a split/bonus-adjusted price series, NOT a total-return series.
+8: from decimal import Decimal, InvalidOperation
+9: from typing import Any, Mapping
+11: import numpy as np
+12: import pandas as pd
+15: SUPPORTED_ACTIONS = {"STOCK_SPLIT", "BONUS"}
+21: left, right = str(ratio).split(":")
+39: """Return the historical price conversion factor for one action."""
+45: raise ValueError("Corporate action is missing action_type.")
+51: "Only verified splits and bonuses are supported."
+55: raise ValueError("Corporate action is missing ratio.")
+59: if action_type == "STOCK_SPLIT":
+62: # Bonus ratio 4:1 means 4 additional shares for each 1 held.
+63: # Total shares become 5, so the historical price factor is 5.
+83: def build_adjusted_prices(
+89: """Build a separate split/bonus-adjusted price series.
+... 17 additional matches omitted
+
+### analytics\ask_greedy\__init__.py (1 lines)
+1: from .calculations import *
+
+### analytics\ask_greedy\adapter.py (33 lines)
+2: from .calculations import (
+21: market data is unavailable. Never claim missing application data prevents
+30: 6. If an operation is unsupported, explain exactly what is missing.
+
+### analytics\ask_greedy\calculations.py (182 lines)
+2: from __future__ import annotations
+4: import math
+5: import numpy as np
+87: from scipy.optimize import minimize
+
+### analytics\ask_greedy\financial_education.py (263 lines)
+3: import re
+16: "historical measure of variability, not a guaranteed loss limit."
+25: "It helps compare how much historical excess return was earned "
+29: "A higher positive value was better on this historical measure. "
+50: "historical return": {
+51: "aliases": ["historical return", "stock return", "returns", "return"],
+53: "Historical return describes the percentage change over a "
+62: "label": "Historical return",
+83: "together historically. It ranges from -1 to +1: positive "
+100: "to movements in a chosen benchmark. A beta near 1 historically "
+129: "historical return may have come with larger fluctuations "
+203: "Historical examples below are observations, not forecasts.",
+209: "NIFTY 50 BASICS",
+210: "The NIFTY 50 is an index representing 50 selected large "
+259: "Historical observations cannot guarantee future results. "
+
+### analytics\ask_greedy\greedy_knowledge.py (90 lines)
+2: from pathlib import Path
+3: import logging
+18: "greedy_v2_splits.py",
+88: "say the available excerpt does not establish the missing detail.\n"
+
+### analytics\ask_greedy\greedy_v2_evidence.py (247 lines)
+1: from __future__ import annotations
+3: import csv
+4: import json
+5: import logging
+6: import re
+7: from pathlib import Path
+25: "ABOUT", "STOCK", "SHARES", "GREEDY", "NIFTY", "INDIA",
+28: "HISTORICAL", "PERFORMANCE", "EXPLAIN", "WHY", "WAS",
+114: for item in str(raw).split(",")
+157: "evidence_scope": "Historical saved experiment records; not a live rerun.",
+185: "Walk-forward records describe saved historical folds, not future performance.",
+186: "Latest-constituent universe can introduce survivorship bias.",
+219: import json
+220: from datetime import date
+234: note = "EXPERIMENT DATE WINDOW: actual dates missing from artifact."
+241: "This is NOT a 10-year backtest. Ten years is the historical "
+
+### analytics\ask_greedy\historical_intelligence.py (303 lines)
+1: from __future__ import annotations
+3: import json
+4: import logging
+5: import re
+6: from datetime import date, timedelta
+8: import pandas as pd
+9: from sqlalchemy import text
+11: from database import engine
+12: from analytics import adjusted_price_adapter
+13: from analytics import index_adapter
+14: from analytics import database_adapter
+15: from analytics.financial_metrics import calculate_metrics
+17: log = logging.getLogger("greedy_historical")
+23: '"end_date":"YYYY-MM-DD or null","include_nifty":true/false,'
+70: bool(p.get("include_nifty")),
+76: # Restrict analysis to the latest available NIFTY 50 snapshot.
+77: constituents = database_adapter.get_latest_constituents()
+79: constituents["symbol"].astype(str).str.strip().str.upper()
+... 38 additional matches omitted
+
+### analytics\ask_greedy\orchestrator.py (146 lines)
+2: import json
+3: import logging
+4: import re
+5: import math
+7: from .calculations import (
+48: {"operation":"none","reason":"missing or ambiguous inputs"}
+
+### analytics\ask_greedy\real_world_research.py (216 lines)
+1: ﻿"""Phase 3: latest imported prices and whole-share affordability."""
+2: from __future__ import annotations
+4: import re
+5: import json
+6: from math import floor, isfinite
+12: "NSE", "NIFTY", "STOCK", "STOCKS", "SHARE", "SHARES",
+105: """Read the latest imported raw close for each exact company symbol."""
+106: from sqlalchemy import text
+107: from backend.database import engine
+121: sp.price_source
+123: JOIN stock_prices sp ON sp.company_id = c.id
+140: "price_source": row["price_source"],
+141: "price_basis": "RAW_CLOSE_UNADJUSTED",
+158: missing = [symbol for symbol in symbols if symbol not in records]
+162: "REAL-WORLD STOCK RESEARCH: No imported closing price is available "
+168: "VERIFIED LATEST IMPORTED STOCK PRICES",
+169: "Source: GREEDY STOCKS stock_prices database.",
+170: "Price basis: raw unadjusted closing price, not a live quote.",
+... 5 additional matches omitted
+
+### analytics\ask_greedy\research_planner.py (419 lines)
+4: from __future__ import annotations
+6: import json
+7: import logging
+8: import re
+14: "historical_analysis",
+48: 2. historical_analysis
+49: Analyse a clearly identified NIFTY 50 company using the existing
+50: historical database engine.
+63: Retrieve the latest imported raw closing prices for explicitly named
+67: Retrieve latest imported raw closing prices and calculate equal-budget
+79: - Never invent ticker symbols, financial inputs or historical values.
+82: - Do not request calculations with missing inputs.
+147: raise ValueError("Duplicate operation ID.")
+164: raise ValueError("Duplicate dependencies.")
+168: raise ValueError("Dependency is missing or out of order.")
+213: r"\b(analy[sz]e|analysis of|historical performance of|"
+214: r"historical returns of|returns? of|sharpe(?: ratio)? of|"
+219: "id": "historical",
+... 1 additional matches omitted
+
+### analytics\ask_greedy\test_calculations.py (53 lines)
+2: import numpy as np
+3: import pytest
+5: from analytics.ask_greedy.calculations import (
+
+### analytics\ask_greedy\test_chat_integration.py (167 lines)
+3: import pytest
+5: import backend.chat_routes as chat
+34: assert "Historical observations" in context
+104: def test_missing_metrics_are_not_fabricated():
+163: from analytics.ask_greedy.financial_education import CONCEPTS
+164: import os
+
+### analytics\ask_greedy\test_financial_education.py (162 lines)
+3: import unittest
+5: from analytics.ask_greedy.financial_education import (
+18: "historical return",
+49: self.assertIn("historical", context.lower())
+98: def test_diversification_discloses_missing_portfolio_data(self):
+112: def test_duplicate_symbols_are_reported_once(self):
+154: def test_nifty_basics_fallback(self):
+155: context = build_education_context("Explain NIFTY 50")
+
+### analytics\ask_greedy\test_greedy_knowledge.py (18 lines)
+1: from analytics.ask_greedy.greedy_knowledge import discover_sources, build_greedy_knowledge_context
+15: from pathlib import Path
+
+### analytics\ask_greedy\test_orchestrator.py (24 lines)
+1: import pytest
+2: from analytics.ask_greedy.orchestrator import _validate_plan, _extract_json
+3: from analytics.ask_greedy.calculations import maximum_sharpe
+12: def test_reject_missing_arguments():
+
+### analytics\ask_greedy\test_phase3_real_world_research.py (91 lines)
+1: ﻿import pytest
+3: from analytics.ask_greedy.real_world_research import (
+8: from analytics.ask_greedy.research_planner import fallback_research_plan
+19: def test_extract_multiple_symbols_without_duplicates():
+35: def test_missing_budget_is_not_invented():
+63: def test_missing_price_is_rejected():
+89: def test_historical_research_route_is_preserved():
+90: names = operations("Analyse RELIANCE historical returns")
+91: assert "historical_analysis" in names
+
+### analytics\ask_greedy\test_research_planner.py (234 lines)
+2: import pytest
+4: from analytics.ask_greedy.research_planner import (
+17: "query": "Research NIFTY 50",
+40: "operation": "historical_analysis",
+57: def test_reject_missing_market_operation():
+68: def test_reject_duplicate_ids():
+103: "Analyse RELIANCE historical returns and calculate Sharpe ratio"
+107: assert "historical_analysis" in names
+164: "operation": "historical_analysis",
+176: "historical_analysis": lambda q: "historical data",
+183: def test_missing_handler_is_reported():
+
+### analytics\audit_10y_price_coverage.py (275 lines)
+1: from pathlib import Path
+2: from datetime import date
+3: import pandas as pd
+4: from sqlalchemy import inspect, text
+6: import sys
+11: from backend.database import engine
+28: print("\n10-YEAR HISTORICAL PRICE COVERAGE AUDIT")
+35: (t for t in tables if t.lower() == "stock_prices"), None
+39: f"stock_prices table not found. Available tables: {tables}"
+47: ["adjusted_close", "adj_close", "close_adj", "close_price", "close", "closing_price"]
+123: if not any(k in name for k in ("benchmark", "nifty", "index")):
+155: # Duplicate symbol/date detection.
+156: duplicates = (
+161: duplicates = duplicates[duplicates["row_count"] > 1]
+162: duplicates.to_csv(OUT / "duplicate_symbol_dates.csv", index=False)
+170: group[price_date].drop_duplicates()
+180: missing = expected_for_symbol.difference(observed)
+186: # Consecutive missing expected sessions are grouped into gap runs.
+... 18 additional matches omitted
+
+### analytics\audit_active_history_coverage.py (144 lines)
+3: import pandas as pd
+4: from sqlalchemy import text, bindparam
+6: from analytics.database_adapter import get_latest_constituents
+7: from backend.database import engine
+11: constituents = get_latest_constituents()
+12: company_ids = constituents["company_id"].astype(int).tolist()
+16: FROM stock_prices
+29: FROM stock_prices
+42: for company in constituents.to_dict("records"):
+54: "missing_dates": None,
+69: missing = [date for date in expected if date not in observed]
+84: "missing_dates": len(missing),
+89: "missing_examples": ", ".join(
+90: date.strftime("%Y-%m-%d") for date in missing[:5]
+102: int((result["missing_dates"] == 0).sum()),
+105: "Total missing reference dates:",
+106: int(result["missing_dates"].fillna(0).sum()),
+118: "missing_dates", "coverage_pct", "invalid_closes",
+... 3 additional matches omitted
+
+### analytics\audit_benchmark_date_coverage.py (323 lines)
+2: """GREEDY STOCKS — NIFTY 50 benchmark date coverage audit.
+10: import csv
+11: import sys
+12: from datetime import date, datetime
+13: from pathlib import Path
+14: from zipfile import ZipFile
+16: import pandas as pd
+17: from sqlalchemy import text
+22: from database import engine
+27: / "nifty50_historical_pr_combined.csv"
+40: """Read unique dates from the original NIFTY 50 PR CSV."""
+56: f"Duplicate benchmark source date: {trade_date}"
+65: """Read NIFTY 50 benchmark dates from MySQL."""
+72: WHERE index_symbol = 'NIFTY 50'
+162: missing = sorted(source_dates - database_dates)
+167: f"Missing: {missing}; Extra: {extra}"
+291: print("\nIMPORTANT")
+
+### analytics\audit_corporate_action_source_rows.py (81 lines)
+1: from pathlib import Path
+2: from zipfile import ZipFile
+3: from io import BytesIO
+4: import pandas as pd
+
+### analytics\audit_extreme_price_moves.py (59 lines)
+1: import pandas as pd
+3: from analytics.database_adapter import (
+4: get_latest_constituents,
+8: constituents = get_latest_constituents()
+11: for company in constituents.to_dict("records"):
+45: kotak = constituents.loc[
+46: constituents["symbol"] == "KOTAKBANK"
+
+### analytics\audit_greedy_universe.py (51 lines)
+1: import sys
+2: from pathlib import Path
+4: import pandas as pd
+9: import _bootstrap
+10: from database_adapter import get_latest_constituents, get_company_prices
+15: constituents = get_latest_constituents()
+18: for _, row in constituents.iterrows():
+30: "missing_prices": [matrix[c].isna().sum() for c in matrix.columns],
+39: print("\nNIFTY 50 HISTORICAL PRICE COVERAGE")
+41: print("Companies:", len(constituents))
+44: print("Companies with missing prices:", int((audit["missing_prices"] > 0).sum()))
+
+### analytics\audit_trading_session_coverage.py (211 lines)
+1: """Read-only trading-session coverage audit for latest NIFTY 50 snapshot."""
+3: import pandas as pd
+4: from sqlalchemy import text, bindparam
+6: from analytics.database_adapter import get_latest_constituents
+7: from backend.database import engine
+15: constituents = get_latest_constituents()
+17: if len(constituents) != 50:
+19: f"Expected 50 latest-snapshot companies; found {len(constituents)}"
+22: company_ids = constituents["company_id"].astype(int).tolist()
+24: # Reference dates are all distinct dates represented in stock_prices.
+28: FROM stock_prices
+45: FROM stock_prices
+59: FROM stock_prices
+72: raise ValueError("No trading dates found in stock_prices.")
+86: stats = constituents[
+114: missing_counts = []
+115: missing_examples = []
+121: missing = [
+... 17 additional matches omitted
+
+### analytics\audit_walk_forward_results.backup_20261109_130619.py (166 lines)
+1: ﻿from pathlib import Path
+2: import pandas as pd
+3: import numpy as np
+4: import json
+60: if group["date"].duplicated().any():
+61: raise ValueError("Duplicate OOS dates detected.")
+110: "HINDSIGHT_BASELINE_NOT_VALID_FOR_HISTORICAL_CLAIMS",
+111: "SURVIVORSHIP_BIASED_EXPLORATORY_COMPARISON",
+133: "TOP10_INDEX_WEIGHT_SELECTED uses latest constituent weights; "
+134: "excluded from valid historical superiority claims."
+137: "Latest eligible universe creates survivorship bias."
+143: "Historical sample is already observed.",
+144: "Latest constituent universe creates survivorship bias.",
+147: "Dividends excluded.",
+
+### analytics\audit_walk_forward_results.py (173 lines)
+1: from pathlib import Path
+2: import pandas as pd
+3: import numpy as np
+4: import json
+60: if group["date"].duplicated().any():
+61: raise ValueError("Duplicate OOS dates detected.")
+110: "HINDSIGHT_BASELINE_NOT_VALID_FOR_HISTORICAL_CLAIMS",
+111: "SURVIVORSHIP_BIASED_EXPLORATORY_COMPARISON",
+133: "TOP10_INDEX_WEIGHT_SELECTED uses latest constituent weights; "
+134: "excluded from valid historical superiority claims."
+137: "Latest eligible universe creates survivorship bias."
+143: "Historical sample is already observed.",
+144: "Latest constituent universe creates survivorship bias.",
+147: "Dividends excluded.",
+
+### analytics\benchmark_analytics.py (101 lines)
+2: """GREEDY STOCKS — NIFTY 50 benchmark analytics.
+4: Uses the official NSE Indices Historical Price Return (PR) dataset
+7: Important:
+9: - No dividend adjustment is included.
+11: - Results describe historical performance, not future returns.
+14: from __future__ import annotations
+16: from analytics.index_adapter import (
+22: from analytics.financial_metrics import calculate_metrics
+30: """Calculate historical NIFTY 50 PR benchmark metrics."""
+44: "No NIFTY 50 benchmark prices found for the requested period."
+50: price_basis="NSE_NIFTY_50_INDEX_CLOSE",
+56: "benchmark_name": "NIFTY 50",
+59: "dividend_adjusted": False,
+66: "Benchmark represents the NIFTY 50 Price Return (PR) Index.",
+67: "Returns exclude dividends.",
+68: "Historical performance is not a forecast.",
+81: print("GREEDY STOCKS — NIFTY 50 BENCHMARK ANALYTICS")
+87: print("Dividend adjusted:", result["dividend_adjusted"])
+
+### analytics\database_adapter.py (218 lines)
+1: from analytics._bootstrap import PROJECT_ROOT
+3: import pandas as pd
+4: from sqlalchemy import text
+6: from database import engine
+7: from analytics.financial_metrics import calculate_metrics
+10: INDEX_SYMBOL = "NIFTY 50"
+13: def get_latest_constituents() -> pd.DataFrame:
+14: """Return companies from the latest available NIFTY 50 snapshot.
+29: FROM index_constituent_snapshots s
+37: FROM index_constituent_snapshots
+53: f"No constituent snapshot found for {INDEX_SYMBOL}."
+68: Missing or invalid prices remain missing; they are not forward-filled.
+72: FROM stock_prices
+113: IMPORTANT:
+114: This is not a point-in-time historical NIFTY 50 ranking.
+116: constituents = get_latest_constituents()
+119: for company in constituents.to_dict("records"):
+154: constituents = get_latest_constituents()
+... 9 additional matches omitted
+
+### analytics\financial_metrics.py (339 lines)
+4: All calculations are historical and descriptive, not forecasts.
+14: from __future__ import annotations
+16: import math
+17: import numbers
+19: import pandas as pd
+63: if result.index.has_duplicates:
+64: raise ValueError("Duplicate price dates are not allowed.")
+66: # Missing values are permitted, but infinite numeric values are not.
+85: if expected.has_duplicates:
+86: raise ValueError("Expected trading sessions cannot contain duplicates.")
+91: def _validate_trading_calendar(
+125: missing = expected.difference(observed)
+133: if len(missing):
+135: f"{len(missing)} expected trading sessions have missing prices."
+144: _validate_trading_calendar(clean, expected_sessions)
+282: price_basis: str = "RAW_CLOSE_UNADJUSTED",
+
+### analytics\greedy_v2_data.py (217 lines)
+1: from pathlib import Path
+2: from datetime import date
+4: import pandas as pd
+6: from analytics.database_adapter import get_all_companies_with_prices
+7: from analytics.adjusted_price_adapter import get_adjusted_company_prices
+8: from analytics.index_adapter import get_index_closes
+19: constituents,
+22: adjusted_prices,
+26: self.constituents = constituents
+29: self.adjusted_prices = adjusted_prices
+46: if result.index.has_duplicates:
+47: raise ValueError(f"{name} contains duplicate dates.")
+50: raise ValueError(f"{name} contains missing or invalid prices.")
+65: return _normalise_price_series(benchmark, "NIFTY_50")
+75: constituents = get_all_companies_with_prices(
+80: missing = required - set(constituents.columns)
+82: if missing:
+83: raise ValueError(f"Missing constituent columns: {sorted(missing)}")
+... 33 additional matches omitted
+
+### analytics\greedy_v2_engine.py (308 lines)
+11: - Maximise historical annualised Sharpe ratio.
+17: from __future__ import annotations
+19: import math
+20: from typing import Any
+22: import sys
+23: from pathlib import Path
+25: import pandas as pd
+32: from portfolio_analytics import calculate_portfolio
+57: if train_prices.index.has_duplicates:
+58: raise ValueError("Duplicate training dates detected.")
+61: raise ValueError("Duplicate stock symbols detected.")
+93: "Training prices contain missing or invalid values. "
+102: missing_sectors = [
+110: if missing_sectors:
+112: f"Missing sector classifications: {missing_sectors}"
+138: raise ValueError("Duplicate user-selected stocks are not allowed.")
+295: "price_basis": "SPLIT_BONUS_ADJUSTED",
+
+### analytics\greedy_v2_splits.py (116 lines)
+1: """Chronological train/validation/test splits for Greedy V2."""
+3: from dataclasses import dataclass
+4: import numpy as np
+5: import pandas as pd
+9: class DataSplits:
+16: def chronological_split(
+21: ) -> DataSplits:
+22: """Chronological split; optionally exclude incomplete training candidates.
+25: Missing values in validation/test are preserved and never filled.
+34: if prices.index.has_duplicates:
+35: raise ValueError("Duplicate dates are not allowed")
+39: raise ValueError("Duplicate price columns are not allowed")
+50: raise ValueError("Prices must contain numeric values or missing values") from exc
+66: raise ValueError("Each split needs enough observations")
+68: raise ValueError("Test split needs at least two observations")
+81: raise ValueError("Missing prices are not allowed")
+93: raise ValueError("Insufficient historical data for all periods")
+112: "missing_prices_filled": False,
+... 1 additional matches omitted
+
+### analytics\historical_rankings.py (389 lines)
+1: """Historical NIFTY 50 stock rankings.
+4: Latest available NIFTY 50 monthly constituent snapshot.
+7: Split/bonus-adjusted close using currently imported corporate actions.
+8: This is NOT a dividend-adjusted total-return series.
+10: Important:
+11: Monthly constituent snapshots are not exact daily membership records.
+13: The session reference is derived from dates present in stock_prices;
+17: import sys
+18: from pathlib import Path
+20: import pandas as pd
+21: from sqlalchemy import text
+27: from database import engine
+28: from analytics.adjusted_prices import build_adjusted_prices
+29: from analytics.financial_metrics import (
+51: FROM index_constituent_snapshots
+52: WHERE index_symbol = 'NIFTY 50'
+65: FROM index_constituent_snapshots snap
+70: WHERE snap.index_symbol = 'NIFTY 50'
+... 36 additional matches omitted
+
+### analytics\index_adapter.py (128 lines)
+2: """GREEDY STOCKS — Read-only NIFTY 50 benchmark adapter."""
+4: import sys
+5: from pathlib import Path
+7: import pandas as pd
+8: from sqlalchemy import text
+13: from database import engine
+15: INDEX_SYMBOL = "NIFTY 50"
+16: INDEX_DATA_SOURCE = "NSE Indices Historical PR"
+23: """Retrieve NIFTY 50 daily OHLC values from MySQL.
+26: Does not forward-fill missing sessions.
+70: if frame["trade_date"].duplicated().any():
+71: raise ValueError("Duplicate NIFTY 50 trading dates found.")
+89: raise ValueError("Missing or invalid NIFTY 50 OHLC values.")
+92: raise ValueError("Non-positive NIFTY 50 OHLC values.")
+99: raise ValueError("Invalid NIFTY 50 OHLC relationships.")
+108: """Return NIFTY 50 closing index values."""
+112: return frame["close_value"].rename("nifty50_close")
+118: print("GREEDY STOCKS — NIFTY 50 INDEX ADAPTER")
+
+### analytics\market_ideas.py (686 lines)
+4: NIFTY 50 only.
+7: Existing historical ranking engine.
+10: Important:
+11: Insights describe historical observations, not predictions
+13: Split/bonus-adjusted prices are not total-return prices.
+15: Greedy selections are historical in-sample experiments.
+18: import json
+19: import sys
+20: from pathlib import Path
+22: import pandas as pd
+27: from analytics.historical_rankings import run_historical_rankings
+82: """Identify companies with the strongest historical returns."""
+104: "Historical performance standout"
+111: "It ranked among the strongest NIFTY 50 "
+112: "historical performers for the selected period."
+120: f"Explain the historical performance and risks "
+144: """Find historically lower-volatility and lower-drawdown stocks."""
+173: "Lower historical volatility"
+... 47 additional matches omitted
+
+### analytics\portfolio_allocation.py (64 lines)
+3: from math import floor, isfinite
+23: raise ValueError(f"Missing valid price for {symbol}.")
+
+### analytics\portfolio_analytics.py (485 lines)
+2: from __future__ import annotations
+4: import math
+5: import numbers
+6: from typing import Any
+8: import pandas as pd
+10: from financial_metrics import calculate_metrics
+41: if index.has_duplicates:
+42: raise ValueError(f"Duplicate {name} dates found.")
+101: raise ValueError("Duplicate stock symbols are not allowed.")
+108: missing = [symbol for symbol in symbols if symbol not in sectors]
+110: if missing:
+112: f"Missing sector information for: {missing}"
+149: price_basis="RAW_CLOSE_UNADJUSTED",
+165: Missing observations are not filled. Only dates with valid returns
+201: missing_columns = [
+206: if missing_columns:
+208: f"Price columns missing for: {missing_columns}"
+231: # Missing observations remain missing; never forward-fill them.
+... 6 additional matches omitted
+
+### analytics\reconcile_bhavcopy_database_dates.py (145 lines)
+3: from pathlib import Path
+4: from zipfile import ZipFile
+6: import pandas as pd
+7: from sqlalchemy import text
+9: from backend.database import engine
+77: FROM stock_prices
+87: missing_in_database = sorted(
+103: print("Dates present in NSE archives but missing in MySQL:",
+104: len(missing_in_database))
+109: if missing_in_database:
+110: print("\nMISSING FROM MYSQL:")
+111: for date in missing_in_database:
+
+### analytics\reconcile_nifty50_index_prices.py (119 lines)
+2: import csv
+3: import sys
+4: from datetime import datetime
+5: from decimal import Decimal
+6: from pathlib import Path
+8: from sqlalchemy import text
+13: from database import engine
+17: / "nifty50_historical_pr_combined.csv"
+53: WHERE index_symbol = 'NIFTY 50'
+69: missing = sorted(source_dates - database_dates)
+89: print("\n--- NIFTY 50 SOURCE RECONCILIATION ---")
+92: print(f"Missing database dates: {len(missing)}")
+96: if missing:
+97: print("\nMissing dates:", missing)
+110: and not missing
+
+### analytics\reconcile_nse_source_prices.py (374 lines)
+3: from pathlib import Path
+4: from zipfile import ZipFile
+5: from decimal import Decimal, InvalidOperation
+7: import pandas as pd
+8: from sqlalchemy import text, bindparam
+10: from analytics.database_adapter import get_latest_constituents
+11: from backend.database import engine
+59: raise ValueError(f"Missing {source_field}")
+97: constituents = get_latest_constituents()
+99: if len(constituents) != 50:
+101: f"Expected 50 latest constituents; found {len(constituents)}"
+104: selected = constituents[
+110: # Build direct symbol mapping and dated historical ticker aliases.
+148: source_duplicates = []
+156: print("Historical ticker aliases:", len(alias_map))
+208: # Apply historical ticker alias only within its recorded
+234: source_duplicates.append({
+262: FROM stock_prices
+... 11 additional matches omitted
+
+### analytics\run_adjusted_price_validation.py (175 lines)
+1: """Validate split/bonus-adjusted prices against imported MySQL data."""
+3: import sys
+4: from pathlib import Path
+6: import pandas as pd
+7: from sqlalchemy import text
+13: from database import engine
+14: from analytics.adjusted_prices import build_adjusted_prices
+46: FROM stock_prices
+67: FROM corporate_actions
+79: print("GREEDY STOCKS — ADJUSTED PRICE VALIDATION")
+82: print("Price basis: split/bonus adjusted; no dividend reinvestment")
+90: print(f"[FAIL] {symbol}: no historical prices")
+97: adjusted = build_adjusted_prices(prices, actions)
+105: adjusted["trade_date"].min().date(),
+107: adjusted["trade_date"].max().date(),
+112: event_rows = adjusted[
+113: (adjusted["trade_date"] >= event_date - pd.Timedelta(days=5))
+114: & (adjusted["trade_date"] <= event_date + pd.Timedelta(days=5))
+... 4 additional matches omitted
+
+### analytics\run_common_window_analysis.py (83 lines)
+1: import pandas as pd
+3: from analytics.database_adapter import (
+4: get_latest_constituents,
+7: from analytics.financial_metrics import calculate_metrics
+12: constituents = get_latest_constituents()
+16: for company in constituents.to_dict("records"):
+59: print("\nGREEDY STOCKS — COMPARABLE NIFTY 50 SNAPSHOT RANKING")
+65: print("Price basis: RAW_CLOSE_UNADJUSTED")
+
+### analytics\run_five_greedy_strategies.py (234 lines)
+2: from __future__ import annotations
+4: import json
+5: import math
+6: import time
+7: from datetime import datetime, timezone
+8: from pathlib import Path
+10: import numpy as np
+11: import pandas as pd
+13: from analytics.greedy_v2_data import prepare_greedy_v2_dataset
+14: from analytics.greedy_v2_splits import chronological_split
+15: from analytics.greedy_v2_engine import greedy_select_stocks
+16: from analytics.portfolio_analytics import calculate_portfolio, compare_with_benchmark
+56: max_per_sector=MAX_PER_SECTOR, price_basis="SPLIT_BONUS_ADJUSTED",
+62: def turnover_cost_adjusted_sharpe(returns: pd.Series, bps: float) -> tuple[float, float]:
+93: net_sharpe, _ = turnover_cost_adjusted_sharpe(ret, cost_bps)
+98: chunks = [prices[trial].iloc[idx].copy() for idx in np.array_split(np.arange(len(prices)), 3) if len(idx) >= MIN_TRAIN_OBS]
+140: max_per_sector=MAX_PER_SECTOR, price_basis="SPLIT_BONUS_ADJUSTED",
+158: prices = dataset.adjusted_prices.copy()
+... 13 additional matches omitted
+
+### analytics\run_greedy_selection.py (208 lines)
+1: import sys
+2: from pathlib import Path
+4: import pandas as pd
+9: import _bootstrap
+11: from database_adapter import get_latest_constituents, get_company_prices
+12: from portfolio_analytics import calculate_portfolio, compare_with_benchmark
+13: from index_adapter import get_index_closes
+26: constituents = get_latest_constituents()
+28: if len(constituents) != 50:
+29: raise ValueError(f"Expected 50 constituents, got {len(constituents)}")
+31: sectors = dict(zip(constituents["symbol"], constituents["sector"]))
+33: print("Loading historical prices for 50 companies...")
+37: for _, row in constituents.iterrows():
+55: raise ValueError("Common price matrix still contains missing values.")
+152: "Benchmark has missing values on common stock-price dates."
+189: print("Candidate universe: Latest NIFTY 50 snapshot")
+190: print("Historical evaluation: Common dates for all 50 stocks")
+196: print("Price basis: Raw unadjusted close")
+... 2 additional matches omitted
+
+### analytics\run_greedy_stability.py (184 lines)
+1: from pathlib import Path
+2: import sys, json, contextlib, io
+3: import pandas as pd
+8: from greedy_v2_data import prepare_greedy_v2_dataset
+9: from greedy_v2_splits import chronological_split
+10: from greedy_v2_engine import greedy_select_stocks
+24: splits = chronological_split(
+25: dataset.adjusted_prices,
+31: full_train = splits.train
+
+### analytics\run_greedy_v2_baselines.py (416 lines)
+4: import json
+5: import random
+6: from datetime import datetime, timezone
+7: from pathlib import Path
+9: import numpy as np
+10: import pandas as pd
+12: from analytics.greedy_v2_data import prepare_greedy_v2_dataset
+13: from analytics.greedy_v2_splits import chronological_split
+14: from analytics.greedy_v2_engine import greedy_select_stocks
+15: from analytics.portfolio_analytics import (
+27: PRICE_BASIS = "SPLIT_BONUS_ADJUSTED"
+192: # All 50 NIFTY constituents, equal weighted.
+273: prices = dataset.adjusted_prices.copy()
+280: splits = chronological_split(
+286: train_benchmark = benchmark.loc[splits.train.index]
+287: validation_benchmark = benchmark.loc[splits.validation.index]
+288: test_benchmark = benchmark.loc[splits.test.index]
+292: train_prices=splits.train,
+... 5 additional matches omitted
+
+### analytics\run_greedy_v2_experiment.backup_20261109_124456.py (448 lines)
+4: import json
+5: from pathlib import Path
+6: from datetime import datetime, timezone
+8: import pandas as pd
+10: from analytics.greedy_v2_data import prepare_greedy_v2_dataset
+11: from analytics.greedy_v2_splits import chronological_split
+12: from analytics.greedy_v2_engine import greedy_select_stocks
+13: from analytics.portfolio_analytics import (
+26: PRICE_BASIS = "SPLIT_BONUS_ADJUSTED"
+65: """Evaluate a fixed stock selection on one historical period."""
+121: # 1. Load historical dataset
+129: prices = dataset.adjusted_prices.copy()
+140: f"Expected 50 NIFTY 50 companies, found {prices.shape[1]}."
+144: raise ValueError("Historical price dataset is empty.")
+154: # 2. Chronological split
+157: splits = chronological_split(
+163: # Use precisely the same dates for NIFTY 50.
+164: train_benchmark = benchmark.loc[splits.train.index]
+... 26 additional matches omitted
+
+### analytics\run_greedy_v2_experiment.backup_sparse_20261109_124756.py (539 lines)
+4: import json
+5: from pathlib import Path
+6: from datetime import datetime, timezone
+8: import pandas as pd
+10: from analytics.greedy_v2_data import prepare_greedy_v2_dataset
+11: from analytics.greedy_v2_splits import chronological_split
+12: from analytics.greedy_v2_engine import greedy_select_stocks
+13: from analytics.portfolio_analytics import (
+17: from analytics.validation.trial_registry import append_trial
+27: PRICE_BASIS = "SPLIT_BONUS_ADJUSTED"
+66: """Evaluate a fixed stock selection on one historical period."""
+122: # 1. Load historical dataset
+130: prices = dataset.adjusted_prices.copy()
+159: f"Expected 50 NIFTY 50 companies, found {prices.shape[1]}."
+163: raise ValueError("Historical price dataset is empty.")
+173: # 2. Chronological split
+176: splits = chronological_split(
+182: # Use precisely the same dates for NIFTY 50.
+... 30 additional matches omitted
+
+### analytics\run_greedy_v2_experiment.py (541 lines)
+4: import json
+5: from pathlib import Path
+6: from datetime import datetime, timezone
+8: import pandas as pd
+10: from analytics.greedy_v2_data import prepare_greedy_v2_dataset
+11: from analytics.greedy_v2_splits import chronological_split
+12: from analytics.greedy_v2_engine import greedy_select_stocks
+13: from analytics.portfolio_analytics import (
+17: from analytics.validation.trial_registry import append_trial
+27: PRICE_BASIS = "SPLIT_BONUS_ADJUSTED"
+66: """Evaluate a fixed stock selection on one historical period."""
+122: # 1. Load historical dataset
+130: prices = dataset.adjusted_prices.copy()
+164: raise ValueError("Historical price dataset is empty.")
+174: # 2. Chronological split
+177: splits = chronological_split(
+184: # Use precisely the same dates for NIFTY 50.
+185: train_benchmark = benchmark.loc[splits.train.index]
+... 29 additional matches omitted
+
+### analytics\run_greedy_validation.py (259 lines)
+1: import sys
+2: from pathlib import Path
+4: import pandas as pd
+9: import _bootstrap
+11: from database_adapter import get_latest_constituents, get_company_prices
+12: from portfolio_analytics import calculate_portfolio, compare_with_benchmark
+13: from index_adapter import get_index_closes
+96: constituents = get_latest_constituents()
+98: if len(constituents) != 50:
+99: raise ValueError("Expected exactly 50 latest constituents.")
+101: sectors = dict(zip(constituents["symbol"], constituents["sector"]))
+105: for _, row in constituents.iterrows():
+119: split = int(len(prices) * TRAIN_RATIO)
+122: train_prices = prices.iloc[:split].copy()
+125: test_prices = prices.iloc[split - 1:].copy()
+174: raise ValueError("Benchmark has missing prices on evaluation dates.")
+249: print("Latest constituent snapshot is used retrospectively.")
+250: print("Prices are unadjusted; dividends are excluded.")
+... 1 additional matches omitted
+
+### analytics\run_greedy_walk_forward.py (252 lines)
+1: import sys
+2: from pathlib import Path
+4: import pandas as pd
+9: import _bootstrap
+11: from database_adapter import get_latest_constituents, get_company_prices
+12: from portfolio_analytics import calculate_portfolio, compare_with_benchmark
+13: from index_adapter import get_index_closes
+69: constituents = get_latest_constituents()
+71: if len(constituents) != 50:
+72: raise ValueError("Expected 50 NIFTY 50 constituents.")
+74: sectors = dict(zip(constituents["symbol"], constituents["sector"]))
+78: for _, row in constituents.iterrows():
+95: raise ValueError("Benchmark prices missing on common dates.")
+172: f"Test NIFTY return: "
+246: print("Historical membership: Latest snapshot, retrospective.")
+247: print("Dividends excluded; corporate-action coverage partial.")
+248: print("Each fold is a historical test, not a live trading result.")
+
+### analytics\run_indian_delivery_cost_model.py (285 lines)
+1: from pathlib import Path
+2: import json, math
+3: import numpy as np
+4: import pandas as pd
+9: PRICE = ROOT / "database/processed/point_in_time/corporate_action_adjusted/nifty50_daily_adjusted_price_returns.csv"
+32: fail(f"Missing input: {p}")
+34: print("Loading adjusted stock returns...")
+36: required = {"trade_date", "symbol", "adjusted_price_return"}
+38: fail(f"Price columns missing: {required - set(prices.columns)}")
+42: prices["adjusted_price_return"] = pd.to_numeric(prices["adjusted_price_return"], errors="coerce")
+43: prices = prices.dropna(subset=["adjusted_price_return"])
+44: if prices.duplicated(["trade_date", "symbol"]).any():
+45: fail("Duplicate date/symbol rows in adjusted returns.")
+47: ret = prices.pivot(index="trade_date", columns="symbol", values="adjusted_price_return")
+54: fail(f"Assignment columns missing: {need - set(daily.columns)}")
+58: if daily["date"].duplicated().any():
+59: fail("Assignment file contains duplicate dates.")
+62: lambda x: [s.strip() for s in str(x).split(",") if s.strip()]
+... 15 additional matches omitted
+
+### analytics\run_multi_strategy_validation.py (466 lines)
+1: from pathlib import Path
+2: import sys
+3: import json
+4: import hashlib
+5: import contextlib
+6: import io
+8: import numpy as np
+9: import pandas as pd
+10: from scipy.stats import skew, kurtosis
+18: from greedy_v2_data import prepare_greedy_v2_dataset
+19: from greedy_v2_splits import chronological_split
+20: from greedy_v2_engine import greedy_select_stocks
+21: from portfolio_analytics import calculate_portfolio
+22: from validation.trial_registry import append_trial, read_trials
+23: from validation.deflated_sharpe import deflated_sharpe
+24: from validation.pbo_cscv import estimate_pbo
+30: PRICE_BASIS = "SPLIT_BONUS_ADJUSTED"
+34: def select_top_weight(constituents, eligible, count=10, sector_cap=3):
+... 28 additional matches omitted
+
+### analytics\run_real_portfolio.py (181 lines)
+1: import sys
+2: from pathlib import Path
+4: import pandas as pd
+6: import _bootstrap
+11: from database_adapter import get_latest_constituents, get_company_prices
+12: from index_adapter import get_index_closes
+13: from portfolio_analytics import calculate_portfolio, compare_with_benchmark
+22: def select_stocks(constituents):
+23: """Select highest-weight constituents within sector constraints."""
+25: ranked = constituents.sort_values(
+56: # 1. Load latest NIFTY 50 universe.
+57: constituents = get_latest_constituents()
+59: if len(constituents) != 50:
+61: f"Expected 50 constituents, received {len(constituents)}."
+64: selected = select_stocks(constituents)
+66: print(f"\nConstituent snapshot: {selected['report_month'].iloc[0]}")
+77: # 2. Retrieve actual historical closing prices.
+104: print(f"Missing price cells: {int(prices.isna().sum().sum())}")
+... 10 additional matches omitted
+
+### analytics\run_registered_greedy_v2_experiment.py (75 lines)
+1: from pathlib import Path
+2: import runpy
+3: import sys
+8: # Match the import convention used by existing analytics scripts.
+11: from validation.trial_registry import append_trial
+12: from portfolio_analytics import calculate_portfolio
+24: splits = state["splits"]
+33: prices=splits.test,
+
+### analytics\run_strategy_baseline_comparison.py (259 lines)
+1: import sys
+2: from pathlib import Path
+4: import pandas as pd
+9: import _bootstrap
+11: from database_adapter import get_latest_constituents, get_company_prices
+12: from portfolio_analytics import calculate_portfolio, compare_with_benchmark
+13: from index_adapter import get_index_closes
+62: def top_weight_select(constituents):
+66: for _, row in constituents.sort_values(
+129: constituents = get_latest_constituents()
+131: if len(constituents) != 50:
+132: raise ValueError("Expected 50 NIFTY 50 constituents.")
+134: sectors = dict(zip(constituents["symbol"], constituents["sector"]))
+138: for _, row in constituents.iterrows():
+155: raise ValueError("Benchmark has missing common dates.")
+157: top10 = top_weight_select(constituents)
+254: print("Historical constituent snapshot is retrospective.")
+255: print("Dividends excluded; corporate-action coverage partial.")
+
+### analytics\run_walk_forward_cost_validation.backup_20261109_130430.py (389 lines)
+1: ﻿from pathlib import Path
+2: import sys, json, contextlib, io
+3: import numpy as np
+4: import pandas as pd
+9: from greedy_v2_data import prepare_greedy_v2_dataset
+10: from greedy_v2_engine import greedy_select_stocks
+25: def select_top_weight(constituents, eligible):
+27: if not required.issubset(constituents.columns):
+28: raise ValueError(f"Missing constituent columns: {required - set(constituents.columns)}")
+31: for _, row in constituents.sort_values(
+59: raise ValueError("Missing returns in evaluation period.")
+122: prices = dataset.adjusted_prices.copy().sort_index()
+202: raise ValueError(f"{mode} training matrix has missing values.")
+215: dataset.constituents,
+242: f"Missing test prices: fold={fold_number}, "
+347: "benchmark": "NIFTY price return",
+349: "Historical latest-constituent universe; survivorship bias remains.",
+350: "Dividends excluded.",
+... 1 additional matches omitted
+
+### analytics\run_walk_forward_cost_validation.py (395 lines)
+1: from pathlib import Path
+2: import sys, json, contextlib, io
+3: import numpy as np
+4: import pandas as pd
+9: from greedy_v2_data import prepare_greedy_v2_dataset
+10: from greedy_v2_engine import greedy_select_stocks
+25: def select_top_weight(constituents, eligible):
+27: if not required.issubset(constituents.columns):
+28: raise ValueError(f"Missing constituent columns: {required - set(constituents.columns)}")
+31: for _, row in constituents.sort_values(
+59: raise ValueError("Missing returns in evaluation period.")
+122: prices = dataset.adjusted_prices.copy().sort_index()
+208: raise ValueError(f"{mode} training matrix has missing values.")
+221: dataset.constituents,
+248: f"Missing test prices: fold={fold_number}, "
+353: "benchmark": "NIFTY price return",
+355: "Historical latest-constituent universe; survivorship bias remains.",
+356: "Dividends excluded.",
+... 1 additional matches omitted
+
+### analytics\test_adjusted_price_adapter.py (225 lines)
+2: import unittest
+3: from unittest.mock import MagicMock, patch
+5: import pandas as pd
+7: from analytics.adjusted_price_adapter import (
+9: get_adjusted_company_prices,
+23: class AdjustedPriceAdapterTests(unittest.TestCase):
+25: @patch("analytics.adjusted_price_adapter.engine.connect")
+29: "action_type": "BONUS",
+43: self.assertEqual(result[0]["action_type"], "BONUS")
+50: @patch("analytics.adjusted_price_adapter.engine.connect")
+66: @patch("analytics.adjusted_price_adapter.get_company_actions")
+67: @patch("analytics.adjusted_price_adapter.engine.connect")
+84: "action_type": "BONUS",
+90: result = get_adjusted_company_prices(
+98: # The 1:1 bonus adjusts the earlier price by a factor of 2.
+100: self.assertAlmostEqual(result.iloc[0]["adjusted_close"], 75.0)
+102: # The ex-date price is not adjusted.
+104: self.assertAlmostEqual(result.iloc[1]["adjusted_close"], 155.0)
+... 23 additional matches omitted
+
+### analytics\test_adjusted_prices.py (232 lines)
+1: import unittest
+2: from copy import deepcopy
+3: from decimal import Decimal
+5: import pandas as pd
+7: from analytics.adjusted_prices import (
+9: build_adjusted_prices,
+13: class AdjustedPriceTests(unittest.TestCase):
+15: def test_split_factor(self):
+18: "action_type": "STOCK_SPLIT",
+25: def test_bonus_factor(self):
+28: "action_type": "BONUS",
+35: def test_fractional_bonus_factor(self):
+38: "action_type": "BONUS",
+45: def test_pre_event_price_is_adjusted(self):
+50: result = build_adjusted_prices(prices, [{
+51: "action_type": "BONUS", "ratio": "2:1", "ex_date": "2025-05-23"
+53: self.assertAlmostEqual(result.iloc[0]["adjusted_close"], 100)
+54: self.assertAlmostEqual(result.iloc[1]["adjusted_close"], 110)
+... 51 additional matches omitted
+
+### analytics\test_benchmark_analytics.py (123 lines)
+4: import unittest
+5: from unittest.mock import patch
+7: import pandas as pd
+9: from analytics.benchmark_analytics import calculate_benchmark_metrics
+23: name="nifty50_close",
+32: self.assertEqual(result["benchmark"], "NIFTY 50")
+39: "NSE Indices Historical PR",
+41: self.assertFalse(result["dividend_adjusted"])
+108: name="nifty50_close",
+111: with self.assertRaisesRegex(ValueError, "No NIFTY 50"):
+
+### analytics\test_financial_metrics.py (245 lines)
+3: import sys
+4: from pathlib import Path
+10: import math
+11: import unittest
+13: import pandas as pd
+15: from analytics.financial_metrics import (
+82: def test_missing_price_is_not_forward_filled_or_bridged(self):
+101: def test_duplicate_price_dates_are_rejected(self):
+106: with self.assertRaisesRegex(ValueError, "Duplicate price dates"):
+121: self.assertEqual(result["price_basis"], "RAW_CLOSE_UNADJUSTED")
+124: def test_missing_expected_trading_session_is_rejected(self):
+139: with self.assertRaisesRegex(ValueError, "missing prices"):
+148: def test_duplicate_expected_sessions_are_rejected(self):
+155: with self.assertRaisesRegex(ValueError, "cannot contain duplicates"):
+171: with self.assertRaisesRegex(ValueError, "missing prices"):
+181: with self.assertRaisesRegex(ValueError, "missing prices"):
+
+### analytics\test_greedy_v2_engine.py (218 lines)
+2: import unittest
+4: import numpy as np
+5: import pandas as pd
+7: from analytics.greedy_v2_engine import greedy_select_stocks
+136: def test_missing_prices_are_rejected(self):
+158: def test_duplicate_dates_are_rejected(self):
+179: def test_missing_sector_is_rejected(self):
+
+### analytics\test_greedy_v2_splits.py (120 lines)
+2: import unittest
+3: import numpy as np
+4: import pandas as pd
+6: from analytics.greedy_v2_splits import chronological_split
+9: class GreedyV2SplitTests(unittest.TestCase):
+22: def test_chronological_split_sizes(self):
+23: result = chronological_split(self.prices)
+29: def test_splits_are_chronological(self):
+30: result = chronological_split(self.prices)
+39: result = chronological_split(self.prices)
+47: result = chronological_split(self.prices)
+55: result = chronological_split(self.prices)
+66: def test_metadata_discloses_split_details(self):
+67: result = chronological_split(self.prices)
+71: self.assertFalse(result.metadata["missing_prices_filled"])
+78: chronological_split(prices)
+80: def test_duplicate_dates_are_rejected(self):
+84: chronological_split(prices)
+... 8 additional matches omitted
+
+### analytics\test_market_ideas.py (461 lines)
+3: import json
+4: import tempfile
+5: import unittest
+6: from pathlib import Path
+7: from unittest.mock import patch
+9: import pandas as pd
+11: from analytics import market_ideas as mi
+61: "index": "NIFTY 50",
+63: "price_basis": "SPLIT_BONUS_ADJUSTED",
+64: "dividend_adjusted": False,
+66: "corporate_action_coverage": "PARTIAL",
+129: "POSITIVE_HISTORICAL_PERFORMANCE",
+134: "NEGATIVE_HISTORICAL_PERFORMANCE",
+139: "FLAT_HISTORICAL_PERFORMANCE",
+158: def test_missing_sector_is_handled(self):
+166: def test_missing_greedy_log_returns_unavailable_idea(self):
+168: missing_file = Path(temp_dir) / "missing.csv"
+170: with patch.object(mi, "GREEDY_LOG", missing_file):
+... 9 additional matches omitted
+
+### analytics\test_portfolio_allocation.py (33 lines)
+1: import unittest
+2: from analytics.portfolio_allocation import allocate_capital
+
+### analytics\test_portfolio_analytics.py (278 lines)
+1: import sys
+2: import unittest
+3: from pathlib import Path
+5: import numpy as np
+6: import pandas as pd
+11: from portfolio_analytics import (
+65: def test_duplicate_symbols_rejected(self):
+72: def test_missing_sector_rejected(self):
+79: def test_missing_price_column_rejected(self):
+87: def test_missing_prices_are_not_filled(self):
+93: self.assertFalse(result["metadata"]["missing_values_filled"])
+154: def test_duplicate_dates_rejected(self):
+
+### analytics\validate_historical_rankings.py (210 lines)
+1: """Quality checks for historical NIFTY 50 rankings.
+6: import sys
+7: from pathlib import Path
+13: import math
+14: import pandas as pd
+16: from analytics.historical_rankings import PERIODS, run_historical_rankings
+33: print(f"VALIDATING {period} HISTORICAL RANKINGS")
+38: result = run_historical_rankings(period)
+113: result["corporate_action_coverage"].eq("PARTIAL").all()
+114: and result.attrs.get("corporate_action_coverage") == "PARTIAL",
+118: result.attrs.get("dividend_adjusted") is False,
+119: "Results are not misrepresented as dividend-adjusted",
+122: result.attrs.get("price_basis") == "SPLIT_BONUS_ADJUSTED",
+123: "Split/bonus-adjusted price basis is disclosed",
+165: "[WARN] Latest monthly constituent snapshot is not exact daily "
+166: "historical membership."
+170: "[WARN] Corporate-action coverage is partial and dividends are "
+175: "[WARN] Session dates come from imported stock_prices, not an "
+... 1 additional matches omitted
+
+### analytics\validation\deflated_sharpe.py (80 lines)
+8: import math
+9: from scipy.stats import norm
+
+### analytics\validation\pbo_cscv.py (97 lines)
+3: from itertools import combinations
+4: import math
+6: import numpy as np
+7: import pandas as pd
+8: from scipy.stats import rankdata
+25: PBO is the fraction of splits where the IS winner ranks below
+36: if returns.columns.has_duplicates:
+43: blocks = np.array_split(np.arange(len(returns)), n_slices)
+47: split_results = []
+75: split_results.append({
+83: pbo = sum(x["overfit"] for x in split_results) / len(split_results)
+87: "splits": len(split_results),
+91: "split_results": split_results,
+
+### analytics\validation\test_validation.py (85 lines)
+1: import json
+3: import numpy as np
+4: import pandas as pd
+5: import pytest
+7: from analytics.validation.trial_registry import append_trial, read_trials
+8: from analytics.validation.deflated_sharpe import (
+12: from analytics.validation.pbo_cscv import estimate_pbo
+15: def test_registry_appends_and_rejects_duplicate(tmp_path):
+28: with pytest.raises(ValueError, match="Duplicate"):
+76: assert result["splits"] == 20
+79: def test_pbo_rejects_missing_returns():
+
+### analytics\validation\trial_registry.py (120 lines)
+3: import json
+4: import math
+5: import time
+6: import uuid
+7: from datetime import datetime, timezone
+8: from pathlib import Path
+44: """Append one immutable trial record. Duplicate IDs are rejected."""
+91: raise ValueError(f"Duplicate trial_id: {trial_id}")
+98: lock_path.unlink(missing_ok=True)
+
+### backend\anomaly_by_series.py (87 lines)
+2: from pathlib import Path
+3: from zipfile import ZipFile
+4: from collections import Counter
+5: from decimal import Decimal, InvalidOperation
+6: import csv
+7: import io
+
+### backend\audit_139_missing_dates.py (156 lines)
+1: import sys, json, csv
+2: from pathlib import Path
+3: from datetime import date, timedelta
+4: from collections import Counter, defaultdict
+5: from sqlalchemy import text
+10: from backend.database import engine
+13: OUTPUT = ROOT / "database" / "raw" / "bhavcopy" / "missing_dates_audit.csv"
+16: # Historical lists are cross-checked against published NSE calendars.
+57: """.split())
+68: SELECT MIN(trade_date), MAX(trade_date) FROM stock_prices
+74: FROM stock_prices
+86: missing = []
+90: missing.append(d)
+94: for d in missing:
+129: print("Missing weekdays found:", len(rows))
+155: print("\nIMPORTANT: POTENTIAL_DATA_GAP is not proof of a trading session.")
+
+### backend\audit_all_constituents.py (303 lines)
+2: import csv
+3: import io
+4: import re
+5: import zipfile
+7: from pathlib import Path
+8: from datetime import datetime
+9: from decimal import Decimal, InvalidOperation
+11: REPORT_DIR = Path("database/raw/constituents")
+14: "NIFTY50": "nifty50_mcwb.csv",
+15: "NIFTYNEXT50": "niftynext50_mcwb.csv",
+82: raise ValueError(f"Missing file: {target}")
+85: lines = content.splitlines()
+105: duplicates = []
+107: missing_beta = []
+116: duplicates.append(symbol)
+126: missing_beta.append(symbol)
+145: "duplicates": duplicates,
+147: "missing_beta": missing_beta,
+... 12 additional matches omitted
+
+### backend\audit_bhavcopy.py (152 lines)
+2: from pathlib import Path
+3: from zipfile import ZipFile, BadZipFile
+4: from collections import Counter
+5: import csv
+6: import io
+47: duplicate_hashes = {}
+50: import hashlib
+80: duplicate_hashes[digest] = (
+81: duplicate_hashes.get(digest, 1) + 1
+83: print(f"  DUPLICATE CONTENT: {member.filename}")
+93: missing = EXPECTED_COLUMNS - columns
+95: if missing:
+97: "  UNEXPECTED SCHEMA. Missing columns:",
+98: sorted(missing)
+143: print(f"Duplicate CSV contents: {len(duplicate_hashes)}")
+
+### backend\audit_date_coverage.py (165 lines)
+2: import csv
+3: import re
+4: import zipfile
+5: from pathlib import Path
+6: from collections import defaultdict, Counter
+7: from datetime import datetime
+8: from statistics import median
+
+### backend\audit_dummy_constituents.py (71 lines)
+2: import zipfile
+3: from pathlib import Path
+4: import pandas as pd
+5: import io
+7: folder = Path("database/raw/constituents")
+
+### backend\audit_eq_quality.py (114 lines)
+2: import csv
+3: import zipfile
+4: from pathlib import Path
+5: from collections import Counter
+6: from decimal import Decimal, InvalidOperation
+56: issues[f"missing_{name}"] += 1
+100: print("No missing, invalid, negative or zero values found.")
+
+### backend\audit_nifty50_bhavcopy_coverage.py (211 lines)
+2: from pathlib import Path
+3: from collections import defaultdict
+4: from zipfile import ZipFile
+5: import pandas as pd
+11: CONSTITUENT_FILE = (
+13: "constituents" / "nifty50_constituent_snapshots.csv"
+25: constituents = pd.read_csv(
+26: CONSTITUENT_FILE,
+31: constituents["Security Symbol"]
+50: "duplicate_rows": 0,
+58: print(f"Historical NIFTY 50 symbols: {len(symbols)}")
+126: duplicate_mask = matched.duplicated(
+131: duplicates = matched[duplicate_mask]
+133: for symbol, count in duplicates.groupby("TckrSymb").size().items():
+134: stats[symbol]["duplicate_rows"] += int(count)
+142: print("NIFTY 50 HISTORICAL BHAVCOPY COVERAGE")
+161: "duplicate_rows": item["duplicate_rows"],
+173: output_dir / "nifty50_bhavcopy_coverage_audit.csv"
+... 3 additional matches omitted
+
+### backend\audit_nifty50_isin_changes.py (131 lines)
+2: from pathlib import Path
+3: from zipfile import ZipFile
+4: import pandas as pd
+65: detail_file = output_dir / "nifty50_isin_series_details.csv"
+88: print("EQ SERIES DUPLICATE CHECK")
+93: duplicate_mask = eq.duplicated(
+100: eq[["TradDt", "TckrSymb"]].drop_duplicates().shape[0])
+101: print("Duplicate EQ symbol-date rows:", int(duplicate_mask.sum()))
+103: if duplicate_mask.any():
+104: print("\nDuplicate records:")
+106: eq[duplicate_mask].sort_values(
+
+### backend\audit_nifty50_membership_changes.py (94 lines)
+2: from pathlib import Path
+3: import pandas as pd
+6: DATA_DIR = ROOT / "database" / "processed" / "constituents"
+8: SOURCE = DATA_DIR / "nifty50_constituent_snapshots.csv"
+9: OUTPUT = DATA_DIR / "nifty50_membership_changes.csv"
+32: print("GREEDY STOCKS — NIFTY 50 MEMBERSHIP CHANGE AUDIT")
+52: print("No constituent changes.")
+91: print("\nIMPORTANT:")
+
+### backend\audit_nifty50_membership_periods.py (234 lines)
+2: from pathlib import Path
+4: import pandas as pd
+10: ROOT / "database" / "processed" / "constituents"
+14: DATA_DIR / "nifty50_constituent_snapshots.csv"
+18: DATA_DIR / "nifty50_membership_events_reconciled.csv"
+22: DATA_DIR / "nifty50_membership_observation_audit_v2.csv"
+54: if snapshots.duplicated(
+58: "Duplicate symbol/month observations found."
+80: internal_missing_months = [
+117: "internal_missing_month_count": len(
+118: internal_missing_months
+121: "internal_missing_months": ", ".join(
+122: internal_missing_months
+135: if not internal_missing_months
+171: print("NIFTY 50 MEMBERSHIP AUDIT V2")
+174: print("Historical instruments:", len(result))
+179: result["internal_missing_month_count"] > 0
+193: result["internal_missing_month_count"] > 0
+... 1 additional matches omitted
+
+### backend\audit_phase2_final.py (367 lines)
+1: import sys
+4: from sqlalchemy import text, inspect
+5: from database import engine
+20: "index_constituent_snapshots",
+21: "index_constituent_observation_spans",
+22: "index_membership_events", "index_constituents",
+23: "stock_prices", "corporate_actions",
+24: "data_import_logs", "validation_logs"
+32: missing_tables = sorted(required - tables)
+35: not missing_tables,
+36: "All expected tables exist" if not missing_tables
+37: else f"Missing: {missing_tables}"
+40: if missing_tables:
+41: print("\nAudit stopped because required tables are missing.")
+49: SUM(isin IS NULL OR isin = '') AS missing_isin
+59: # 2. Monthly constituent snapshots
+64: FROM index_constituent_snapshots
+65: WHERE index_symbol = 'NIFTY 50'
+... 28 additional matches omitted
+
+### backend\backfill_nse_historical.py (361 lines)
+1: import argparse
+2: import json
+3: import subprocess
+4: import sys
+5: import time
+6: import zipfile
+7: from datetime import date, timedelta
+8: from pathlib import Path
+9: from urllib.parse import urljoin
+11: import pandas as pd
+12: import requests
+13: from requests.adapters import HTTPAdapter
+14: from urllib3.util.retry import Retry
+20: IMPORTER = ROOT / "backend" / "import_nifty50_historical_prices.py"
+22: LEGACY_CUTOFF = date(2024, 7, 8)  # UDiFF archive era begins 08-Jul-2024
+23: LEGACY_BASE = "https://archives.nseindia.com/content/historical/EQUITIES/"
+24: UDIFF_BASE = "https://nsearchives.nseindia.com/content/cm/"
+61: url = urljoin(UDIFF_BASE, filename)
+... 22 additional matches omitted
+
+### backend\build_benchmark_discrepancy_register.py (70 lines)
+1: import csv
+2: from datetime import date
+3: from pathlib import Path
+7: INPUT = ROOT / "database" / "raw" / "index" / "missing_bhavcopy_recovery.csv"
+69: print(f"Archives missing: {sum(not r['archive_found'] for r in rows)}")
+
+### backend\build_nifty50_company_master.py (92 lines)
+2: from pathlib import Path
+3: import pandas as pd
+6: DATA_DIR = ROOT / "database" / "processed" / "constituents"
+8: SOURCE = DATA_DIR / "nifty50_constituent_snapshots.csv"
+9: OUTPUT = DATA_DIR / "nifty50_company_master.csv"
+21: # Historical identity and corporate-action mapping.
+51: "historical_symbol": symbol,
+73: ["canonical_symbol", "historical_symbol"]
+79: print("NIFTY 50 COMPANY MASTER — VERSION 2")
+82: print(f"Historical symbols: {len(master)}")
+84: print(f"Missing industries: {(master['industry'].fillna('').str.strip() == '').sum()}")
+
+### backend\build_nifty50_historical_universe.py (179 lines)
+1: import csv
+2: import io
+3: import urllib.request
+4: from pathlib import Path
+5: from datetime import date
+13: "nse-historical-membership/main/"
+17: HISTORY_FILE = DATA / "nse_historical_index_membership_source.csv"
+18: OUTPUT = DATA / "nifty50_membership_2016_2026.csv"
+19: UNIQUE_OUTPUT = DATA / "nifty50_unique_companies_2016_2026.csv"
+20: MATCH_OUTPUT = DATA / "nifty50_bhavcopy_match_2016_2026.csv"
+25: print("Downloading historical membership dataset...")
+36: print("Historical source rows:", len(all_rows))
+47: nifty_rows = []
+50: if index_name != "NIFTY 50":
+62: nifty_rows.append({
+69: if not nifty_rows:
+71: "No NIFTY 50 records found. Check source index_name and CSV schema."
+74: fields = list(nifty_rows[0].keys())
+... 11 additional matches omitted
+
+### backend\build_nifty50_membership_review.py (239 lines)
+1: import csv
+2: from pathlib import Path
+3: from collections import defaultdict
+4: from datetime import date
+7: MEMBERSHIP = ROOT / "nifty50_membership_2016_2026.csv"
+8: IDENTITY_AUDIT = ROOT / "nifty50_combined_historical_symbol_audit.csv"
+9: OUT_LEDGER = ROOT / "nifty50_membership_review_ledger.csv"
+10: OUT_IDENTITY = ROOT / "nifty50_symbol_identity_master.csv"
+11: OUT_ISSUES = ROOT / "nifty50_membership_review_issues.csv"
+96: "issue": "MISSING_SYMBOL",
+110: "issue": "INVALID_OR_MISSING_START_DATE",
+138: # If the source uses a renamed/canonical ticker, split the interval
+162: "historical_trading_symbol": candidate["symbol"],
+189: "historical_trading_symbol": source_symbol,
+210: "historical_trading_symbol", "isin", "membership_start",
+221: key=lambda x: (x["company_identity_key"], x["membership_start"], x["historical_trading_symbol"])
+239: print("\nIMPORTANT: Every membership row remains PROVISIONAL until checked against official dated NSE Indices snapshots/announcements.")
+
+### backend\catch_up_nse_data.py (293 lines)
+2: import argparse
+3: import logging
+4: import re
+5: import subprocess
+6: import sys
+8: from datetime import date, datetime, time, timedelta
+9: from pathlib import Path
+10: from zoneinfo import ZoneInfo
+12: from sqlalchemy import text
+18: from database import engine
+19: from nse_trading_calendar import get_session_status
+57: FROM stock_prices
+63: "stock_prices contains no records. "
+64: "Run the initial historical import first."
+97: def verify_import(trade_date):
+102: FROM stock_prices
+110: f"Importer completed but no stock_prices records "
+117: def process_missing_dates(latest_date, target_date, dry_run=False):
+... 7 additional matches omitted
+
+### backend\certify_nifty50_pr_candidate.py (85 lines)
+1: import csv
+2: from pathlib import Path
+3: from datetime import datetime
+5: REVIEW = Path("database/raw/index/nifty50_historical_pr_10y_review.csv")
+6: OLD = Path("database/raw/index/nifty50_historical_pr_combined.csv")
+7: OUT = Path("database/raw/index/nifty50_historical_pr_10y_candidate.csv")
+8: AUDIT = Path("database/raw/index/nifty50_pr_source_corrections.csv")
+16: raise RuntimeError(f"Duplicate date in {path}: {d}")
+32: raise RuntimeError(f"Old date missing: {d}")
+
+### backend\chat_routes.py (1130 lines)
+2: import logging
+3: import os
+4: import re
+5: import sys
+6: from datetime import datetime, timezone
+7: from pathlib import Path
+9: from dotenv import load_dotenv
+10: from fastapi import APIRouter, HTTPException
+11: from pydantic import BaseModel, Field
+12: from sqlalchemy import text
+25: from backend.database import engine
+26: from analytics.market_ideas import generate_market_ideas
+27: from analytics.ask_greedy.orchestrator import build_calculation_context
+28: from analytics.ask_greedy.greedy_knowledge import build_greedy_knowledge_context
+29: from analytics.ask_greedy.historical_intelligence import build_historical_intelligence_context
+30: from analytics.ask_greedy.greedy_v2_evidence import build_greedy_v2_evidence_context
+31: from analytics.ask_greedy.financial_education import build_education_context
+32: from analytics.ask_greedy.real_world_research import (
+... 42 additional matches omitted
+
+### backend\company_routes.py (193 lines)
+2: from datetime import date
+3: from decimal import Decimal
+5: from fastapi import APIRouter, HTTPException
+6: from sqlalchemy import text
+8: from database import engine
+68: FROM stock_prices
+86: price_source
+87: FROM stock_prices
+105: dividend_amount,
+108: FROM corporate_actions
+154: "price_basis": "RAW_CLOSE_UNADJUSTED",
+163: "corporate_actions": [
+178: "Latest price is an unadjusted raw closing price.",
+179: "Corporate action coverage is limited to imported records.",
+180: "Dividend-adjusted total-return history is not provided.",
+182: "Historical price coverage does not establish historical NIFTY 50 membership.",
+
+### backend\compare_constituents.py (193 lines)
+2: import csv
+3: import io
+4: import zipfile
+5: from pathlib import Path
+6: from decimal import Decimal, InvalidOperation
+7: from collections import Counter
+9: REPORT_DIR = Path("database/raw/constituents")
+16: issues[f"missing_{field}"] += 1
+34: lines = content.splitlines()
+47: duplicate_symbols = []
+56: duplicate_symbols.append(symbol)
+84: return records, issues, duplicate_symbols
+93: for index_name in ("nifty50", "niftynext50"):
+127: print("\nCONSTITUENT REPORT VALIDATION")
+135: for index_name, (records, issues, duplicates) in reports[month].items():
+146: print(f"  Duplicate symbols: {len(duplicates)}")
+149: print(f"  Missing/invalid fields: {dict(issues)}")
+154: if duplicates:
+... 2 additional matches omitted
+
+### backend\database.py (47 lines)
+2: import os
+3: from pathlib import Path
+5: from dotenv import load_dotenv
+6: from sqlalchemy import create_engine
+7: from sqlalchemy.engine import URL
+8: from sqlalchemy.orm import sessionmaker
+22: raise RuntimeError("Database credentials are missing from .env")
+
+### backend\db_test.py (30 lines)
+2: from sqlalchemy import text
+3: from database import engine
+
+### backend\discover_nse_symbols.py (160 lines)
+1: import csv
+2: import io
+3: import zipfile
+4: from pathlib import Path
+5: from collections import defaultdict
+6: from datetime import datetime
+147: print("\nIMPORTANT SYMBOLS:")
+
+### backend\download_nifty50_pr_candidate.py (145 lines)
+1: import requests, csv, time
+2: from datetime import date, datetime, timedelta
+3: from pathlib import Path
+7: URL = "https://www.nseindia.com/api/historicalOR/indicesHistory"
+8: OUT = Path("database/raw/index/nifty50_historical_pr_10y_candidate.csv")
+9: EXISTING = Path("database/raw/index/nifty50_historical_pr_combined.csv")
+16: "Referer": "https://www.nseindia.com/reports-indices-historical-index-data",
+23: "indexType": "NIFTY 50",
+58: if x.get("EOD_INDEX_NAME") != "NIFTY 50":
+70: raise RuntimeError(f"Duplicate date across chunks: {dt}")
+73: "Index Name": "NIFTY 50",
+95: missing_old = []
+98: missing_old.append(dt)
+107: if conflicts or missing_old:
+112: print("Old dates missing:", len(missing_old))
+113: for dt in missing_old[:20]:
+114: print("MISSING:", dt)
+116: review = OUT.with_name("nifty50_historical_pr_10y_review.csv")
+... 1 additional matches omitted
+
+### backend\download_nse_cm_bhavcopy.py (456 lines)
+2: import argparse
+3: import csv
+4: import io
+5: import logging
+6: import re
+7: import sys
+8: import time
+9: import zipfile
+11: from datetime import datetime
+12: from pathlib import Path
+13: from zoneinfo import ZoneInfo
+15: import requests
+16: from requests.adapters import HTTPAdapter
+17: from urllib3.util.retry import Retry
+95: missing = REQUIRED_COLUMNS - columns
+97: if missing:
+99: f"Missing required columns: {sorted(missing)}"
+213: temporary.unlink(missing_ok=True)
+... 3 additional matches omitted
+
+### backend\extract_nifty50_constituents.py (174 lines)
+2: import io
+3: import zipfile
+4: from pathlib import Path
+6: import pandas as pd
+10: SOURCE_DIR = PROJECT_ROOT / "database" / "raw" / "constituents"
+11: OUTPUT_DIR = PROJECT_ROOT / "database" / "processed" / "constituents"
+26: print("GREEDY STOCKS - NIFTY 50 CONSTITUENT EXTRACTION")
+32: parts = archive.stem.lower().replace("mcwb_", "").split("_")
+55: # IMPORTANT: Only NIFTY 50. Never read NIFTY Next 50.
+59: if Path(name).name.lower() == "nifty50_mcwb.csv"
+65: print(f"MISSING NIFTY 50 FILE: {archive.name}")
+133: duplicate_count = int(symbols.duplicated().sum())
+137: f"Real constituents: {len(real_df)} | "
+139: f"Duplicate symbols: {duplicate_count}"
+143: print("  WARNING: Expected 50 real constituents.")
+145: if duplicate_count:
+146: print("  WARNING: Duplicate constituent symbols detected.")
+152: snapshot_path = OUTPUT_DIR / "nifty50_constituent_snapshots.csv"
+... 4 additional matches omitted
+
+### backend\fix_eternal_historical_ticker.py (188 lines)
+1: import sys
+4: from pathlib import Path
+5: from zipfile import ZipFile
+6: from io import BytesIO
+7: from decimal import Decimal
+8: import pandas as pd
+10: from sqlalchemy import text
+11: from database import engine
+23: INSERT INTO stock_prices (
+27: total_traded_value, total_trades, price_source
+32: 'NSE CM-UDiFF EQ - historical ticker ZOMATO'
+127: raise ValueError(f"ZOMATO EQ row missing in {date_code}")
+137: SELECT id FROM stock_prices
+151: # Preserve the historical source ticker as an observed alias.
+172: 'NSE CM-UDiFF Common Bhavcopy Final',
+179: print("\nHISTORICAL TICKER CORRECTION COMPLETE")
+184: print("Historical ticker alias: ZOMATO")
+
+### backend\import_eternal_isin.py (136 lines)
+1: import sys
+4: from pathlib import Path
+5: from zipfile import ZipFile
+6: from io import BytesIO
+7: import pandas as pd
+9: from sqlalchemy import text
+10: from database import engine
+49: if df.duplicated(["date"]).any():
+63: "Review before importing."
+111: "source_name": "NSE CM-UDiFF Common Bhavcopy Final",
+113: "EQ observations under historical symbols ZOMATO and "
+130: print("Historical symbols:", sorted(df["symbol"].unique()))
+
+### backend\import_nifty50_company_master.py (614 lines)
+2: from pathlib import Path
+4: import pandas as pd
+5: from sqlalchemy import text
+7: from database import engine
+12: # NIFTY 50 COMPANY MASTER IMPORTER
+17: CONSTITUENT_DIR = (
+18: ROOT / "database" / "processed" / "constituents"
+22: CONSTITUENT_DIR / "nifty50_company_master_v2.csv"
+26: CONSTITUENT_DIR / "nifty50_sector_review.csv"
+63: "historical_symbol",
+81: f"Missing company master column: {column}"
+88: f"Missing sector review column: {column}"
+101: if companies["historical_symbol"].duplicated().any():
+103: "Duplicate historical symbols detected."
+106: if companies["canonical_symbol"].duplicated().any():
+108: "Duplicate canonical symbols detected."
+112: "historical_symbol",
+138: if sectors["source_industry"].duplicated().any():
+... 32 additional matches omitted
+
+### backend\import_nifty50_historical_prices.py (396 lines)
+1: import sys
+2: import argparse
+4: from pathlib import Path
+5: from zipfile import ZipFile
+6: from io import BytesIO
+7: from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
+9: import pandas as pd
+10: from sqlalchemy import text
+11: from database import engine
+15: UDIFF_REQUIRED = {
+24: UDIFF_MAP = {
+39: INSERT INTO stock_prices (
+42: price_source
+46: :total_traded_value, :total_trades, :price_source
+62: # Include inactive identities for historical symbols (e.g. TATAMOTORS).
+88: if UDIFF_REQUIRED.issubset(df.columns):
+89: return member, df, "UDIFF"
+94: f"UDiFF missing: {sorted(UDIFF_REQUIRED - set(df.columns))}; "
+... 26 additional matches omitted
+
+### backend\import_nifty50_historical_prices_before_datefix.py (395 lines)
+1: import sys
+2: import argparse
+4: from pathlib import Path
+5: from zipfile import ZipFile
+6: from io import BytesIO
+7: from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
+9: import pandas as pd
+10: from sqlalchemy import text
+11: from database import engine
+15: UDIFF_REQUIRED = {
+24: UDIFF_MAP = {
+39: INSERT INTO stock_prices (
+42: price_source
+46: :total_traded_value, :total_trades, :price_source
+62: # Include inactive identities for historical symbols (e.g. TATAMOTORS).
+88: if UDIFF_REQUIRED.issubset(df.columns):
+89: return member, df, "UDIFF"
+94: f"UDiFF missing: {sorted(UDIFF_REQUIRED - set(df.columns))}; "
+... 26 additional matches omitted
+
+### backend\import_nifty50_historical_prices_before_legacy.py (505 lines)
+2: import sys
+3: import argparse
+7: from pathlib import Path
+8: from zipfile import ZipFile
+9: from io import BytesIO
+10: from decimal import Decimal
+12: import pandas as pd
+14: from sqlalchemy import text
+15: from database import engine
+42: INSERT INTO stock_prices (
+46: total_traded_value, total_trades, price_source
+51: :total_traded_value, :total_trades, 'NSE CM-UDiFF EQ'
+132: f"Missing or invalid numeric data in {archive_name}"
+170: # No duplicate symbol/date records
+171: if df.duplicated(["TradDt", "TckrSymb"]).any():
+173: f"Duplicate EQ symbol/date in {archive_name}"
+225: FROM stock_prices
+277: "Import NSE CM-UDiFF historical "
+... 16 additional matches omitted
+
+### backend\import_nifty50_index_prices.py (222 lines)
+1: import argparse
+2: import csv
+3: import sys
+4: from datetime import datetime
+5: from decimal import Decimal, InvalidOperation
+6: from pathlib import Path
+8: from sqlalchemy import text
+12: from database import engine
+14: CSV_PATH = ROOT / "database/raw/index/nifty50_historical_pr_10y_candidate.csv"
+15: INDEX_SYMBOL = "NIFTY 50"
+16: DATA_SOURCE = "NSE Indices Historical PR"
+69: raise ValueError(f"Duplicate date: {d}")
+154: print("\\n--- NIFTY 50 PR IMPORT REVIEW ---")
+198: raise RuntimeError(f"Post-import count mismatch: {len(final_rows)}")
+204: raise RuntimeError(f"Post-import date missing: {d}")
+207: raise RuntimeError(f"Post-import value mismatch: {d} {field}")
+209: print("\\nIMPORT COMMITTED SUCCESSFULLY.")
+221: print(f"IMPORT FAILED: {exc}")
+
+### backend\import_nifty50_isin_identifiers.py (144 lines)
+1: import sys
+4: from pathlib import Path
+5: import pandas as pd
+6: from sqlalchemy import text
+7: from database import engine
+9: SOURCE = Path("database/processed/audit/nifty50_isin_series_details.csv")
+10: SOURCE_NAME = "NSE CM-UDiFF Common Bhavcopy Final"
+12: "nifty50_isin_series_details.csv; EQ-series observations; "
+18: raise FileNotFoundError(f"Missing source file: {SOURCE}")
+24: raise ValueError(f"Missing columns: {required - set(df.columns)}")
+36: if df.duplicated(["TradDt", "TckrSymb"]).any():
+37: raise ValueError("Duplicate symbol/date observations found.")
+65: missing = sorted(set(periods["TckrSymb"]) - set(company_map))
+66: if missing:
+67: raise ValueError(f"Symbols missing from companies table: {missing}")
+130: print("\nISIN IMPORT SUCCESS")
+133: print("Historical ISIN periods:", len(periods))
+
+### backend\import_nifty50_membership_events.py (470 lines)
+2: from pathlib import Path
+4: import pandas as pd
+5: from sqlalchemy import text
+7: from database import engine
+12: # NIFTY 50 MEMBERSHIP EVENT IMPORTER
+21: / "constituents"
+22: / "nifty50_membership_events_reconciled.csv"
+26: INDEX_SYMBOL = "NIFTY 50"
+38: index_symbol VARCHAR(30) NOT NULL DEFAULT 'NIFTY 50',
+134: f"Missing event column: {column}"
+168: if df.duplicated(
+178: "Duplicate membership events detected."
+229: # 3. IMPORT EVENTS TRANSACTIONALLY
+232: def import_events(df):
+259: missing_symbols = sorted(
+263: if missing_symbols:
+266: + ", ".join(missing_symbols)
+384: # 4. POST-IMPORT VERIFICATION
+... 6 additional matches omitted
+
+### backend\import_nifty50_observation_spans.py (189 lines)
+1: import sys
+4: from pathlib import Path
+5: import pandas as pd
+6: from sqlalchemy import text
+7: from database import engine
+10: "database/processed/constituents/"
+11: "nifty50_membership_observation_audit_v2.csv"
+19: "internal_missing_month_count", "internal_missing_months",
+25: raise ValueError(f"Missing columns: {required - set(df.columns)}")
+27: if df["symbol"].duplicated().any():
+28: raise ValueError("Duplicate symbols in observation audit.")
+42: "observed_month_count", "internal_missing_month_count",
+48: CREATE TABLE IF NOT EXISTS index_constituent_observation_spans (
+50: index_symbol VARCHAR(30) NOT NULL DEFAULT 'NIFTY 50',
+57: internal_missing_month_count SMALLINT UNSIGNED NOT NULL,
+58: internal_missing_months TEXT,
+88: missing = sorted(set(df["symbol"]) - set(company_map))
+89: if missing:
+... 20 additional matches omitted
+
+### backend\import_nifty50_snapshots.py (371 lines)
+2: from pathlib import Path
+3: from decimal import Decimal, InvalidOperation
+5: import pandas as pd
+6: from sqlalchemy import text
+8: from database import engine
+17: / "constituents"
+18: / "nifty50_constituent_snapshots.csv"
+40: INSERT INTO index_constituent_snapshots (
+78: """Convert missing Pandas values into Python None."""
+99: """Convert valid numeric values into Decimal; missing values to None."""
+125: f"Constituent CSV not found: {DATA_FILE}"
+144: missing = [
+150: if missing:
+152: f"Missing CSV columns: {missing}"
+194: # Check duplicate month-symbol combinations.
+195: if df.duplicated(
+199: "Duplicate month-symbol records detected."
+202: # Exactly 50 real constituents per month.
+... 16 additional matches omitted
+
+### backend\import_verified_corporate_actions.py (257 lines)
+1: """Import verified corporate actions into GREEDY STOCKS.
+4: Original stock_prices records are never modified.
+7: import sys
+8: from pathlib import Path
+13: from sqlalchemy import text
+14: from database import engine
+20: "action_type": "STOCK_SPLIT",
+39: "action_type": "BONUS",
+46: "Four bonus shares for every one existing share. "
+48: "Combined with same-day 2:1 split, "
+59: "action_type": "STOCK_SPLIT",
+78: "action_type": "BONUS",
+85: "Two bonus shares for every one existing share. "
+96: "action_type": "BONUS",
+103: "One bonus share for every one existing share. "
+105: "Bonus allotment deemed date: 11 August 2025."
+111: "Record%20Date%20for%20bonus%20shares.pdf"
+116: "action_type": "BONUS",
+... 9 additional matches omitted
+
+### backend\inspect_archives.py (23 lines)
+2: from pathlib import Path
+3: from zipfile import ZipFile, BadZipFile
+
+### backend\inspect_constituent_reports.py (24 lines)
+2: import zipfile
+3: from pathlib import Path
+5: REPORT_DIR = Path("database/raw/constituents")
+
+### backend\inspect_price_anomalies.py (57 lines)
+2: from pathlib import Path
+3: from zipfile import ZipFile
+4: import csv
+5: import io
+
+### backend\log_phase2_reconciliation.py (110 lines)
+1: import sys
+4: from sqlalchemy import text
+5: from database import engine
+9: "(retrospective reconciliation; not original importer log)"
+11: IMPORT_TYPE = "POST_IMPORT_RECONCILIATION"
+15: ("MONTHLY_SNAPSHOTS", "950 constituent observations across 19 months; 50 rows per month."),
+23: ("DUPLICATE_PRICES", "Zero duplicate company/date groups."),
+26: ("ETERNAL_HISTORICAL_IDENTITY", "Historical ZOMATO ticker and ETERNAL ISIN mapping verified.")
+30: ("CORPORATE_ACTION_COVERAGE",
+31: "Zero corporate-action records. Adjusted-price and total-return history is not established."),
+32: ("IMPORT_LOG_PROVENANCE",
+33: "This is a retrospective reconciliation record. Original historical importer execution logs were not captured."),
+35: "Validation entries document the current reconciliation checks, not historical validation executions.")
+41: FROM data_import_logs
+43: AND import_type = :import_type
+48: "import_type": IMPORT_TYPE
+52: print("Reconciliation log already exists. No duplicate created.")
+53: print("Import log ID:", existing)
+... 16 additional matches omitted
+
+### backend\main.py (199 lines)
+1: import sys
+2: from pathlib import Path
+8: import logging
+9: import sys
+10: from pathlib import Path
+12: from chat_routes import router as chat_router
+13: from sector_routes import router as sector_router
+14: from company_routes import router as company_router
+15: from portfolio_routes import router as portfolio_router
+16: from fastapi import FastAPI, HTTPException, Query
+17: from fastapi.middleware.cors import CORSMiddleware
+18: from sqlalchemy import text
+31: # IMPORTS
+34: from database import engine
+35: from analytics.market_ideas import generate_market_ideas
+54: "AI-powered, beginner-friendly NIFTY 50 "
+140: description="Historical analysis period.",
+150: Generate evidence-based NIFTY 50 Market Ideas.
+... 2 additional matches omitted
+
+### backend\main_backup.py (77 lines)
+2: from fastapi import FastAPI
+3: from fastapi.middleware.cors import CORSMiddleware
+4: from sqlalchemy import text
+6: from database import engine
+14: description="AI-powered NIFTY 50 learning assistant",
+
+### backend\migrate_missing_nifty50_universe.py (398 lines)
+1: import sys
+2: import argparse
+3: from pathlib import Path
+4: from zipfile import ZipFile
+5: from collections import defaultdict
+6: from datetime import date
+7: import pandas as pd
+8: from sqlalchemy import text
+12: from database import engine
+13: from import_nifty50_historical_prices import (
+19: AUDIT = ROOT / "nifty50_missing_symbol_isin_audit.csv"
+20: SOURCE = "NSE CM Bhavcopy historical identity and price archive"
+58: raise FileNotFoundError("No historical ZIP archives found")
+60: print("GREEDY STOCKS — HISTORICAL UNIVERSE MIGRATION")
+69: legacy = udiff = 0
+75: if fmt == "UDIFF":
+80: if fmt == "UDIFF":
+81: udiff += 1
+... 8 additional matches omitted
+
+### backend\nse_trading_calendar.py (136 lines)
+2: import argparse
+4: from datetime import datetime, date
+
+### backend\portfolio_routes.py (495 lines)
+3: import logging
+4: import math
+5: import sys
+6: from datetime import date, timedelta
+7: from pathlib import Path
+9: from fastapi import APIRouter, HTTPException
+10: from pydantic import BaseModel, Field, FiniteFloat
+16: from analytics.greedy_v2_data import prepare_greedy_v2_dataset
+17: from analytics.greedy_v2_splits import chronological_split
+18: from analytics.greedy_v2_engine import greedy_select_stocks
+19: from analytics.portfolio_analytics import (
+23: from analytics.portfolio_allocation import allocate_capital
+72: split = chronological_split(
+73: dataset.adjusted_prices,
+79: train_prices=split.train,
+118: validation_prices = split.validation
+119: validation_benchmark = dataset.benchmark_prices.reindex(split.validation.index)
+128: price_basis="SPLIT_BONUS_ADJUSTED",
+... 49 additional matches omitted
+
+### backend\prepare_nifty50_company_master_v2.py (117 lines)
+2: from pathlib import Path
+3: import pandas as pd
+9: "constituents" / "nifty50_company_master.csv"
+13: ROOT / "database" / "processed" / "constituents"
+16: OUTPUT_FILE = OUTPUT_DIR / "nifty50_company_master_v2.csv"
+26: "historical_symbol",
+39: missing = [column for column in required if column not in df.columns]
+41: if missing:
+42: raise ValueError(f"Missing columns: {missing}")
+48: old_tata = df["historical_symbol"] == "TATAMOTORS"
+56: new_tata = df["historical_symbol"] == "TMPV"
+64: # Each historical symbol must now map to one unique instrument identity.
+65: if df["historical_symbol"].duplicated().any():
+66: raise ValueError("Duplicate historical symbols detected.")
+68: if df["canonical_symbol"].duplicated().any():
+69: duplicates = df[
+70: df["canonical_symbol"].duplicated(keep=False)
+75: + duplicates.to_string(index=False)
+... 6 additional matches omitted
+
+### backend\prepare_sector_review.py (89 lines)
+2: from pathlib import Path
+3: import pandas as pd
+9: "constituents" / "nifty50_company_master_v2.csv"
+14: "constituents" / "nifty50_sector_review.csv"
+32: raise ValueError("source_industry column is missing.")
+59: raise ValueError("Missing normalized sector detected.")
+
+### backend\reconcile_nifty50_membership_changes.py (70 lines)
+2: from pathlib import Path
+3: import pandas as pd
+6: DATA_DIR = ROOT / "database" / "processed" / "constituents"
+8: SOURCE = DATA_DIR / "nifty50_membership_changes.csv"
+9: OUTPUT = DATA_DIR / "nifty50_membership_events_reconciled.csv"
+60: print("NIFTY 50 MEMBERSHIP EVENT RECONCILIATION")
+
+### backend\recover_missing_nse_dates.py (283 lines)
+1: import json
+2: import re
+3: import shutil
+4: import subprocess
+5: import sys
+6: import time
+7: import zipfile
+8: from datetime import date, datetime, timedelta
+9: from pathlib import Path
+10: from collections import Counter
+12: import requests
+13: from requests.adapters import HTTPAdapter
+14: from urllib3.util.retry import Retry
+16: # Resolve project paths and Python imports correctly.
+20: from backend.database import engine
+21: from sqlalchemy import text
+25: IMPORTER = ROOT / "backend" / "import_nifty50_historical_prices.py"
+48: "https://archives.nseindia.com/content/historical/"
+... 21 additional matches omitted
+
+### backend\run_daily_nse_pipeline.py (226 lines)
+2: import argparse
+3: import logging
+4: import re
+5: import subprocess
+6: import sys
+8: from datetime import datetime
+9: from pathlib import Path
+10: from zoneinfo import ZoneInfo
+12: from nse_trading_calendar import get_session_status
+18: IMPORTER = ROOT / "backend" / "import_nifty50_historical_prices.py"
+150: # STEP 3: IMPORT ONLY THIS ARCHIVE
+153: logging.info("STEP 3: Starting single-archive import.")
+158: str(IMPORTER),
+166: logging.info("Importer completed successfully.")
+
+### backend\sector_routes.py (315 lines)
+2: from datetime import date, timedelta
+3: from decimal import Decimal
+5: from fastapi import APIRouter, HTTPException, Query
+6: from sqlalchemy import text
+8: from database import engine
+11: router = APIRouter(tags=["NIFTY 50 Sectors"])
+41: FROM index_constituent_snapshots
+42: WHERE index_symbol = 'NIFTY 50'
+49: detail="NIFTY 50 constituent snapshot is unavailable.",
+62: FROM index_constituent_snapshots snap
+67: WHERE snap.index_symbol = 'NIFTY 50'
+75: text("SELECT MAX(trade_date) FROM stock_prices")
+81: detail="Historical stock price data is unavailable.",
+95: FROM stock_prices p
+105: FROM stock_prices p
+115: FROM stock_prices p
+125: FROM stock_prices p
+228: "average_constituent_return_pct": (
+... 15 additional matches omitted
+
+### backend\validate_bhavcopy.py (147 lines)
+2: from pathlib import Path
+3: from zipfile import ZipFile
+4: from collections import Counter
+5: from decimal import Decimal, InvalidOperation
+6: import csv
+7: import io
+65: issues["missing_symbols"] += 1
+72: issues["missing_dates"] += 1
+
+### backend\validate_nifty50_extraction.py (98 lines)
+2: from pathlib import Path
+3: import pandas as pd
+6: DATA_DIR = ROOT / "database" / "processed" / "constituents"
+8: REAL_FILE = DATA_DIR / "nifty50_constituent_snapshots.csv"
+9: DUMMY_FILE = DATA_DIR / "nifty50_dummy_adjustments.csv"
+12: raise FileNotFoundError(f"Missing file: {REAL_FILE}")
+22: missing_columns = [c for c in required if c not in df.columns]
+24: if missing_columns:
+25: raise ValueError(f"Missing columns: {missing_columns}")
+31: print("GREEDY STOCKS — NIFTY 50 EXTRACTION VALIDATION")
+44: print(f"Missing/non-numeric weights: {invalid_weights}")
+54: duplicates = int(group[symbol_col].duplicated().sum())
+60: and duplicates == 0
+71: f"duplicates={duplicates} | weight total={weight_total:.6f} | "

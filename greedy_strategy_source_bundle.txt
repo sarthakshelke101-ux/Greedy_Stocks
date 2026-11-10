@@ -1,0 +1,1795 @@
+GREEDY STOCKS - SOURCE BUNDLE
+
+
+================================================================================
+FILE: analytics/greedy_v2_engine.py
+================================================================================
+
+"""Greedy V2 — sequential portfolio selection engine.
+
+This module selects stocks using ONLY the price history supplied to it.
+The caller is responsible for passing training-period prices, never
+validation or test-period prices.
+
+Method:
+- Equal-weight portfolio.
+- Sequential greedy selection.
+- Maximise historical annualised Sharpe ratio.
+- Maximum 10 stocks.
+- Maximum 3 stocks per sector.
+- Risk-free rate defaults to 0%.
+"""
+
+from __future__ import annotations
+
+import math
+from typing import Any
+
+import sys
+from pathlib import Path
+
+import pandas as pd
+
+ANALYTICS_DIR = Path(__file__).resolve().parent
+
+if str(ANALYTICS_DIR) not in sys.path:
+    sys.path.insert(0, str(ANALYTICS_DIR))
+
+from portfolio_analytics import calculate_portfolio
+
+
+def greedy_select_stocks(
+    train_prices: pd.DataFrame,
+    sectors: dict[str, str],
+    target_stocks: int = 10,
+    max_per_sector: int = 3,
+    risk_free_rate: float = 0.0,
+    fixed_symbols: list[str] | None = None,
+) -> dict[str, Any]:
+    """Select stocks sequentially using training-period Sharpe ratio."""
+
+    if not isinstance(train_prices, pd.DataFrame):
+        raise TypeError("train_prices must be a pandas DataFrame.")
+
+    if train_prices.empty:
+        raise ValueError("Training price data is empty.")
+
+    if not isinstance(train_prices.index, pd.DatetimeIndex):
+        raise ValueError("Training prices require a DatetimeIndex.")
+
+    if train_prices.index.tz is not None:
+        raise ValueError("Training dates must not contain a timezone.")
+
+    if train_prices.index.has_duplicates:
+        raise ValueError("Duplicate training dates detected.")
+
+    if not train_prices.columns.is_unique:
+        raise ValueError("Duplicate stock symbols detected.")
+
+    if len(train_prices) < 60:
+        raise ValueError("At least 60 price observations are required.")
+
+    if not isinstance(target_stocks, int) or isinstance(target_stocks, bool):
+        raise ValueError("target_stocks must be an integer.")
+
+    if not isinstance(max_per_sector, int) or isinstance(max_per_sector, bool):
+        raise ValueError("max_per_sector must be an integer.")
+
+    if target_stocks < 1:
+        raise ValueError("target_stocks must be at least 1.")
+
+    if max_per_sector < 1:
+        raise ValueError("max_per_sector must be at least 1.")
+
+    if target_stocks > len(train_prices.columns):
+        raise ValueError("Target exceeds the available number of stocks.")
+
+    if not math.isfinite(float(risk_free_rate)):
+        raise ValueError("risk_free_rate must be finite.")
+
+    if risk_free_rate < 0:
+        raise ValueError("risk_free_rate cannot be negative.")
+
+    prices = train_prices.copy().sort_index()
+
+    prices = prices.apply(pd.to_numeric, errors="coerce")
+
+    if prices.isna().any().any():
+        raise ValueError(
+            "Training prices contain missing or invalid values. "
+            "Do not fill or silently remove them."
+        )
+
+    if (prices <= 0).any().any():
+        raise ValueError("Training prices must be positive.")
+
+    symbols = list(prices.columns)
+
+    missing_sectors = [
+        symbol
+        for symbol in symbols
+        if symbol not in sectors
+        or not isinstance(sectors[symbol], str)
+        or not sectors[symbol].strip()
+    ]
+
+    if missing_sectors:
+        raise ValueError(
+            f"Missing sector classifications: {missing_sectors}"
+        )
+
+    sector_capacity = sum(
+        min(
+            max_per_sector,
+            sum(
+                sectors[symbol] == sector
+                for symbol in symbols
+            ),
+        )
+        for sector in set(sectors.values())
+    )
+
+    if target_stocks > sector_capacity:
+        raise ValueError(
+            "Target cannot be reached under the sector constraint."
+        )
+
+    # User-selected stocks are fixed starting holdings.
+    fixed_symbols = [
+        str(symbol).strip().upper()
+        for symbol in (fixed_symbols or [])
+    ]
+
+    if len(fixed_symbols) != len(set(fixed_symbols)):
+        raise ValueError("Duplicate user-selected stocks are not allowed.")
+
+    unknown_symbols = [symbol for symbol in fixed_symbols if symbol not in symbols]
+    if unknown_symbols:
+        raise ValueError(
+            f"User-selected stocks are unavailable in the eligible data: {unknown_symbols}"
+        )
+
+    if len(fixed_symbols) > target_stocks:
+        raise ValueError(
+            f"You selected {len(fixed_symbols)} stocks but requested "
+            f"{target_stocks}. Increase portfolio size or remove selections."
+        )
+
+    fixed_sector_counts: dict[str, int] = {}
+    for symbol in fixed_symbols:
+        sector = sectors[symbol]
+        fixed_sector_counts[sector] = fixed_sector_counts.get(sector, 0) + 1
+
+    conflicts = {
+        sector: count
+        for sector, count in fixed_sector_counts.items()
+        if count > max_per_sector
+    }
+    if conflicts:
+        raise ValueError(
+            f"Your selected stocks exceed the sector limit of "
+            f"{max_per_sector}: {conflicts}"
+        )
+
+    selected: list[str] = list(fixed_symbols)
+    selection_log: list[dict[str, Any]] = []
+
+    print("\nGREEDY STOCKS — V2 SELECTION ENGINE")
+    print("=" * 65)
+    print("Available candidates:", len(symbols))
+    print("Target portfolio size:", target_stocks)
+    print("Maximum stocks per sector:", max_per_sector)
+    print("Risk-free rate:", risk_free_rate)
+    print("Training observations:", len(prices))
+    print("Training dates:", prices.index.min().date(), "to", prices.index.max().date())
+
+    # Sequential greedy selection.
+    for step in range(len(selected) + 1, target_stocks + 1):
+
+        candidates: list[dict[str, Any]] = []
+
+        for symbol in symbols:
+
+            if symbol in selected:
+                continue
+
+            current_sector_count = sum(
+                sectors[item] == sectors[symbol]
+                for item in selected
+            )
+
+            if current_sector_count >= max_per_sector:
+                continue
+
+            trial_symbols = selected + [symbol]
+
+            result = calculate_portfolio(
+                prices=prices,
+                sectors=sectors,
+                symbols=trial_symbols,
+                risk_free_rate=risk_free_rate,
+                max_stocks=target_stocks,
+                max_per_sector=max_per_sector,
+            )
+
+            sharpe = result["metrics"].get("sharpe_ratio")
+
+            if sharpe is None or pd.isna(sharpe):
+                continue
+
+            sharpe = float(sharpe)
+
+            if not math.isfinite(sharpe):
+                continue
+
+            candidates.append({
+                "symbol": symbol,
+                "sector": sectors[symbol],
+                "portfolio_sharpe": sharpe,
+                "portfolio_size": len(trial_symbols),
+            })
+
+        if not candidates:
+            raise ValueError(
+                f"No valid candidates available at selection step {step}."
+            )
+
+        # Deterministic tie-breaking by ticker.
+        candidates.sort(
+            key=lambda item: (
+                -item["portfolio_sharpe"],
+                item["symbol"],
+            )
+        )
+
+        winner = candidates[0]
+
+        previous_sharpe = (
+            selection_log[-1]["portfolio_sharpe"]
+            if selection_log
+            else None
+        )
+
+        selected.append(winner["symbol"])
+
+        selection_log.append({
+            "step": step,
+            "symbol": winner["symbol"],
+            "sector": winner["sector"],
+            "portfolio_size": len(selected),
+            "portfolio_sharpe": winner["portfolio_sharpe"],
+            "previous_portfolio_sharpe": previous_sharpe,
+            "marginal_sharpe_change": (
+                winner["portfolio_sharpe"] - previous_sharpe
+                if previous_sharpe is not None
+                else None
+            ),
+            "candidates_evaluated": len(candidates),
+        })
+
+        print(
+            f"Step {step:02d}: {winner['symbol']:<15} "
+            f"Sector: {winner['sector']:<25} "
+            f"Sharpe: {winner['portfolio_sharpe']:.4f}"
+        )
+
+    # Calculate final portfolio metrics.
+    final_result = calculate_portfolio(
+        prices=prices,
+        sectors=sectors,
+        symbols=selected,
+        risk_free_rate=risk_free_rate,
+        max_stocks=target_stocks,
+        max_per_sector=max_per_sector,
+    )
+
+    print("\nSELECTION COMPLETE")
+    print("-" * 65)
+    print("Selected stocks:", len(selected))
+    print("Unique sectors:", len({
+        sectors[symbol] for symbol in selected
+    }))
+    print("Selected symbols:", ", ".join(selected))
+    print("Final Sharpe:", final_result["metrics"].get("sharpe_ratio"))
+
+    return {
+        "selected_symbols": selected,
+        "selection_log": pd.DataFrame(selection_log),
+        "portfolio_result": final_result,
+        "assumptions": {
+            "selection_method": "SEQUENTIAL_GREEDY_SHARPE",
+            "price_basis": "SPLIT_BONUS_ADJUSTED",
+            "weighting": "EQUAL_WEIGHT",
+            "daily_rebalancing": True,
+            "risk_free_rate": risk_free_rate,
+            "target_stocks": target_stocks,
+            "user_selected_symbols": fixed_symbols,
+            "greedy_selected_symbols": [
+                x for x in selected if x not in fixed_symbols
+            ],
+            "max_per_sector": max_per_sector,
+            "selection_uses_training_data_only": True,
+            "globally_optimal": False,
+        },
+    }
+
+
+================================================================================
+FILE: analytics/greedy_v2_data.py
+================================================================================
+from pathlib import Path
+from datetime import date
+
+import pandas as pd
+
+from analytics.database_adapter import get_all_companies_with_prices
+from analytics.adjusted_price_adapter import get_adjusted_company_prices
+from analytics.index_adapter import get_index_closes
+
+
+MINIMUM_OBSERVATIONS = 252
+START_DATE = "2016-11-08"
+END_DATE = date.today().isoformat()
+
+
+class GreedyV2Dataset:
+    def __init__(
+        self,
+        constituents,
+        sectors,
+        raw_prices,
+        adjusted_prices,
+        benchmark_prices,
+        metadata,
+    ):
+        self.constituents = constituents
+        self.sectors = sectors
+        self.raw_prices = raw_prices
+        self.adjusted_prices = adjusted_prices
+        self.benchmark_prices = benchmark_prices
+        self.metadata = metadata
+
+
+def _normalise_price_series(series, name):
+    result = pd.to_numeric(series, errors="coerce").copy()
+
+    if not isinstance(result.index, pd.DatetimeIndex):
+        result.index = pd.to_datetime(result.index, errors="raise")
+
+    if result.index.tz is not None:
+        raise ValueError(f"{name} contains timezone-aware dates.")
+
+    result.index = result.index.normalize()
+    result = result.sort_index()
+
+    if result.index.has_duplicates:
+        raise ValueError(f"{name} contains duplicate dates.")
+
+    if result.isna().any():
+        raise ValueError(f"{name} contains missing or invalid prices.")
+
+    if (result <= 0).any():
+        raise ValueError(f"{name} contains non-positive prices.")
+
+    result.name = name
+    return result
+
+
+def _load_benchmark(start_date, end_date):
+    benchmark = get_index_closes(start_date, end_date)
+
+    if not isinstance(benchmark, pd.Series):
+        raise TypeError("get_index_closes must return a pandas Series.")
+
+    return _normalise_price_series(benchmark, "NIFTY_50")
+
+
+def prepare_greedy_v2_dataset(
+    start_date=START_DATE,
+    end_date=END_DATE,
+):
+    print("\nGREEDY STOCKS — V2 DATA PREPARATION")
+    print("=" * 65)
+
+    constituents = get_all_companies_with_prices(
+        min_observations=MINIMUM_OBSERVATIONS
+    ).copy()
+
+    required = {"company_id", "symbol", "sector"}
+    missing = required - set(constituents.columns)
+
+    if missing:
+        raise ValueError(f"Missing constituent columns: {sorted(missing)}")
+
+    if constituents["symbol"].duplicated().any():
+        raise ValueError("Duplicate constituent symbols detected.")
+
+    constituents = constituents.sort_values("symbol").reset_index(drop=True)
+
+    sectors = dict(zip(constituents["symbol"], constituents["sector"]))
+
+    raw_series = {}
+    adjusted_series = {}
+    coverage = []
+    skipped_symbols = []
+
+    for _, company in constituents.iterrows():
+        symbol = str(company["symbol"])
+        company_id = int(company["company_id"])
+
+        result = get_adjusted_company_prices(
+            company_id=company_id,
+            start_date=start_date,
+            end_date=end_date,
+        )
+
+        if result.empty:
+            skipped_symbols.append(symbol)
+            print(f"SKIP {symbol}: no prices in requested window")
+            continue
+
+        dates = pd.DatetimeIndex(pd.to_datetime(result["trade_date"]))
+
+        raw = pd.Series(
+            result["close"].to_numpy(),
+            index=dates,
+            name=symbol,
+        )
+
+        adjusted = pd.Series(
+            result["adjusted_close"].to_numpy(),
+            index=dates,
+            name=symbol,
+        )
+
+        raw_series[symbol] = _normalise_price_series(
+            raw, f"{symbol}_RAW"
+        )
+
+        adjusted_series[symbol] = _normalise_price_series(
+            adjusted, symbol
+        )
+
+        coverage.append({
+            "symbol": symbol,
+            "observations": len(result),
+            "first_date": dates.min(),
+            "last_date": dates.max(),
+        })
+
+    if not adjusted_series:
+        raise ValueError("No eligible companies have prices in the requested window.")
+
+    # Keep only companies with observations in this requested window.
+    constituents = constituents[
+        constituents["symbol"].isin(adjusted_series)
+    ].copy().reset_index(drop=True)
+    sectors = dict(zip(constituents["symbol"], constituents["sector"]))
+
+    # Preserve each stock's complete available history.
+    raw_prices = pd.concat(raw_series.values(), axis=1).sort_index()
+    adjusted_prices = pd.concat(
+        adjusted_series.values(), axis=1
+    ).sort_index()
+
+    # Benchmark remains independent. No all-50-stock intersection.
+    benchmark_prices = _load_benchmark(start_date, end_date)
+
+    # Retain the full date range and missing values.
+    # Downstream training/evaluation selects valid observations.
+    metadata = {
+        "requested_start_date": start_date,
+        "requested_end_date": end_date,
+        "actual_start_date": str(adjusted_prices.index.min().date()),
+        "actual_end_date": str(adjusted_prices.index.max().date()),
+        "constituent_count": len(adjusted_series),
+        "skipped_no_window_history": skipped_symbols,
+        "universe_basis": "ALL_COMPANIES_WITH_PRICE_HISTORY",
+        "minimum_observations": MINIMUM_OBSERVATIONS,
+        "inactive_companies_included": True,
+        "price_observation_count": len(adjusted_prices),
+        "benchmark_observation_count": len(benchmark_prices),
+        "stock_symbols": list(adjusted_prices.columns),
+        "price_basis": "SPLIT_BONUS_ADJUSTED",
+        "raw_price_basis": "RAW_CLOSE_UNADJUSTED",
+        "dividend_adjusted": False,
+        "corporate_action_coverage": "PARTIAL",
+        "membership_basis": "NOT_RESTRICTED_TO_INDEX_MEMBERSHIP",
+        "session_reference": "Available stock-price observations",
+        "forward_filled": False,
+        "database_writes": False,
+        "common_all_stock_dates": False,
+        "company_coverage": coverage,
+    }
+
+    print("\nDATA QUALITY REPORT")
+    print("-" * 65)
+    print("Requested:", start_date, "to", end_date)
+    print("Actual stock history:", metadata["actual_start_date"], "to", metadata["actual_end_date"])
+    print("Eligible companies:", len(adjusted_prices.columns))
+    print("Inactive companies included:", int((constituents["is_active"] == 0).sum()))
+    print("Minimum observations:", MINIMUM_OBSERVATIONS)
+    print("Skipped (no window history):", skipped_symbols)
+    print("Adjusted matrix:", adjusted_prices.shape)
+    print("Raw matrix:", raw_prices.shape)
+    print("Benchmark observations:", len(benchmark_prices))
+    print("Forward filling: False")
+    print("Database writes: False")
+    print("\nDATA PREPARATION: PASS")
+
+    return GreedyV2Dataset(
+        constituents=constituents,
+        sectors=sectors,
+        raw_prices=raw_prices,
+        adjusted_prices=adjusted_prices,
+        benchmark_prices=benchmark_prices,
+        metadata=metadata,
+    )
+
+
+if __name__ == "__main__":
+    dataset = prepare_greedy_v2_dataset()
+
+    print("\nFINAL MATRIX SHAPES")
+    print("Raw:", dataset.raw_prices.shape)
+    print("Adjusted:", dataset.adjusted_prices.shape)
+    print("Benchmark:", dataset.benchmark_prices.shape)
+
+
+================================================================================
+FILE: analytics/run_greedy_v2_experiment.py
+================================================================================
+
+"""Run a chronological, out-of-sample Greedy V2 experiment."""
+
+import json
+from pathlib import Path
+from datetime import datetime, timezone
+
+import pandas as pd
+
+from analytics.greedy_v2_data import prepare_greedy_v2_dataset
+from analytics.greedy_v2_splits import chronological_split
+from analytics.greedy_v2_engine import greedy_select_stocks
+from analytics.portfolio_analytics import (
+    calculate_portfolio,
+    compare_with_benchmark,
+)
+from analytics.validation.trial_registry import append_trial
+
+
+ROOT = Path(__file__).resolve().parents[1]
+OUTPUT_DIR = ROOT / "database" / "processed" / "analytics"
+
+TARGET_STOCKS = 10
+MAX_PER_SECTOR = 3
+RISK_FREE_RATE = 0.0
+
+PRICE_BASIS = "SPLIT_BONUS_ADJUSTED"
+RETURN_TYPE = "PRICE_RETURN"
+
+
+def json_safe(value):
+    """Convert supported objects into JSON-compatible values."""
+
+    if isinstance(value, dict):
+        return {
+            str(key): json_safe(item)
+            for key, item in value.items()
+        }
+
+    if isinstance(value, (list, tuple)):
+        return [json_safe(item) for item in value]
+
+    if isinstance(value, pd.Timestamp):
+        return value.isoformat()
+
+    if hasattr(value, "item"):
+        return value.item()
+
+    return value
+
+
+def scalar_metrics(portfolio):
+    """Return scalar financial metrics without pandas objects."""
+
+    metrics = portfolio["metrics"]
+    output = {}
+
+    for key, value in metrics.items():
+        if isinstance(value, (str, int, float, bool)) or value is None:
+            output[key] = value
+
+    return output
+
+
+def evaluate_period(name, prices, benchmark, sectors, symbols):
+    """Evaluate a fixed stock selection on one historical period."""
+
+    portfolio = calculate_portfolio(
+        prices=prices,
+        sectors=sectors,
+        symbols=symbols,
+        risk_free_rate=RISK_FREE_RATE,
+        max_stocks=TARGET_STOCKS,
+        max_per_sector=MAX_PER_SECTOR,
+        price_basis=PRICE_BASIS,
+        return_type=RETURN_TYPE,
+    )
+
+    comparison = compare_with_benchmark(
+        portfolio["daily_returns"],
+        benchmark,
+    )
+
+    return {
+        "period": name,
+        "start_date": str(
+            portfolio["daily_returns"].index[0].date()
+        ),
+        "end_date": str(
+            portfolio["daily_returns"].index[-1].date()
+        ),
+        "return_observations": len(
+            portfolio["daily_returns"]
+        ),
+        "portfolio_metrics": scalar_metrics(portfolio),
+        "benchmark_comparison": {
+            "portfolio_return_pct": comparison[
+                "portfolio_return_pct"
+            ],
+            "benchmark_return_pct": comparison[
+                "benchmark_return_pct"
+            ],
+            "excess_return_pct": comparison[
+                "excess_return_pct"
+            ],
+            "common_return_observations": comparison[
+                "common_return_observations"
+            ],
+            "benchmark_basis": comparison[
+                "benchmark_basis"
+            ],
+        },
+        "portfolio_metadata": portfolio["metadata"],
+    }
+
+
+def main():
+    print("\nGREEDY STOCKS — V2 REAL-WORLD EXPERIMENT")
+    print("=" * 65)
+
+    # ---------------------------------------------------------
+    # 1. Load historical dataset
+    # ---------------------------------------------------------
+
+    dataset = prepare_greedy_v2_dataset(
+        start_date="2025-04-01",
+        end_date="2026-11-05",
+    )
+
+    prices = dataset.adjusted_prices.copy()
+    benchmark = dataset.benchmark_prices.copy()
+    sectors = dataset.sectors
+
+    # Explicit common-date alignment. Never forward-fill or invent prices.
+    stock_dates = prices.index
+    benchmark_only_dates = benchmark.index.difference(stock_dates)
+    stock_only_dates = stock_dates.difference(benchmark.index)
+    common_dates = stock_dates.intersection(benchmark.index).sort_values()
+
+    if len(common_dates) == 0:
+        raise ValueError("No common stock and benchmark dates.")
+
+    prices = prices.loc[common_dates].copy()
+    benchmark = benchmark.loc[common_dates].copy()
+
+    print("\\nBENCHMARK DATE-ALIGNMENT AUDIT")
+    print("Common dates:", len(common_dates))
+    print("Excluded benchmark-only dates:",
+          [str(d.date()) for d in benchmark_only_dates])
+    print("Excluded stock-only dates:",
+          [str(d.date()) for d in stock_only_dates])
+    print("Forward filling: False")
+
+    if not prices.index.equals(benchmark.index):
+        raise ValueError("Date alignment failed after intersection.")
+
+    if prices.shape[1] < TARGET_STOCKS:
+        raise ValueError(
+            f"Only {prices.shape[1]} eligible companies; "
+            f"portfolio requires {TARGET_STOCKS}."
+        )
+
+    if prices.empty:
+        raise ValueError("Historical price dataset is empty.")
+
+    print(f"\nCompanies: {prices.shape[1]}")
+    print(f"Observations: {len(prices)}")
+    print(
+        f"Date range: {prices.index[0].date()} "
+        f"to {prices.index[-1].date()}"
+    )
+
+    # ---------------------------------------------------------
+    # 2. Chronological split
+    # ---------------------------------------------------------
+
+    splits = chronological_split(
+        prices,
+        train_fraction=0.60,
+        validation_fraction=0.20,
+        allow_sparse_evaluation=True,
+    )
+
+    # Use precisely the same dates for NIFTY 50.
+    train_benchmark = benchmark.loc[splits.train.index]
+    validation_benchmark = benchmark.loc[
+        splits.validation.index
+    ]
+    test_benchmark = benchmark.loc[splits.test.index]
+
+    print("\nCHRONOLOGICAL SPLITS")
+    print("-" * 65)
+
+    print(
+        f"Training:   {splits.metadata['train_start']} to "
+        f"{splits.metadata['train_end']} "
+        f"({splits.metadata['train_observations']} observations)"
+    )
+
+    print(
+        f"Validation: {splits.metadata['validation_start']} to "
+        f"{splits.metadata['validation_end']} "
+        f"({splits.metadata['validation_observations']} returns)"
+    )
+
+    print(
+        f"Final test: {splits.metadata['test_start']} to "
+        f"{splits.metadata['test_end']} "
+        f"({splits.metadata['test_observations']} returns)"
+    )
+
+    # ---------------------------------------------------------
+    # 3. Greedy selection using training data ONLY
+    # ---------------------------------------------------------
+
+    print("\nTRAINING-ONLY STOCK SELECTION")
+    print("-" * 65)
+
+    selection = greedy_select_stocks(
+        train_prices=splits.train,
+        sectors=sectors,
+        target_stocks=TARGET_STOCKS,
+        max_per_sector=MAX_PER_SECTOR,
+        risk_free_rate=RISK_FREE_RATE,
+    )
+
+    selected_symbols = selection.get("selected_symbols")
+
+    if selected_symbols is None:
+        selected_symbols = selection.get("selected_stocks")
+
+    if selected_symbols is None:
+        raise KeyError(
+            "Could not find selected symbols in Greedy V2 result. "
+            f"Available keys: {list(selection.keys())}"
+        )
+
+    selected_symbols = list(selected_symbols)
+
+    if len(selected_symbols) != TARGET_STOCKS:
+        raise ValueError(
+            f"Expected {TARGET_STOCKS} selected stocks, "
+            f"received {len(selected_symbols)}."
+        )
+
+    if len(set(selected_symbols)) != len(selected_symbols):
+        raise ValueError(
+            "Greedy V2 returned duplicate stock symbols."
+        )
+
+    if any(
+        symbol not in prices.columns
+        for symbol in selected_symbols
+    ):
+        raise ValueError(
+            "Selected stock is missing from the price matrix."
+        )
+
+    sector_counts = {}
+
+    for symbol in selected_symbols:
+        sector = sectors[symbol]
+        sector_counts[sector] = (
+            sector_counts.get(sector, 0) + 1
+        )
+
+    if any(
+        count > MAX_PER_SECTOR
+        for count in sector_counts.values()
+    ):
+        raise ValueError(
+            "Greedy V2 violated the sector constraint."
+        )
+
+    print("\nSelected stocks:")
+
+    for symbol in selected_symbols:
+        print(f"  {symbol:<18} {sectors[symbol]}")
+
+    # ---------------------------------------------------------
+    # 4. Evaluate the fixed portfolio on all three periods
+    # ---------------------------------------------------------
+
+    print("\nEVALUATING TRAINING PERIOD")
+
+    training_result = evaluate_period(
+        "TRAINING",
+        splits.train,
+        train_benchmark,
+        sectors,
+        selected_symbols,
+    )
+
+    print("\nEVALUATING VALIDATION PERIOD")
+
+    validation_result = evaluate_period(
+        "VALIDATION",
+        splits.validation,
+        validation_benchmark,
+        sectors,
+        selected_symbols,
+    )
+
+    print("\nEVALUATING FINAL TEST PERIOD")
+
+    test_result = evaluate_period(
+        "FINAL_TEST",
+        splits.test,
+        test_benchmark,
+        sectors,
+        selected_symbols,
+    )
+
+    # Register the exact final-test daily return series.
+    # This does not alter Greedy V2 selection or test-period evaluation.
+    registry_portfolio = calculate_portfolio(
+        prices=splits.test,
+        sectors={s: sectors[s] for s in selected_symbols},
+        symbols=selected_symbols,
+        risk_free_rate=RISK_FREE_RATE,
+        max_stocks=TARGET_STOCKS,
+        max_per_sector=MAX_PER_SECTOR,
+        price_basis=PRICE_BASIS,
+        return_type=RETURN_TYPE,
+    )
+
+    registry_returns = registry_portfolio["daily_returns"]
+    registry_dates = [str(d.date()) for d in registry_returns.index]
+
+    import hashlib
+    import json
+
+    registry_config = {
+        "target_stocks": TARGET_STOCKS,
+        "max_per_sector": MAX_PER_SECTOR,
+        "risk_free_rate": RISK_FREE_RATE,
+        "price_basis": PRICE_BASIS,
+        "return_type": RETURN_TYPE,
+        "selected_symbols": list(selected_symbols),
+    }
+
+    identity_payload = json.dumps(
+        {
+            "algorithm": "GREEDY_V2",
+            "config": registry_config,
+            "dates": registry_dates,
+            "returns": [float(x) for x in registry_returns.tolist()],
+        },
+        sort_keys=True,
+        separators=(",", ":"),
+        allow_nan=False,
+    )
+
+    stable_trial_id = "greedy-v2-" + hashlib.sha256(
+        identity_payload.encode("utf-8")
+    ).hexdigest()[:24]
+
+    registry_record = append_trial(
+        algorithm="GREEDY_V2",
+        config=registry_config,
+        daily_returns=registry_returns.tolist(),
+        dates=registry_dates,
+        trial_id=stable_trial_id,
+        metadata={
+            "period": "FINAL_TEST",
+            "start_date": registry_dates[0],
+            "end_date": registry_dates[-1],
+            "observations": len(registry_returns),
+            "membership_basis": "LATEST_MONTHLY_SNAPSHOT",
+            "transaction_costs_included": False,
+            "source_runner": "run_greedy_v2_experiment.py",
+            "benchmark_only_dates_excluded": [
+                str(d.date()) for d in benchmark_only_dates
+            ],
+            "stock_only_dates_excluded": [
+                str(d.date()) for d in stock_only_dates
+            ],
+            "date_alignment": "COMMON_DATES_INTERSECTION",
+        },
+    )
+
+    print("\\nTRIAL REGISTRY")
+    print("Trial ID:", registry_record["trial_id"])
+    print("Observations:", registry_record["observations"])
+
+    # ---------------------------------------------------------
+    # 5. Prepare experiment report
+    # ---------------------------------------------------------
+
+    results = {
+        "experiment": "GREEDY_V2_CHRONOLOGICAL",
+        "generated_at_utc": datetime.now(
+            timezone.utc
+        ).isoformat(),
+
+        "selected_symbols": selected_symbols,
+        "sector_allocation": sector_counts,
+
+        "selection_constraints": {
+            "target_stocks": TARGET_STOCKS,
+            "max_per_sector": MAX_PER_SECTOR,
+            "risk_free_rate": RISK_FREE_RATE,
+        },
+
+        "data_metadata": dataset.metadata,
+        "split_metadata": splits.metadata,
+
+        "methodology": {
+            "selection_uses_training_only": True,
+            "validation_used_for_selection": False,
+            "test_used_for_selection": False,
+            "portfolio_weighting": "EQUAL_WEIGHT",
+            "rebalancing": "DAILY",
+            "price_basis": PRICE_BASIS,
+            "return_type": RETURN_TYPE,
+            "dividend_adjusted": False,
+            "corporate_action_coverage": "PARTIAL",
+            "benchmark": "NIFTY_50_PRICE_RETURN",
+            "membership_basis": "LATEST_MONTHLY_SNAPSHOT",
+            "transaction_costs_included": False,
+            "database_writes": False,
+        },
+
+        "period_results": {
+            "training": training_result,
+            "validation": validation_result,
+            "final_test": test_result,
+        },
+    }
+
+    # ---------------------------------------------------------
+    # 6. Save experiment outputs
+    # ---------------------------------------------------------
+
+    OUTPUT_DIR.mkdir(
+        parents=True,
+        exist_ok=True,
+    )
+
+    json_path = (
+        OUTPUT_DIR / "greedy_v2_experiment.json"
+    )
+
+    log_path = (
+        OUTPUT_DIR / "greedy_v2_selection_log.csv"
+    )
+
+    with json_path.open(
+        "w",
+        encoding="utf-8",
+    ) as file:
+        json.dump(
+            json_safe(results),
+            file,
+            indent=2,
+            allow_nan=False,
+        )
+
+    selection_log = selection.get("selection_log")
+
+    if isinstance(selection_log, pd.DataFrame):
+        selection_log.to_csv(
+            log_path,
+            index=False,
+        )
+    else:
+        pd.DataFrame(
+            selection_log
+        ).to_csv(
+            log_path,
+            index=False,
+        )
+
+    # ---------------------------------------------------------
+    # 7. Print experiment summary
+    # ---------------------------------------------------------
+
+    print("\nEXPERIMENT SUMMARY")
+    print("=" * 65)
+
+    for name, result in [
+        ("TRAINING", training_result),
+        ("VALIDATION", validation_result),
+        ("FINAL TEST", test_result),
+    ]:
+        comparison = result["benchmark_comparison"]
+
+        print(f"\n{name}")
+
+        print(
+            f"  Portfolio return: "
+            f"{comparison['portfolio_return_pct']:.4f}%"
+        )
+
+        print(
+            f"  NIFTY 50 return:  "
+            f"{comparison['benchmark_return_pct']:.4f}%"
+        )
+
+        print(
+            f"  Excess return:    "
+            f"{comparison['excess_return_pct']:.4f} pp"
+        )
+
+        print(
+            f"  Common sessions:  "
+            f"{comparison['common_return_observations']}"
+        )
+
+    # ---------------------------------------------------------
+    # 8. Disclosures
+    # ---------------------------------------------------------
+
+    print("\nDISCLOSURES")
+    print("-" * 65)
+
+    print(
+        "Historical experiment, not an investment recommendation."
+    )
+    print("No dividends or transaction costs included.")
+    print("Corporate-action coverage is partial.")
+    print(
+        "Latest constituent snapshot creates survivorship-bias risk."
+    )
+    print(
+        "Equal-weight portfolio assumes daily rebalancing."
+    )
+    print(
+        "Greedy selection is heuristic, not globally optimal."
+    )
+
+    print("\nFILES SAVED")
+    print(json_path)
+    print(log_path)
+
+    print("\nDatabase writes: NONE")
+    print("GREEDY V2 EXPERIMENT: COMPLETE")
+
+
+if __name__ == "__main__":
+    main()
+
+
+================================================================================
+FILE: analytics/portfolio_analytics.py
+================================================================================
+
+from __future__ import annotations
+
+import math
+import numbers
+from typing import Any
+
+import pandas as pd
+
+from financial_metrics import calculate_metrics
+
+
+def _validate_positive_integer(value: int, name: str) -> None:
+    if (
+        isinstance(value, bool)
+        or not isinstance(value, numbers.Integral)
+        or value <= 0
+    ):
+        raise ValueError(f"{name} must be a positive integer.")
+
+
+def _validate_risk_free_rate(rate: float) -> None:
+    if (
+        isinstance(rate, bool)
+        or not isinstance(rate, numbers.Real)
+        or not math.isfinite(float(rate))
+        or rate <= -1
+    ):
+        raise ValueError(
+            "Annual risk-free rate must be finite and greater than -100%."
+        )
+
+
+def _validate_datetime_index(index: pd.Index, name: str) -> None:
+    if not isinstance(index, pd.DatetimeIndex):
+        raise ValueError(f"{name} must use a DatetimeIndex.")
+
+    if index.hasnans:
+        raise ValueError(f"{name} cannot contain NaT dates.")
+
+    if index.has_duplicates:
+        raise ValueError(f"Duplicate {name} dates found.")
+
+
+def _validate_matching_timezones(
+    first: pd.DatetimeIndex,
+    second: pd.DatetimeIndex,
+) -> None:
+    first_tz = str(first.tz) if first.tz is not None else None
+    second_tz = str(second.tz) if second.tz is not None else None
+
+    if first_tz != second_tz:
+        raise ValueError(
+            "Portfolio and benchmark dates must use the same timezone."
+        )
+
+
+def _validate_finite_numeric_series(
+    values: pd.Series,
+    name: str,
+) -> pd.Series:
+    result = pd.to_numeric(values, errors="coerce")
+
+    numeric_values = result.dropna()
+
+    if not numeric_values.map(
+        lambda value: math.isfinite(float(value))
+    ).all():
+        raise ValueError(f"{name} must contain only finite values.")
+
+    return result.astype(float)
+
+
+def validate_portfolio(
+    symbols: list[str],
+    sectors: dict[str, str],
+    max_stocks: int = 10,
+    max_per_sector: int = 3,
+) -> None:
+    """Validate the stock selection and sector constraints."""
+
+    _validate_positive_integer(max_stocks, "max_stocks")
+    _validate_positive_integer(max_per_sector, "max_per_sector")
+
+    if not isinstance(symbols, (list, tuple)):
+        raise ValueError("symbols must be a list or tuple.")
+
+    if not isinstance(sectors, dict):
+        raise ValueError("sectors must be a dictionary.")
+
+    if not symbols:
+        raise ValueError("Select at least one stock.")
+
+    if any(
+        not isinstance(symbol, str) or not symbol.strip()
+        for symbol in symbols
+    ):
+        raise ValueError("Stock symbols must be non-empty strings.")
+
+    if len(symbols) != len(set(symbols)):
+        raise ValueError("Duplicate stock symbols are not allowed.")
+
+    if len(symbols) > max_stocks:
+        raise ValueError(
+            f"Portfolio cannot contain more than {max_stocks} stocks."
+        )
+
+    missing = [symbol for symbol in symbols if symbol not in sectors]
+
+    if missing:
+        raise ValueError(
+            f"Missing sector information for: {missing}"
+        )
+
+    invalid_sectors = [
+        symbol
+        for symbol in symbols
+        if not isinstance(sectors[symbol], str)
+        or not sectors[symbol].strip()
+    ]
+
+    if invalid_sectors:
+        raise ValueError(
+            f"Invalid sector information for: {invalid_sectors}"
+        )
+
+    sector_counts = pd.Series(
+        [sectors[symbol] for symbol in symbols]
+    ).value_counts()
+
+    violations = sector_counts[
+        sector_counts > max_per_sector
+    ]
+
+    if not violations.empty:
+        raise ValueError(
+            f"Maximum {max_per_sector} stocks per sector exceeded: "
+            f"{violations.to_dict()}"
+        )
+
+
+def calculate_portfolio(
+    prices,
+    sectors,
+    symbols=None,
+    risk_free_rate=0.0,
+    max_stocks=10,
+    max_per_sector=3,
+    price_basis="RAW_CLOSE_UNADJUSTED",
+    return_type="PRICE_RETURN",
+) -> dict[str, Any]:
+    """
+    Calculate an equal-weight, daily-rebalanced portfolio.
+
+    Input:
+        prices: Date-indexed closing prices, one column per stock.
+        sectors: Mapping of stock symbol to sector.
+        symbols: Selected stock symbols. Defaults to all price columns.
+        risk_free_rate: Annual risk-free rate for Sharpe ratio.
+        max_stocks: Maximum number of stocks in the portfolio.
+        max_per_sector: Maximum number of stocks per sector.
+        price_basis: Basis for price calculations.
+        return_type: Type of returns to calculate.
+
+    Missing observations are not filled. Only dates with valid returns
+    for every selected stock are used.
+
+    Equal weights are reset every session, representing daily
+    rebalancing rather than buy-and-hold.
+    """
+
+    _validate_risk_free_rate(risk_free_rate)
+    _validate_positive_integer(max_stocks, "max_stocks")
+    _validate_positive_integer(max_per_sector, "max_per_sector")
+
+    if not isinstance(prices, pd.DataFrame):
+        raise ValueError("prices must be a pandas DataFrame.")
+
+    if prices.empty:
+        raise ValueError("Price dataset is empty.")
+
+    if not isinstance(price_basis, str) or not price_basis.strip():
+        raise ValueError("price_basis must be a non-empty string.")
+
+    if not isinstance(return_type, str) or not return_type.strip():
+        raise ValueError("return_type must be a non-empty string.")
+
+    selected = (
+        list(prices.columns)
+        if symbols is None
+        else list(symbols)
+    )
+
+    validate_portfolio(
+        selected,
+        sectors,
+        max_stocks=max_stocks,
+        max_per_sector=max_per_sector,
+    )
+
+    missing_columns = [
+        symbol for symbol in selected
+        if symbol not in prices.columns
+    ]
+
+    if missing_columns:
+        raise ValueError(
+            f"Price columns missing for: {missing_columns}"
+        )
+
+    data = prices[selected].copy()
+
+    try:
+        converted_index = pd.DatetimeIndex(
+            pd.to_datetime(data.index, errors="raise")
+        )
+    except (ValueError, TypeError) as exc:
+        raise ValueError(
+            "Portfolio dates must be valid datetime values."
+        ) from exc
+
+    _validate_datetime_index(converted_index, "portfolio trading")
+
+    data.index = converted_index
+    data = data.sort_index()
+
+    data = data.apply(
+        lambda column: pd.to_numeric(column, errors="coerce")
+    )
+
+    # Missing observations remain missing; never forward-fill them.
+    values = data.to_numpy(dtype=float)
+    observed_values = values[~pd.isna(values)]
+
+    if not all(math.isfinite(float(value)) for value in observed_values):
+        raise ValueError("Observed prices must be finite.")
+
+    if (observed_values <= 0).any():
+        raise ValueError("Observed prices must be positive.")
+
+    # No forward-fill or synthetic prices.
+    stock_returns = data.pct_change(fill_method=None)
+
+    # Require all selected stocks to have valid returns on a date.
+    aligned_returns = stock_returns.dropna(how="any")
+
+    if len(aligned_returns) < 2:
+        raise ValueError(
+            "Insufficient aligned return observations."
+        )
+
+    if not aligned_returns.map(
+        lambda value: math.isfinite(float(value))
+    ).all().all():
+        raise ValueError("Portfolio returns must be finite.")
+
+    if (aligned_returns <= -1).any().any():
+        raise ValueError(
+            "Stock returns cannot be less than or equal to -100%."
+        )
+
+    weights = {
+        symbol: 1.0 / len(selected)
+        for symbol in selected
+    }
+
+    # Equal weights are reset every session:
+    # daily rebalancing assumption.
+    portfolio_returns = aligned_returns.mul(
+        pd.Series(weights)
+    ).sum(axis=1).rename("portfolio")
+
+    if not portfolio_returns.map(math.isfinite).all():
+        raise ValueError("Portfolio returns must be finite.")
+
+    cumulative_values = (
+        (1 + portfolio_returns).cumprod() * 100
+    )
+
+    if not cumulative_values.map(math.isfinite).all():
+        raise ValueError(
+            "Portfolio value calculation produced non-finite values."
+        )
+
+    # Include the starting portfolio value immediately before
+    # the first valid return.
+    first_return_date = portfolio_returns.index[0]
+
+    prior_dates = data.index[
+        data.index < first_return_date
+    ]
+
+    if prior_dates.empty:
+        raise ValueError(
+            "Cannot establish a starting portfolio value."
+        )
+
+    baseline_date = prior_dates[-1]
+
+    portfolio_values = pd.concat([
+        pd.Series(
+            [100.0],
+            index=pd.DatetimeIndex([baseline_date]),
+        ),
+        cumulative_values,
+    ])
+
+    portfolio_values.name = "portfolio_value"
+
+    metrics = calculate_metrics(
+        portfolio_values,
+        risk_free_rate=risk_free_rate,
+        price_basis=price_basis,
+        return_type=return_type,
+    )
+
+    correlation = aligned_returns.corr()
+
+    sector_weights: dict[str, float] = {}
+
+    for symbol, weight in weights.items():
+        sector = sectors[symbol]
+        sector_weights[sector] = (
+            sector_weights.get(sector, 0.0) + weight
+        )
+
+    return {
+        "symbols": selected,
+        "weights": weights,
+        "sector_allocation": sector_weights,
+        "portfolio_values": portfolio_values,
+        "daily_returns": portfolio_returns,
+        "stock_returns": aligned_returns,
+        "correlation": correlation,
+        "metrics": metrics,
+        "metadata": {
+            "method": "EQUAL_WEIGHT",
+            "rebalancing": "DAILY",
+            "risk_free_rate": risk_free_rate,
+            "price_basis": price_basis,
+            "return_type": return_type,
+            "dividend_adjusted": False,
+            "corporate_action_coverage": "PARTIAL",
+            "input_price_observations": len(data),
+            "aligned_return_observations": len(aligned_returns),
+            "excluded_return_dates": (
+                len(stock_returns) - len(aligned_returns)
+            ),
+            "missing_values_filled": False,
+            "database_writes": False,
+        },
+    }
+
+
+def compare_with_benchmark(
+    portfolio_returns: pd.Series,
+    benchmark_prices: pd.Series,
+) -> dict[str, Any]:
+    """Compare portfolio and benchmark on common return dates.
+
+    Portfolio returns must be daily simple returns expressed as decimals.
+    Benchmark input must contain positive closing prices.
+    """
+
+    if not isinstance(portfolio_returns, pd.Series):
+        raise ValueError(
+            "portfolio_returns must be a pandas Series."
+        )
+
+    if not isinstance(benchmark_prices, pd.Series):
+        raise ValueError(
+            "benchmark_prices must be a pandas Series."
+        )
+
+    if portfolio_returns.empty or benchmark_prices.empty:
+        raise ValueError(
+            "Portfolio returns and benchmark prices cannot be empty."
+        )
+
+    _validate_datetime_index(
+        portfolio_returns.index,
+        "portfolio return",
+    )
+
+    _validate_datetime_index(
+        benchmark_prices.index,
+        "benchmark trading",
+    )
+
+    _validate_matching_timezones(
+        portfolio_returns.index,
+        benchmark_prices.index,
+    )
+
+    portfolio = _validate_finite_numeric_series(
+        portfolio_returns,
+        "Portfolio returns",
+    ).sort_index()
+
+    benchmark = _validate_finite_numeric_series(
+        benchmark_prices,
+        "Benchmark prices",
+    ).sort_index()
+
+    if portfolio.isna().any():
+        raise ValueError(
+            "Portfolio returns cannot contain missing values."
+        )
+
+    if (portfolio <= -1).any():
+        raise ValueError(
+            "Portfolio returns cannot be less than or equal to -100%."
+        )
+
+    # Align benchmark observations to valid positive finite prices.
+    # Missing/invalid benchmark observations must not create artificial returns.
+    benchmark = benchmark.replace([float("inf"), float("-inf")], float("nan"))
+    benchmark = benchmark.where(benchmark > 0).dropna()
+
+    if benchmark.empty or len(benchmark) < 2:
+        raise ValueError(
+            "Insufficient valid positive benchmark prices for evaluation."
+        )
+
+    # Compare portfolio and benchmark only on common trading dates.
+    common_dates = portfolio.index.intersection(benchmark.index)
+    if len(common_dates) < 2:
+        raise ValueError(
+            "Insufficient overlapping portfolio and benchmark trading dates."
+        )
+
+    portfolio = portfolio.loc[common_dates]
+    benchmark = benchmark.loc[common_dates]
+
+    benchmark_returns = benchmark.pct_change(
+        fill_method=None
+    ).dropna()
+
+    if not benchmark_returns.map(math.isfinite).all():
+        raise ValueError("Benchmark returns must be finite.")
+
+    comparison = pd.concat(
+        [
+            portfolio.rename("portfolio"),
+            benchmark_returns.rename("benchmark"),
+        ],
+        axis=1,
+        join="inner",
+    ).dropna()
+
+    if len(comparison) < 2:
+        raise ValueError(
+            "Insufficient common portfolio and benchmark dates."
+        )
+
+    portfolio_growth = (
+        (1 + comparison["portfolio"]).prod() - 1
+    )
+
+    benchmark_growth = (
+        (1 + comparison["benchmark"]).prod() - 1
+    )
+
+    if not (
+        math.isfinite(float(portfolio_growth))
+        and math.isfinite(float(benchmark_growth))
+    ):
+        raise ValueError(
+            "Benchmark comparison produced non-finite returns."
+        )
+
+    return {
+        "portfolio_return_pct": float(
+            portfolio_growth * 100
+        ),
+        "benchmark_return_pct": float(
+            benchmark_growth * 100
+        ),
+        "excess_return_pct": float(
+            (portfolio_growth - benchmark_growth) * 100
+        ),
+        "common_return_observations": len(comparison),
+        "comparison_returns": comparison,
+        "benchmark_basis": "NIFTY_50_PRICE_RETURN",
+    }
+
+
+================================================================================
+FILE: analytics/test_greedy_v2_engine.py
+================================================================================
+
+import unittest
+
+import numpy as np
+import pandas as pd
+
+from analytics.greedy_v2_engine import greedy_select_stocks
+
+
+class GreedyV2EngineTests(unittest.TestCase):
+
+    def setUp(self):
+        dates = pd.bdate_range("2025-01-01", periods=100)
+
+        rng = np.random.default_rng(42)
+
+        symbols = ["AAA", "BBB", "CCC", "DDD", "EEE", "FFF"]
+
+        daily_drifts = {
+            "AAA": 0.0008,
+            "BBB": 0.0005,
+            "CCC": 0.0003,
+            "DDD": 0.0001,
+            "EEE": 0.0004,
+            "FFF": 0.0006,
+        }
+
+        price_data = {}
+
+        for symbol in symbols:
+            returns = rng.normal(
+                loc=daily_drifts[symbol],
+                scale=0.008,
+                size=len(dates),
+            )
+
+            price_data[symbol] = (
+                100 * np.cumprod(1 + returns)
+            )
+
+        self.prices = pd.DataFrame(
+            price_data,
+            index=dates,
+        )
+
+        self.sectors = {
+            "AAA": "IT",
+            "BBB": "IT",
+            "CCC": "IT",
+            "DDD": "BANKING",
+            "EEE": "BANKING",
+            "FFF": "PHARMA",
+        }
+
+    def test_selects_requested_number_of_stocks(self):
+        result = greedy_select_stocks(
+            self.prices,
+            self.sectors,
+            target_stocks=3,
+        )
+
+        self.assertEqual(len(result["selected_symbols"]), 3)
+
+    def test_sector_limit_is_respected(self):
+        result = greedy_select_stocks(
+            self.prices,
+            self.sectors,
+            target_stocks=4,
+            max_per_sector=2,
+        )
+
+        selected = result["selected_symbols"]
+
+        for sector in set(self.sectors.values()):
+            count = sum(
+                self.sectors[symbol] == sector
+                for symbol in selected
+            )
+            self.assertLessEqual(count, 2)
+
+    def test_selected_symbols_are_unique(self):
+        result = greedy_select_stocks(
+            self.prices,
+            self.sectors,
+            target_stocks=4,
+        )
+
+        selected = result["selected_symbols"]
+
+        self.assertEqual(len(selected), len(set(selected)))
+
+    def test_selection_log_has_one_row_per_step(self):
+        result = greedy_select_stocks(
+            self.prices,
+            self.sectors,
+            target_stocks=4,
+        )
+
+        self.assertEqual(len(result["selection_log"]), 4)
+
+    def test_selection_log_steps_are_sequential(self):
+        result = greedy_select_stocks(
+            self.prices,
+            self.sectors,
+            target_stocks=4,
+        )
+
+        self.assertEqual(
+            result["selection_log"]["step"].tolist(),
+            [1, 2, 3, 4],
+        )
+
+    def test_equal_weighting_is_disclosed(self):
+        result = greedy_select_stocks(
+            self.prices,
+            self.sectors,
+            target_stocks=3,
+        )
+
+        self.assertEqual(
+            result["assumptions"]["weighting"],
+            "EQUAL_WEIGHT",
+        )
+
+    def test_training_only_selection_is_disclosed(self):
+        result = greedy_select_stocks(
+            self.prices,
+            self.sectors,
+            target_stocks=3,
+        )
+
+        self.assertTrue(
+            result["assumptions"]["selection_uses_training_data_only"]
+        )
+
+    def test_missing_prices_are_rejected(self):
+        prices = self.prices.copy()
+        prices.iloc[5, 0] = np.nan
+
+        with self.assertRaises(ValueError):
+            greedy_select_stocks(
+                prices,
+                self.sectors,
+                target_stocks=3,
+            )
+
+    def test_non_positive_prices_are_rejected(self):
+        prices = self.prices.copy()
+        prices.iloc[5, 0] = 0
+
+        with self.assertRaises(ValueError):
+            greedy_select_stocks(
+                prices,
+                self.sectors,
+                target_stocks=3,
+            )
+
+    def test_duplicate_dates_are_rejected(self):
+        prices = self.prices.copy()
+        prices.index = list(prices.index[:-1]) + [prices.index[-2]]
+
+        with self.assertRaises(ValueError):
+            greedy_select_stocks(
+                prices,
+                self.sectors,
+                target_stocks=3,
+            )
+
+    def test_insufficient_history_is_rejected(self):
+        prices = self.prices.iloc[:30]
+
+        with self.assertRaises(ValueError):
+            greedy_select_stocks(
+                prices,
+                self.sectors,
+                target_stocks=3,
+            )
+
+    def test_missing_sector_is_rejected(self):
+        sectors = self.sectors.copy()
+        del sectors["AAA"]
+
+        with self.assertRaises(ValueError):
+            greedy_select_stocks(
+                self.prices,
+                sectors,
+                target_stocks=3,
+            )
+
+    def test_impossible_sector_constraint_is_rejected(self):
+        with self.assertRaises(ValueError):
+            greedy_select_stocks(
+                self.prices,
+                self.sectors,
+                target_stocks=5,
+                max_per_sector=1,
+            )
+
+    def test_invalid_target_is_rejected(self):
+        with self.assertRaises(ValueError):
+            greedy_select_stocks(
+                self.prices,
+                self.sectors,
+                target_stocks=0,
+            )
+
+    def test_risk_free_rate_is_validated(self):
+        with self.assertRaises(ValueError):
+            greedy_select_stocks(
+                self.prices,
+                self.sectors,
+                target_stocks=3,
+                risk_free_rate=-0.01,
+            )
+
+
+if __name__ == "__main__":
+    unittest.main(verbosity=2)

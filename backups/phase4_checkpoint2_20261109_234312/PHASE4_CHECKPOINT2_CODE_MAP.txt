@@ -1,0 +1,450 @@
+PHASE 4 CHECKPOINT 2 ? READ-ONLY DATABASE REALITY AUDIT
+===========================================================================
+
+
+===========================================================================
+FILE: analytics/audit_10y_price_coverage.py
+===========================================================================
+TOP-LEVEL DEFINITIONS:
+  FunctionDef: pick (line 18)
+
+IMPORTS:
+  from pathlib import Path
+  from datetime import date
+  import pandas as pd
+  from sqlalchemy import inspect, text
+  import sys
+  from backend.database import engine
+
+DATABASE / SQL REFERENCES:
+1: from pathlib import Path
+2: from datetime import date
+4: from sqlalchemy import inspect, text
+11: from backend.database import engine
+35: (t for t in tables if t.lower() == "stock_prices"), None
+39: f"stock_prices table not found. Available tables: {tables}"
+57: text(f"SELECT * FROM `{price_table_name}`"),
+92: text(f"SELECT `{company_pk}`, `{company_symbol}` "
+93: f"FROM `{company_table_name}`"),
+133: text(f"SELECT DISTINCT `{dcol}` FROM `{table_name}`"),
+268: "proxy, not proof of complete historical index membership."
+
+
+===========================================================================
+FILE: analytics/audit_corporate_action_source_rows.py
+===========================================================================
+TOP-LEVEL DEFINITIONS:
+
+IMPORTS:
+  from pathlib import Path
+  from zipfile import ZipFile
+  from io import BytesIO
+  import pandas as pd
+
+DATABASE / SQL REFERENCES:
+1: from pathlib import Path
+2: from zipfile import ZipFile
+3: from io import BytesIO
+
+
+===========================================================================
+FILE: analytics/audit_extreme_price_moves.py
+===========================================================================
+TOP-LEVEL DEFINITIONS:
+
+IMPORTS:
+  import pandas as pd
+  from analytics.database_adapter import (
+    get_latest_constituents,
+    get_company_prices,
+)
+
+DATABASE / SQL REFERENCES:
+3: from analytics.database_adapter import (
+
+
+===========================================================================
+FILE: analytics/adjusted_prices.py
+===========================================================================
+TOP-LEVEL DEFINITIONS:
+  FunctionDef: _parse_ratio (line 18)
+  FunctionDef: action_adjustment_factor (line 38)
+  FunctionDef: _normalise_date (line 67)
+  FunctionDef: build_adjusted_prices (line 83)
+
+IMPORTS:
+  from decimal import Decimal, InvalidOperation
+  from typing import Any, Mapping
+  import numpy as np
+  import pandas as pd
+
+DATABASE / SQL REFERENCES:
+8: from decimal import Decimal, InvalidOperation
+9: from typing import Any, Mapping
+25: raise ValueError(f"Invalid corporate-action ratio: {ratio!r}") from None
+72: raise ValueError(f"Invalid {field_name}: {value!r}") from None
+117: raise ValueError("Invalid trading date found in price input.") from None
+
+
+===========================================================================
+FILE: analytics/adjusted_price_adapter.py
+===========================================================================
+TOP-LEVEL DEFINITIONS:
+  FunctionDef: get_company_actions (line 17)
+  FunctionDef: get_adjusted_company_prices (line 49)
+  MAIN GUARD: line 131
+
+IMPORTS:
+  from __future__ import annotations
+  import pandas as pd
+  from sqlalchemy import text
+  from backend.database import engine
+  from analytics.adjusted_prices import build_adjusted_prices
+
+MAIN ENTRY POINT:
+131: if __name__ == "__main__":
+132:     print("ADJUSTED PRICE ADAPTER — READ-ONLY TEST")
+133: 
+134:     query = text("""
+135:         SELECT id, symbol
+136:         FROM companies
+137:         WHERE symbol IN (
+138:             'BAJFINANCE',
+139:             'KOTAKBANK',
+140:             'BSE',
+141:             'NESTLEIND',
+142:             'HDFCBANK',
+143:             'TRENT'
+144:         )
+145:         ORDER BY symbol
+146:     """)
+147: 
+148:     with engine.connect() as conn:
+149:         companies = conn.execute(query).mappings().all()
+150: 
+151:     for company in companies:
+152:         result = get_adjusted_company_prices(
+153:             company_id=int(company["id"]),
+154:             start_date="2025-04-01",
+155:             end_date="2026-11-05",
+156:         )
+157: 
+158:         print(f"\n{company['symbol']}")
+159:         print("Price observations:", len(result))
+160:         print("First date:", result["trade_date"].min() if not result.empty else None)
+161:         print("Last date:", result["trade_date"].max() if not result.empty else None)
+162:         print("Price basis:", result.attrs["price_basis"])
+163:         print("Dividend adjusted:", result.attrs["dividend_adjusted"])
+164: 
+165:         if not result.empty:
+166:             print(
+167:                 result[
+168:                     ["trade_date", "close", "adjustment_factor", "adjusted_close"]
+169:                 ].tail(3).to_string(index=False)
+170:             )
+171: 
+172:     print("\nDatabase writes: NONE")
+
+DATABASE / SQL REFERENCES:
+8: from __future__ import annotations
+11: from sqlalchemy import text
+13: from backend.database import engine
+14: from analytics.adjusted_prices import build_adjusted_prices
+30: FROM corporate_actions
+61: SELECT trade_date, close_price
+62: FROM stock_prices
+89: result.attrs["corporate_action_coverage"] = "PARTIAL"
+126: adjusted.attrs["corporate_action_coverage"] = "PARTIAL"
+135: SELECT id, symbol
+136: FROM companies
+
+
+===========================================================================
+FILE: analytics/historical_rankings.py
+===========================================================================
+TOP-LEVEL DEFINITIONS:
+  FunctionDef: get_latest_snapshot (line 48)
+  FunctionDef: get_snapshot_companies (line 56)
+  FunctionDef: get_company_prices (line 78)
+  FunctionDef: get_company_actions (line 99)
+  FunctionDef: get_trading_sessions (line 121)
+  FunctionDef: calculate_company_metrics (line 143)
+  FunctionDef: run_historical_rankings (line 218)
+  MAIN GUARD: line 360
+
+IMPORTS:
+  import sys
+  from pathlib import Path
+  import pandas as pd
+  from sqlalchemy import text
+  from database import engine
+  from analytics.adjusted_prices import build_adjusted_prices
+  from analytics.financial_metrics import (
+    period_return,
+    annualized_volatility,
+    cagr,
+    maximum_drawdown,
+    sharpe_ratio,
+)
+
+MAIN ENTRY POINT:
+360: if __name__ == "__main__":
+361:     import argparse
+362: 
+363:     parser = argparse.ArgumentParser()
+364:     parser.add_argument("--period", choices=list(PERIODS), default="3M")
+365:     args = parser.parse_args()
+366: 
+367:     ranking = run_historical_rankings(args.period)
+368: 
+369:     columns = [
+370:         "return_rank",
+371:         "symbol",
+372:         "company_name",
+373:         "sector",
+374:         "period_return",
+375:         "annualized_volatility",
+376:         "cagr",
+377:         "maximum_drawdown",
+378:         "sharpe_ratio",
+379:         "observations",
+380:         "data_status",
+381:         "data_quality_reason",
+382:     ]
+383: 
+384:     print("\n" + "=" * 110)
+385:     print("GREEDY STOCKS — HISTORICAL NIFTY 50 RANKINGS")
+386:     print("=" * 110)
+387:     print(ranking[columns].to_string(index=False))
+388:     print("\nRanking metadata:")
+389:     print(ranking.attrs)
+
+DATABASE / SQL REFERENCES:
+11: Monthly constituent snapshots are not exact daily membership records.
+13: The session reference is derived from dates present in stock_prices;
+18: from pathlib import Path
+21: from sqlalchemy import text
+27: from database import engine
+28: from analytics.adjusted_prices import build_adjusted_prices
+29: from analytics.financial_metrics import (
+50: SELECT MAX(report_month)
+51: FROM index_constituent_snapshots
+65: FROM index_constituent_snapshots snap
+66: JOIN companies c
+68: LEFT JOIN sectors s
+89: FROM stock_prices
+108: FROM corporate_actions
+122: """Return observed market dates from imported stock_prices.
+125: shared date set. It cannot detect a market session missing from every
+130: SELECT DISTINCT trade_date
+131: FROM stock_prices
+212: "corporate_actions_applied": len(actions),
+223: f"Unsupported period {period}. Choose from {list(PERIODS)}."
+243: SELECT MAX(sp.trade_date)
+244: FROM stock_prices sp
+245: JOIN companies c ON c.id = sp.company_id
+246: JOIN index_constituent_snapshots snap
+311: "corporate_actions_applied": len(actions),
+314: "corporate_action_coverage": "PARTIAL",
+323: "corporate_action_coverage": "PARTIAL",
+354: result.attrs["membership_basis"] = "LATEST_MONTHLY_SNAPSHOT"
+355: result.attrs["corporate_action_coverage"] = "PARTIAL"
+
+
+===========================================================================
+FILE: backend/audit_nifty50_bhavcopy_coverage.py
+===========================================================================
+TOP-LEVEL DEFINITIONS:
+  FunctionDef: main (line 24)
+  MAIN GUARD: line 210
+
+IMPORTS:
+  from pathlib import Path
+  from collections import defaultdict
+  from zipfile import ZipFile
+  import pandas as pd
+
+MAIN ENTRY POINT:
+210: if __name__ == "__main__":
+211:     main()
+
+DATABASE / SQL REFERENCES:
+2: from pathlib import Path
+3: from collections import defaultdict
+4: from zipfile import ZipFile
+13: "constituents" / "nifty50_constituent_snapshots.csv"
+173: output_dir / "nifty50_bhavcopy_coverage_audit.csv"
+
+
+===========================================================================
+FILE: backend/audit_nifty50_membership_changes.py
+===========================================================================
+TOP-LEVEL DEFINITIONS:
+
+IMPORTS:
+  from pathlib import Path
+  import pandas as pd
+
+DATABASE / SQL REFERENCES:
+2: from pathlib import Path
+8: SOURCE = DATA_DIR / "nifty50_constituent_snapshots.csv"
+9: OUTPUT = DATA_DIR / "nifty50_membership_changes.csv"
+32: print("GREEDY STOCKS — NIFTY 50 MEMBERSHIP CHANGE AUDIT")
+87: print(f"Total membership changes: {len(result)}")
+
+
+===========================================================================
+FILE: backend/audit_nifty50_membership_periods.py
+===========================================================================
+TOP-LEVEL DEFINITIONS:
+  FunctionDef: main (line 26)
+  MAIN GUARD: line 233
+
+IMPORTS:
+  from pathlib import Path
+  import pandas as pd
+
+MAIN ENTRY POINT:
+233: if __name__ == "__main__":
+234:     main()
+
+DATABASE / SQL REFERENCES:
+2: from pathlib import Path
+14: DATA_DIR / "nifty50_constituent_snapshots.csv"
+18: DATA_DIR / "nifty50_membership_events_reconciled.csv"
+22: DATA_DIR / "nifty50_membership_observation_audit_v2.csv"
+171: print("NIFTY 50 MEMBERSHIP AUDIT V2")
+
+
+===========================================================================
+FILE: backend/audit_nifty50_isin_changes.py
+===========================================================================
+TOP-LEVEL DEFINITIONS:
+
+IMPORTS:
+  from pathlib import Path
+  from zipfile import ZipFile
+  import pandas as pd
+
+DATABASE / SQL REFERENCES:
+2: from pathlib import Path
+3: from zipfile import ZipFile
+65: detail_file = output_dir / "nifty50_isin_series_details.csv"
+
+
+===========================================================================
+FILE: backend/import_verified_corporate_actions.py
+===========================================================================
+TOP-LEVEL DEFINITIONS:
+  FunctionDef: main (line 153)
+  MAIN GUARD: line 256
+
+IMPORTS:
+  import sys
+  from pathlib import Path
+  from sqlalchemy import text
+  from database import engine
+
+MAIN ENTRY POINT:
+256: if __name__ == "__main__":
+257:     main()
+
+DATABASE / SQL REFERENCES:
+4: Original stock_prices records are never modified.
+8: from pathlib import Path
+13: from sqlalchemy import text
+14: from database import engine
+27: "Face value subdivision from INR 2 to INR 1; "
+66: "Face value subdivision from INR 5 to INR 1; "
+161: SELECT id
+162: FROM companies
+175: SELECT id
+176: FROM corporate_actions
+203: INSERT INTO corporate_actions (
+244: text("SELECT COUNT(*) FROM corporate_actions")
+253: print("Original stock_prices modified: NO")
+
+
+===========================================================================
+FILE: backend/import_nifty50_membership_events.py
+===========================================================================
+TOP-LEVEL DEFINITIONS:
+  FunctionDef: create_table (line 98)
+  FunctionDef: load_events (line 110)
+  FunctionDef: import_events (line 232)
+  FunctionDef: verify_events (line 387)
+  FunctionDef: main (line 441)
+  MAIN GUARD: line 469
+
+IMPORTS:
+  from pathlib import Path
+  import pandas as pd
+  from sqlalchemy import text
+  from database import engine
+
+MAIN ENTRY POINT:
+469: if __name__ == "__main__":
+470:     main()
+
+DATABASE / SQL REFERENCES:
+2: from pathlib import Path
+5: from sqlalchemy import text
+7: from database import engine
+12: # NIFTY 50 MEMBERSHIP EVENT IMPORTER
+22: / "nifty50_membership_events_reconciled.csv"
+34: CREATE TABLE IF NOT EXISTS index_membership_events (
+63: UNIQUE KEY uq_membership_event (
+71: KEY idx_membership_event_date (
+76: KEY idx_membership_old_company (
+80: KEY idx_membership_new_company (
+84: CONSTRAINT fk_membership_event_old_company
+88: CONSTRAINT fk_membership_event_new_company
+103: print("Membership events table is ready.")
+178: "Duplicate membership events detected."
+243: SELECT id, symbol
+244: FROM companies
+283: FROM index_membership_events
+322: INSERT INTO index_membership_events (
+367: SELECT COUNT(*)
+368: FROM index_membership_events
+403: FROM index_membership_events e
+404: JOIN companies old_c
+406: JOIN companies new_c
+416: print("MEMBERSHIP EVENT VERIFICATION")
+444: print("GREEDY STOCKS - MEMBERSHIP EVENT IMPORT")
+466: print("\nMEMBERSHIP EVENT IMPORT SUCCESSFUL.")
+
+
+===========================================================================
+FILE: backend/import_nifty50_observation_spans.py
+===========================================================================
+TOP-LEVEL DEFINITIONS:
+  FunctionDef: main (line 14)
+  MAIN GUARD: line 188
+
+IMPORTS:
+  import sys
+  from pathlib import Path
+  import pandas as pd
+  from sqlalchemy import text
+  from database import engine
+
+MAIN ENTRY POINT:
+188: if __name__ == "__main__":
+189:     main()
+
+DATABASE / SQL REFERENCES:
+4: from pathlib import Path
+6: from sqlalchemy import text
+7: from database import engine
+11: "nifty50_membership_observation_audit_v2.csv"
+48: CREATE TABLE IF NOT EXISTS index_constituent_observation_spans (
+84: text("SELECT id, symbol FROM companies")
+90: raise ValueError(f"Companies missing from master: {missing}")
+118: SELECT first_observed_month, last_observed_month,
+120: FROM index_constituent_observation_spans
+147: INSERT INTO index_constituent_observation_spans (
+169: SELECT COUNT(*) FROM index_constituent_observation_spans
+175: text("SELECT COUNT(*) FROM index_constituents")
+184: print("Exact membership periods:", exact_periods)
+186: print("\nObservation boundaries are NOT legal membership dates.")

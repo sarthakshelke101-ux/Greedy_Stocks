@@ -1,0 +1,217 @@
+﻿
+========== analytics/market_ideas.py ==========
+
+--- Lines 475-535 ---
+475:         "insufficient_data_companies": int(
+476:             (ranking["data_status"] != "CALCULATED").sum()
+477:         ),
+478:         "database_writes": False,
+479:         "interpretation": "HISTORICAL_RESEARCH_NOT_INVESTMENT_ADVICE",
+480:     }
+481: 
+482:     ideas = []
+483: 
+484:     ideas.extend(
+485:         performance_standouts(ranking, period, top_n)
+486:     )
+487: 
+488:     ideas.extend(
+489:         risk_stability_insights(ranking, period, top_n)
+490:     )
+491: 
+492:     ideas.extend(
+493:         sector_opportunities(ranking, period, top_n)
+494:     )
+495: 
+496:     ideas.extend(
+497:         greedy_experimental_insights(top_n=10)
+498:     )
+499: 
+500:     ideas.append(fundamental_research_status())
+501: 
+502:     report = {
+503:         "product": "GREEDY STOCKS",
+504:         "report_type": "MARKET_IDEAS",
+505:         "metadata": metadata,
+506:         "ideas": ideas,
+507:         "disclosures": [
+508:             "Insights describe historical observations, not forecasts.",
+509:             "The universe uses the latest monthly NIFTY 50 snapshot.",
+510:             "Historical daily membership is not reconstructed.",
+511:             "Prices are split/bonus adjusted where imported actions apply.",
+512:             "Corporate-action coverage is partial.",
+513:             "Dividends are excluded; this is not a total-return series.",
+514:             (
+515:                 "Greedy selections are in-sample historical experiments, "
+516:                 "not live or out-of-sample recommendations."
+517:             ),
+518:             (
+519:                 "Fundamental and valuation claims are not generated "
+520:                 "without verified data."
+521:             ),
+522:         ],
+523:     }
+524: 
+525:     return report
+526: 
+527: 
+528: def save_market_ideas(report):
+529:     """Save a JSON report without writing to the database."""
+530:     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+531: 
+532:     period = report["metadata"]["period"]
+533:     output_file = OUTPUT_DIR / f"market_ideas_{period.lower()}.json"
+534: 
+535:     with output_file.open("w", encoding="utf-8") as file:
+
+========== analytics/test_market_ideas.py ==========
+
+--- Lines 1-45 ---
+1: """Tests for the GREEDY STOCKS Market Ideas engine."""
+2: 
+3: import json
+4: import tempfile
+5: import unittest
+6: from pathlib import Path
+7: from unittest.mock import patch
+8: 
+9: import pandas as pd
+10: 
+11: from analytics import market_ideas as mi
+12: 
+13: 
+14: def sample_ranking():
+15:     """Build a small deterministic ranking dataset for testing."""
+16:     rows = [
+17:         # Positive sector
+18:         ("POS_A", "Positive A Ltd", "Positive Sector", 8.0, 20.0, -5.0),
+19:         ("POS_B", "Positive B Ltd", "Positive Sector", 4.0, 22.0, -6.0),
+20: 
+21:         # Negative sector
+22:         ("NEG_A", "Negative A Ltd", "Negative Sector", -8.0, 25.0, -12.0),
+23:         ("NEG_B", "Negative B Ltd", "Negative Sector", -4.0, 24.0, -10.0),
+24: 
+25:         # Flat sector
+26:         ("FLAT_A", "Flat A Ltd", "Flat Sector", 0.0, 18.0, -3.0),
+27:         ("FLAT_B", "Flat B Ltd", "Flat Sector", 0.0, 19.0, -4.0),
+28: 
+29:         # Single-company sector should be excluded
+30:         ("SINGLE", "Single Ltd", "Single Sector", 5.0, 21.0, -7.0),
+31:     ]
+32: 
+33:     result = pd.DataFrame(
+34:         [
+35:             {
+36:                 "symbol": symbol,
+37:                 "company_name": company_name,
+38:                 "sector": sector,
+39:                 "period_return": period_return,
+40:                 "annualized_volatility": volatility,
+41:                 "maximum_drawdown": drawdown,
+42:                 "sharpe_ratio": 0.5,
+43:                 "return_rank": index + 1,
+44:                 "observations": 100,
+45:                 "data_status": "CALCULATED",
+
+--- Lines 180-280 ---
+180:             pd.DataFrame(
+181:                 {"step": [1], "selected_symbol": ["TEST"]}
+182:             ).to_csv(log_file, index=False)
+183: 
+184:             with patch.object(mi, "GREEDY_LOG", log_file):
+185:                 with self.assertRaises(ValueError):
+186:                     mi.greedy_experimental_insights()
+187: 
+188:     def test_greedy_log_generates_historical_experiment_ideas(self):
+189:         with tempfile.TemporaryDirectory() as temp_dir:
+190:             log_file = Path(temp_dir) / "greedy.csv"
+191: 
+192:             pd.DataFrame(
+193:                 {
+194:                     "step": [2, 1],
+195:                     "selected_symbol": ["TEST_B", "TEST_A"],
+196:                     "sector": ["Sector B", "Sector A"],
+197:                     "portfolio_sharpe": [0.8, 0.5],
+198:                     "previous_portfolio_sharpe": [0.4, 0.2],
+199:                     "candidates_evaluated": [10, 10],
+200:                     "sector_limit": [3, 3],
+201:                 }
+202:             ).to_csv(log_file, index=False)
+203: 
+204:             with patch.object(mi, "GREEDY_LOG", log_file):
+205:                 ideas = mi.greedy_experimental_insights(top_n=2)
+206: 
+207:         self.assertEqual(len(ideas), 2)
+208:         self.assertEqual(
+209:             ideas[0]["evidence"]["symbol"],
+210:             "TEST_A",
+211:         )
+212:         self.assertEqual(
+213:             ideas[0]["evidence"]["classification"],
+214:             "HISTORICAL_TRAINING_EXPERIMENT",
+215:         )
+216:         self.assertIn("not live", ideas[0]["risk"])
+217: 
+218:     def test_fundamental_research_is_not_fabricated(self):
+219:         idea = mi.fundamental_research_status()
+220: 
+221:         self.assertEqual(
+222:             idea["category"],
+223:             "FUNDAMENTAL_RESEARCH",
+224:         )
+225:         self.assertEqual(
+226:             idea["status"],
+227:             "NOT_YET_AVAILABLE",
+228:         )
+229:         self.assertFalse(
+230:             idea["evidence"]["fundamental_data_available"]
+231:         )
+232:         self.assertFalse(
+233:             idea["evidence"]["valuation_claims_enabled"]
+234:         )
+235: 
+236:     def test_invalid_period_is_rejected(self):
+237:         with self.assertRaises(ValueError):
+238:             mi.generate_market_ideas(period="5Y")
+239: 
+240:     def test_non_string_period_is_rejected(self):
+241:         with self.assertRaises(ValueError):
+242:             mi.generate_market_ideas(period=3)
+243: 
+244:     def test_invalid_top_n_is_rejected(self):
+245:         for value in [0, 11, -1, 2.5, True, "5"]:
+246:             with self.subTest(top_n=value):
+247:                 with self.assertRaises(ValueError):
+248:                     mi.generate_market_ideas(top_n=value)
+249: 
+250:     def test_generate_market_ideas_builds_expected_categories(self):
+251:         with (
+252:             patch.object(
+253:                 mi,
+254:                 "run_historical_rankings",
+255:                 return_value=self.ranking,
+256:             ),
+257:             patch.object(
+258:                 mi,
+259:                 "greedy_experimental_insights",
+260:                 return_value=[],
+261:             ),
+262:         ):
+263:             report = mi.generate_market_ideas(
+264:                 period="3M",
+265:                 top_n=3,
+266:             )
+267: 
+268:         categories = {
+269:             idea["category"]
+270:             for idea in report["ideas"]
+271:         }
+272: 
+273:         expected = {
+274:             "PERFORMANCE_STANDOUTS",
+275:             "RISK_AND_STABILITY",
+276:             "SECTOR_PERFORMANCE",
+277:             "FUNDAMENTAL_RESEARCH",
+278:         }
+279: 
+280:         self.assertTrue(expected.issubset(categories))

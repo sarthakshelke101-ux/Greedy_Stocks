@@ -1,0 +1,1990 @@
+GREEDY STOCKS - PHASE 3 ARCHITECTURE AUDIT
+Scanned source files: 244
+
+=================================================================
+PRICE DATA
+=================================================================
+
+FILE: analytics\run_five_greedy_strategies.py
+  L206: "transaction_costs_are_estimated_not_broker_quotes": True,
+
+FILE: backend\company_routes.py
+  L74: latest_price = connection.execute(
+  L156: "latest_price": (
+  L159: for key, value in latest_price.items()
+  L161: if latest_price else None
+  L178: "Latest price is an unadjusted raw closing price.",
+
+FILE: backend\import_verified_corporate_actions.py
+  L33: "https://www.nseindia.com/get-quote/equity/"
+  L53: "https://www.nseindia.com/get-quote/equity/"
+  L90: "https://www.nseindia.com/get-quote/equity/"
+  L128: "https://www.nseindia.com/get-quote/equity/"
+
+FILE: backend\portfolio_routes.py
+  L90: latest_prices = {}
+  L109: latest_prices[symbol] = float(available.iloc[-1])
+  L113: prices=latest_prices,
+  L362: latest_prices = {}
+  L379: latest_prices[symbol] = float(available.iloc[-1])
+
+FILE: frontend\package-lock.json
+  L468: "integrity": "sha512-ZZ1w0aoQkwuUuC7Yf+7sdeaNfqQiiLcSRbfI08oAxqLtpXQr9AIVX7Ay7HLDuiLYAaFPu8oBYNq/QIi9URHJ3Q==",
+  L4892: "integrity": "sha512-PwwhEakHVKTdRNVOw+/Gyh0+MzlCl4R6qKvkhuvLtPMggI1WAHt9sOwZxQLSGpUaDnrdyDsomoRgNnCfKNSXXg==",
+
+FILE: database\processed\analytics\five_strategy_experiment\five_strategy_comparison.json
+  L25: "transaction_costs_are_estimated_not_broker_quotes": true
+
+Total matching lines: 19
+
+=================================================================
+BUDGET / AFFORDABILITY
+=================================================================
+
+FILE: analytics\portfolio_allocation.py
+  L35: budget_per_stock = capital / len(symbols)
+  L41: quantity = floor(budget_per_stock / price)
+  L42: amount = round(quantity * price, 2)
+  L47: "quantity": quantity,
+
+FILE: analytics\run_indian_delivery_cost_model.py
+  L263: "share_quantity": "Fractional-weight/notional estimate; not whole-share execution",
+
+FILE: analytics\test_portfolio_allocation.py
+  L6: def test_equal_budget_whole_share_allocation(self):
+  L10: self.assertEqual([x["quantity"] for x in result["holdings"]], [50, 25])
+
+FILE: database\processed\analytics\greedy_10y_point_in_time\experiment4_final_unique_date_costs\indian_delivery_cost_results\delivery_cost_assumptions.json
+  L25: "share_quantity": "Fractional-weight/notional estimate; not whole-share execution",
+
+FILE: analytics\ask_greedy\calculations.py
+  L162: # One share each, if affordable, then distribute remaining
+  L163: # capital by iterative affordable-share allocation.
+  L170: affordable = np.where(p <= remaining + 1e-9)[0]
+  L171: if len(affordable) == 0:
+  L173: i = int(affordable[np.argmin(p[affordable])])
+
+Total matching lines: 13
+
+=================================================================
+HISTORICAL SCREENING
+=================================================================
+
+FILE: analytics\adjusted_prices.py
+  L1: """Corporate-action adjusted historical price calculations.
+  L39: """Return the historical price conversion factor for one action."""
+  L63: # Total shares become 5, so the historical price factor is 5.
+  L91: For every action, historical prices strictly before its ex-date
+  L174: historical_mask = (trading_dates < ex_date).to_numpy()
+
+FILE: analytics\adjusted_price_adapter.py
+  L54: """Return raw and split/bonus-adjusted historical prices.
+
+FILE: analytics\audit_10y_price_coverage.py
+  L28: print("\n10-YEAR HISTORICAL PRICE COVERAGE AUDIT")
+  L30: print("Period:", START, "to", END)
+  L153: print(f"Expected dates in period: {len(benchmark_dates):,}")
+  L224: "full_period_expected_sessions": len(benchmark_dates),
+  L225: "full_period_coverage_pct": round(
+
+FILE: analytics\audit_benchmark_date_coverage.py
+  L27: / "nifty50_historical_pr_combined.csv"
+
+FILE: analytics\audit_greedy_universe.py
+  L39: print("\nNIFTY 50 HISTORICAL PRICE COVERAGE")
+
+FILE: analytics\audit_walk_forward_results.backup_20261109_130619.py
+  L110: "HINDSIGHT_BASELINE_NOT_VALID_FOR_HISTORICAL_CLAIMS",
+  L134: "excluded from valid historical superiority claims."
+  L143: "Historical sample is already observed.",
+
+FILE: analytics\audit_walk_forward_results.py
+  L110: "HINDSIGHT_BASELINE_NOT_VALID_FOR_HISTORICAL_CLAIMS",
+  L134: "excluded from valid historical superiority claims."
+  L143: "Historical sample is already observed.",
+
+FILE: analytics\benchmark_analytics.py
+  L4: Uses the official NSE Indices Historical Price Return (PR) dataset
+  L11: - Results describe historical performance, not future returns.
+  L30: """Calculate historical NIFTY 50 PR benchmark metrics."""
+  L44: "No NIFTY 50 benchmark prices found for the requested period."
+  L68: "Historical performance is not a forecast.",
+
+FILE: analytics\database_adapter.py
+  L114: This is not a point-in-time historical NIFTY 50 ranking.
+  L143: "period_return_pct",
+  L172: ["symbol", "period_return_pct", "cagr_pct",
+  L213: raise ValueError("No companies meet the historical data threshold.")
+
+FILE: analytics\financial_metrics.py
+  L4: All calculations are historical and descriptive, not forecasts.
+  L171: def period_return(
+  L310: "period_return_pct": period_return(clean, expected_sessions),
+
+FILE: analytics\greedy_v2_data.py
+  L159: # Retain the full date range and missing values.
+
+FILE: analytics\greedy_v2_engine.py
+  L5: The caller is responsible for passing training-period prices, never
+  L6: validation or test-period prices.
+  L11: - Maximise historical annualised Sharpe ratio.
+  L43: """Select stocks sequentially using training-period Sharpe ratio."""
+
+FILE: analytics\greedy_v2_splits.py
+  L93: raise ValueError("Insufficient historical data for all periods")
+
+FILE: analytics\historical_rankings.py
+  L1: """Historical NIFTY 50 stock rankings.
+  L30: period_return,
+  L38: PERIODS = {
+  L183: "period_return": period_return(
+  L218: def run_historical_rankings(period="3M"):
+
+FILE: analytics\index_adapter.py
+  L16: INDEX_DATA_SOURCE = "NSE Indices Historical PR"
+
+FILE: analytics\market_ideas.py
+  L7: Existing historical ranking engine.
+  L11: Insights describe historical observations, not predictions
+  L15: Greedy selections are historical in-sample experiments.
+  L27: from analytics.historical_rankings import run_historical_rankings
+  L34: SUPPORTED_PERIODS = {"1M", "3M", "6M", "1Y"}
+
+FILE: analytics\reconcile_nifty50_index_prices.py
+  L17: / "nifty50_historical_pr_combined.csv"
+
+FILE: analytics\reconcile_nse_source_prices.py
+  L110: # Build direct symbol mapping and dated historical ticker aliases.
+  L156: print("Historical ticker aliases:", len(alias_map))
+  L208: # Apply historical ticker alias only within its recorded
+
+FILE: analytics\run_adjusted_price_validation.py
+  L90: print(f"[FAIL] {symbol}: no historical prices")
+  L104: "Date range:",
+
+FILE: analytics\run_common_window_analysis.py
+  L52: "period_return_pct",
+  L61: print(f"Period: {START} to {END}")
+  L70: ["rank", "symbol", "period_return_pct", "cagr_pct",
+  L79: ["rank", "symbol", "period_return_pct"]
+
+FILE: analytics\run_five_greedy_strategies.py
+  L145: "period": label,
+  L217: for period in ("training", "validation", "final_test"):
+  L218: row[f"{period}_return_pct"] = item[period]["portfolio"]["total_return_pct"]
+  L219: row[f"{period}_sharpe"] = item[period]["portfolio"]["sharpe_ratio"]
+  L220: row[f"{period}_max_drawdown_pct"] = item[period]["portfolio"]["maximum_drawdown_pct"]
+
+FILE: analytics\run_greedy_selection.py
+  L33: print("Loading historical prices for 50 companies...")
+  L190: print("Historical evaluation: Common dates for all 50 stocks")
+  L199: print("Historical membership: Latest snapshot, not point-in-time")
+
+FILE: analytics\run_greedy_stability.py
+  L41: print("Training period:", full_train.index.min().date(),
+
+FILE: analytics\run_greedy_v2_baselines.py
+  L51: "period_return_pct",
+  L171: def run_period_comparison(
+  L172: period_name,
+  L179: print(f"\nBASELINE COMPARISON — {period_name}")
+  L256: "period": period_name,
+
+FILE: analytics\run_greedy_v2_experiment.backup_20261109_124456.py
+  L64: def evaluate_period(name, prices, benchmark, sectors, symbols):
+  L65: """Evaluate a fixed stock selection on one historical period."""
+  L84: "period": name,
+  L121: # 1. Load historical dataset
+  L144: raise ValueError("Historical price dataset is empty.")
+
+FILE: analytics\run_greedy_v2_experiment.backup_sparse_20261109_124756.py
+  L65: def evaluate_period(name, prices, benchmark, sectors, symbols):
+  L66: """Evaluate a fixed stock selection on one historical period."""
+  L85: "period": name,
+  L122: # 1. Load historical dataset
+  L163: raise ValueError("Historical price dataset is empty.")
+
+FILE: analytics\run_greedy_v2_experiment.py
+  L65: def evaluate_period(name, prices, benchmark, sectors, symbols):
+  L66: """Evaluate a fixed stock selection on one historical period."""
+  L85: "period": name,
+  L122: # 1. Load historical dataset
+  L164: raise ValueError("Historical price dataset is empty.")
+
+FILE: analytics\run_greedy_validation.py
+  L121: # Training ends before the test period begins.
+  L217: "period": "TRAIN",
+  L226: "period": "TEST",
+  L252: print("This is a single historical holdout, not proof of predictive ability.")
+
+FILE: analytics\run_greedy_walk_forward.py
+  L98: print(f"Date range: {prices.index[0].date()} to {prices.index[-1].date()}")
+  L246: print("Historical membership: Latest snapshot, retrospective.")
+  L248: print("Each fold is a historical test, not a live trading result.")
+
+FILE: analytics\run_indian_delivery_cost_model.py
+  L267: "membership": "Historical membership and Tata demerger limitations remain",
+
+FILE: analytics\run_multi_strategy_validation.py
+  L284: "period": "OBSERVED_FINAL_TEST",
+  L291: "historical_holdout_already_observed": True,
+  L379: "period": {
+  L428: "The final test period has already been observed.",
+
+FILE: analytics\run_real_portfolio.py
+  L77: # 2. Retrieve actual historical closing prices.
+  L102: print(f"Price date range: {prices.index.min()} to {prices.index.max()}")
+  L174: print("Historical results are not forecasts.")
+
+FILE: analytics\run_registered_greedy_v2_experiment.py
+  L58: "period": "FINAL_TEST",
+
+FILE: analytics\run_strategy_baseline_comparison.py
+  L254: print("Historical constituent snapshot is retrospective.")
+
+FILE: analytics\run_walk_forward_cost_validation.backup_20261109_130430.py
+  L59: raise ValueError("Missing returns in evaluation period.")
+  L143: print("Date range:", prices.index.min().date(), "to", prices.index.max().date())
+  L349: "Historical latest-constituent universe; survivorship bias remains.",
+  L354: "Historical period is already observed; not a fresh holdout.",
+
+FILE: analytics\run_walk_forward_cost_validation.py
+  L59: raise ValueError("Missing returns in evaluation period.")
+  L143: print("Date range:", prices.index.min().date(), "to", prices.index.max().date())
+  L355: "Historical latest-constituent universe; survivorship bias remains.",
+  L360: "Historical period is already observed; not a fresh holdout.",
+
+FILE: analytics\test_benchmark_analytics.py
+  L39: "NSE Indices Historical PR",
+  L52: metrics["period_return_pct"],
+
+FILE: analytics\test_financial_metrics.py
+  L17: period_return,
+  L43: def test_period_return(self):
+  L44: self.assertAlmostEqual(period_return(self.prices), -1.0)
+  L66: index=pd.bdate_range("2025-01-01", periods=100),
+  L68: self.assertAlmostEqual(period_return(prices), 0.0)
+
+FILE: analytics\test_greedy_v2_engine.py
+  L13: dates = pd.bdate_range("2025-01-01", periods=100)
+
+FILE: analytics\test_greedy_v2_splits.py
+  L12: dates = pd.bdate_range("2025-01-01", periods=100)
+  L54: def test_no_data_is_lost_between_periods(self):
+
+FILE: analytics\test_market_ideas.py
+  L39: "period_return": period_return,
+  L52: period_return,
+  L129: "POSITIVE_HISTORICAL_PERFORMANCE",
+  L134: "NEGATIVE_HISTORICAL_PERFORMANCE",
+  L139: "FLAT_HISTORICAL_PERFORMANCE",
+
+FILE: analytics\test_portfolio_analytics.py
+  L21: dates = pd.bdate_range("2025-01-01", periods=100)
+  L260: index=pd.date_range("2026-01-01", periods=3),
+  L264: index=pd.date_range(
+  L266: periods=4,
+
+FILE: analytics\validate_historical_rankings.py
+  L1: """Quality checks for historical NIFTY 50 rankings.
+  L16: from analytics.historical_rankings import PERIODS, run_historical_rankings
+  L20: PERIOD_ORDER = ["1M", "3M", "6M", "1Y"]
+  L31: def validate_period(period):
+  L33: print(f"VALIDATING {period} HISTORICAL RANKINGS")
+
+FILE: backend\audit_139_missing_dates.py
+  L16: # Historical lists are cross-checked against published NSE calendars.
+  L156: print("The holiday list is a screening reference; verify uncertain dates against NSE archive records.")
+
+FILE: backend\audit_all_constituents.py
+  L168: print("\nFULL HISTORICAL CONSTITUENT AUDIT")
+
+FILE: backend\audit_nifty50_bhavcopy_coverage.py
+  L58: print(f"Historical NIFTY 50 symbols: {len(symbols)}")
+  L142: print("NIFTY 50 HISTORICAL BHAVCOPY COVERAGE")
+  L186: print(f"Historical symbols checked: {len(symbols)}")
+
+FILE: backend\audit_nifty50_membership_periods.py
+  L40: snapshots["report_month"] = pd.PeriodIndex(
+  L174: print("Historical instruments:", len(result))
+
+FILE: backend\audit_phase2_final.py
+  L179: # 6. Historical stock prices
+  L190: "Historical price volume and coverage",
+  L305: # 10. Exact membership periods are intentionally not inferred.
+  L306: exact_periods = conn.execute(text("""
+  L312: "Exact effective membership periods",
+
+FILE: backend\backfill_nse_historical.py
+  L20: IMPORTER = ROOT / "backend" / "import_nifty50_historical_prices.py"
+  L23: LEGACY_BASE = "https://archives.nseindia.com/content/historical/EQUITIES/"
+  L214: "Resumable NSE CM historical backfill. "
+  L249: print("GREEDY STOCKS - RESUMABLE NSE HISTORICAL BACKFILL")
+
+FILE: backend\build_nifty50_company_master.py
+  L21: # Historical identity and corporate-action mapping.
+  L51: "historical_symbol": symbol,
+  L73: ["canonical_symbol", "historical_symbol"]
+  L82: print(f"Historical symbols: {len(master)}")
+
+FILE: backend\build_nifty50_historical_universe.py
+  L13: "nse-historical-membership/main/"
+  L17: HISTORY_FILE = DATA / "nse_historical_index_membership_source.csv"
+  L25: print("Downloading historical membership dataset...")
+  L36: print("Historical source rows:", len(all_rows))
+  L60: # Keep every membership interval overlapping our project period.
+
+FILE: backend\build_nifty50_membership_review.py
+  L8: IDENTITY_AUDIT = ROOT / "nifty50_combined_historical_symbol_audit.csv"
+  L13: PERIOD_START = date(2016, 11, 8)
+  L14: PERIOD_END = date(2026, 11, 6)
+  L33: return PERIOD_END if is_end else None
+  L127: start = max(start, PERIOD_START)
+
+FILE: backend\catch_up_nse_data.py
+  L64: "Run the initial historical import first."
+
+FILE: backend\certify_nifty50_pr_candidate.py
+  L5: REVIEW = Path("database/raw/index/nifty50_historical_pr_10y_review.csv")
+  L6: OLD = Path("database/raw/index/nifty50_historical_pr_combined.csv")
+  L7: OUT = Path("database/raw/index/nifty50_historical_pr_10y_candidate.csv")
+
+FILE: backend\chat_routes.py
+  L29: from analytics.ask_greedy.historical_intelligence import build_historical_intelligence_context
+  L62: - Explain verified historical financial research supplied
+  L71: GREEDY STOCKS historical financial figures.
+  L78: - Historical performance is not a forecast.
+  L88: - Historical results do not guarantee future performance.
+
+FILE: backend\company_routes.py
+  L182: "Historical price coverage does not establish historical NIFTY 50 membership.",
+
+FILE: backend\download_nifty50_pr_candidate.py
+  L7: URL = "https://www.nseindia.com/api/historicalOR/indicesHistory"
+  L8: OUT = Path("database/raw/index/nifty50_historical_pr_10y_candidate.csv")
+  L9: EXISTING = Path("database/raw/index/nifty50_historical_pr_combined.csv")
+  L16: "Referer": "https://www.nseindia.com/reports-indices-historical-index-data",
+  L116: review = OUT.with_name("nifty50_historical_pr_10y_review.csv")
+
+FILE: backend\fix_eternal_historical_ticker.py
+  L32: 'NSE CM-UDiFF EQ - historical ticker ZOMATO'
+  L151: # Preserve the historical source ticker as an observed alias.
+  L179: print("\nHISTORICAL TICKER CORRECTION COMPLETE")
+  L184: print("Historical ticker alias: ZOMATO")
+
+FILE: backend\import_eternal_isin.py
+  L95: raise ValueError("Existing ETERNAL ISIN period conflicts.")
+  L113: "EQ observations under historical symbols ZOMATO and "
+  L130: print("Historical symbols:", sorted(df["symbol"].unique()))
+
+FILE: backend\import_nifty50_company_master.py
+  L63: "historical_symbol",
+  L101: if companies["historical_symbol"].duplicated().any():
+  L103: "Duplicate historical symbols detected."
+  L112: "historical_symbol",
+  L222: companies["historical_symbol"].isin(
+
+FILE: backend\import_nifty50_historical_prices.py
+  L62: # Include inactive identities for historical symbols (e.g. TATAMOTORS).
+  L253: description="Import NSE CM historical prices (legacy and UDiFF)."
+  L269: archives, mode = sorted(ROOT.rglob("*.zip")), "FULL HISTORICAL"
+  L277: print("GREEDY STOCKS - NSE HISTORICAL PRICE IMPORT")
+  L363: date_range = conn.execute(text("""
+
+FILE: backend\import_nifty50_historical_prices_before_datefix.py
+  L62: # Include inactive identities for historical symbols (e.g. TATAMOTORS).
+  L252: description="Import NSE CM historical prices (legacy and UDiFF)."
+  L268: archives, mode = sorted(ROOT.rglob("*.zip")), "FULL HISTORICAL"
+  L276: print("GREEDY STOCKS - NSE HISTORICAL PRICE IMPORT")
+  L362: date_range = conn.execute(text("""
+
+FILE: backend\import_nifty50_historical_prices_before_legacy.py
+  L277: "Import NSE CM-UDiFF historical "
+  L322: import_mode = "FULL HISTORICAL"
+  L341: print("GREEDY STOCKS - NSE HISTORICAL PRICE IMPORT")
+  L459: date_range = conn.execute(
+  L484: print("First date:", date_range[0])
+
+FILE: backend\import_nifty50_index_prices.py
+  L14: CSV_PATH = ROOT / "database/raw/index/nifty50_historical_pr_10y_candidate.csv"
+  L16: DATA_SOURCE = "NSE Indices Historical PR"
+  L160: print("Date range:", start, "to", end)
+
+FILE: backend\import_nifty50_isin_identifiers.py
+  L41: # A new period begins whenever the ISIN changes for a symbol.
+  L42: df["new_period"] = (
+  L47: df["period_number"] = df.groupby("TckrSymb")["new_period"].cumsum()
+  L49: periods = (
+  L50: df.groupby(["TckrSymb", "ISIN", "period_number"], as_index=False)
+
+FILE: backend\import_nifty50_observation_spans.py
+  L174: exact_periods = conn.execute(
+  L184: print("Exact membership periods:", exact_periods)
+
+FILE: backend\log_phase2_reconciliation.py
+  L25: ("MEMBERSHIP_DATE_SEMANTICS", "No exact effective membership periods inferred from monthly observations."),
+  L26: ("ETERNAL_HISTORICAL_IDENTITY", "Historical ZOMATO ticker and ETERNAL ISIN mapping verified.")
+  L33: "This is a retrospective reconciliation record. Original historical importer execution logs were not captured."),
+  L35: "Validation entries document the current reconciliation checks, not historical validation executions.")
+
+FILE: backend\main.py
+  L137: period: str = Query(
+  L140: description="Historical analysis period.",
+  L152: Supported periods:
+  L156: - Reads existing historical data.
+  L157: - Generates historical insights.
+
+FILE: backend\migrate_missing_nifty50_universe.py
+  L13: from import_nifty50_historical_prices import (
+  L20: SOURCE = "NSE CM Bhavcopy historical identity and price archive"
+  L48: date_ranges = {
+  L58: raise FileNotFoundError("No historical ZIP archives found")
+  L60: print("GREEDY STOCKS — HISTORICAL UNIVERSE MIGRATION")
+
+FILE: backend\portfolio_routes.py
+  L117: # Validation-period metrics are kept separate from training selection.
+  L206: "historical_membership_survivorship_bias": True,
+  L207: "historical_metrics_are_daily_rebalanced": True,
+  L290: def _period_summary(prices, include_baseline=True):
+  L292: raise ValueError("Insufficient historical observations for this period.")
+
+FILE: backend\prepare_nifty50_company_master_v2.py
+  L26: "historical_symbol",
+  L48: old_tata = df["historical_symbol"] == "TATAMOTORS"
+  L56: new_tata = df["historical_symbol"] == "TMPV"
+  L64: # Each historical symbol must now map to one unique instrument identity.
+  L65: if df["historical_symbol"].duplicated().any():
+
+FILE: backend\recover_missing_nse_dates.py
+  L25: IMPORTER = ROOT / "backend" / "import_nifty50_historical_prices.py"
+  L48: "https://archives.nseindia.com/content/historical/"
+
+FILE: backend\run_daily_nse_pipeline.py
+  L18: IMPORTER = ROOT / "backend" / "import_nifty50_historical_prices.py"
+
+FILE: backend\sector_routes.py
+  L13: PERIOD_DAYS = {
+  L29: def get_sector_data(period: str):
+  L30: if period not in PERIOD_DAYS:
+  L33: detail="Period must be 1M, 3M, 6M, or 1Y.",
+  L81: detail="Historical stock price data is unavailable.",
+
+FILE: database\company_identity_schema.sql
+  L15: UNIQUE KEY uq_company_identifier_period (
+
+FILE: database\market_data_schema.sql
+  L4: -- 1. HISTORICAL INDEX CONSTITUENTS
+  L16: UNIQUE KEY uq_constituent_period (
+  L59: -- 3. HISTORICAL INDEX PRICES
+
+FILE: database\raw\bhavcopy\backfill_manifest.before_recovery.json
+  L11: "url": "https://archives.nseindia.com/content/historical/EQUITIES/2016/NOV/cm08NOV2016bhav.csv.zip"
+  L21: "url": "https://archives.nseindia.com/content/historical/EQUITIES/2016/NOV/cm09NOV2016bhav.csv.zip"
+  L31: "url": "https://archives.nseindia.com/content/historical/EQUITIES/2016/NOV/cm10NOV2016bhav.csv.zip"
+  L41: "url": "https://archives.nseindia.com/content/historical/EQUITIES/2016/NOV/cm11NOV2016bhav.csv.zip"
+  L47: "url": "https://archives.nseindia.com/content/historical/EQUITIES/2016/NOV/cm14NOV2016bhav.csv.zip"
+
+FILE: database\raw\bhavcopy\backfill_manifest.json
+  L11: "url": "https://archives.nseindia.com/content/historical/EQUITIES/2016/NOV/cm08NOV2016bhav.csv.zip"
+  L21: "url": "https://archives.nseindia.com/content/historical/EQUITIES/2016/NOV/cm09NOV2016bhav.csv.zip"
+  L31: "url": "https://archives.nseindia.com/content/historical/EQUITIES/2016/NOV/cm10NOV2016bhav.csv.zip"
+  L41: "url": "https://archives.nseindia.com/content/historical/EQUITIES/2016/NOV/cm11NOV2016bhav.csv.zip"
+  L47: "url": "https://archives.nseindia.com/content/historical/EQUITIES/2016/NOV/cm14NOV2016bhav.csv.zip"
+
+FILE: database\processed\analytics\greedy_v2_baseline_comparison.json
+  L527: "period_results": {
+  L529: "period": "VALIDATION",
+  L544: "period_return_pct": 1.2825415289589248,
+  L623: "period_return_pct": 3.9253755305092453,
+  L5695: "period": "FINAL_TEST",
+
+FILE: database\processed\analytics\greedy_v2_experiment.json
+  L700: "period_results": {
+  L702: "period": "TRAINING",
+  L711: "period_return_pct": 42.37013098391882,
+  L746: "period": "VALIDATION",
+  L755: "period_return_pct": -3.1129876739230067,
+
+FILE: database\processed\analytics\market_ideas_3m.json
+  L6: "period": "3M",
+  L17: "interpretation": "HISTORICAL_RESEARCH_NOT_INVESTMENT_ADVICE"
+  L22: "title": "KOTAKBANK — Historical performance standout",
+  L24: "why": "It ranked among the strongest NIFTY 50 historical performers for the selected period.",
+  L26: "explore": "Explain the historical performance and risks of KOTAKBANK.",
+
+FILE: database\processed\analytics\multi_strategy_validation_report.json
+  L3: "period": {
+  L450: "The final test period has already been observed.",
+
+FILE: database\processed\analytics\walk_forward_clean_report.json
+  L21: "hindsight_baseline": "TOP10_INDEX_WEIGHT_SELECTED uses latest constituent weights; excluded from valid historical superiority claims.",
+  L25: "Historical sample is already observed.",
+
+FILE: database\processed\analytics\walk_forward_validation_report.json
+  L79: "Historical latest-constituent universe; survivorship bias remains.",
+  L84: "Historical period is already observed; not a fresh holdout.",
+
+FILE: database\processed\point_in_time\DAY4_RESEARCH_DATASET_CANDIDATE\manifest.json
+  L23: "date_range": {
+  L54: "date_range": {
+  L84: "date_range": {
+  L101: "date_range": {
+  L120: "date_range": {
+
+FILE: database\processed\analytics\five_strategy_experiment\five_strategy_comparison.json
+  L54: "period": "TRAINING",
+  L67: "period": "VALIDATION",
+  L80: "period": "FINAL_TEST",
+  L119: "period": "TRAINING",
+  L132: "period": "VALIDATION",
+
+FILE: database\processed\analytics\greedy_10y_point_in_time\experiment4_final_unique_date_costs\indian_delivery_cost_results\delivery_cost_assumptions.json
+  L29: "membership": "Historical membership and Tata demerger limitations remain",
+
+FILE: analytics\ask_greedy\financial_education.py
+  L16: "historical measure of variability, not a guaranteed loss limit."
+  L25: "It helps compare how much historical excess return was earned "
+  L29: "A higher positive value was better on this historical measure. "
+  L40: "measured wealth series during the selected period."
+  L44: "peak at its worst point in that period. It does not mean the "
+
+FILE: analytics\ask_greedy\greedy_v2_evidence.py
+  L28: "HISTORICAL", "PERFORMANCE", "EXPLAIN", "WHY", "WAS",
+  L157: "evidence_scope": "Historical saved experiment records; not a live rerun.",
+  L185: "Walk-forward records describe saved historical folds, not future performance.",
+  L241: "This is NOT a 10-year backtest. Ten years is the historical "
+
+FILE: analytics\ask_greedy\historical_intelligence.py
+  L17: log = logging.getLogger("greedy_historical")
+  L64: raise ValueError("Invalid date range")
+  L203: "period_return_pct": metrics["period_return_pct"],
+  L264: def build_historical_intelligence_context(client, model, question):
+  L265: """Read-only historical analysis using adjusted prices and shared metrics."""
+
+FILE: analytics\ask_greedy\research_planner.py
+  L14: "historical_analysis",
+  L46: 2. historical_analysis
+  L48: historical database engine.
+  L69: - Never invent ticker symbols, financial inputs or historical values.
+  L203: r"\b(analy[sz]e|analysis of|historical performance of|"
+
+FILE: analytics\ask_greedy\test_chat_integration.py
+  L34: assert "Historical observations" in context
+  L82: "metadata": {"period": "3M"},
+
+FILE: analytics\ask_greedy\test_financial_education.py
+  L18: "historical return",
+  L44: metadata={"period": "3M"},
+  L49: self.assertIn("historical", context.lower())
+
+FILE: analytics\ask_greedy\test_research_planner.py
+  L40: "operation": "historical_analysis",
+  L103: "Analyse RELIANCE historical returns and calculate Sharpe ratio"
+  L107: assert "historical_analysis" in names
+  L164: "operation": "historical_analysis",
+  L176: "historical_analysis": lambda q: "historical data",
+
+FILE: analytics\validation\deflated_sharpe.py
+  L3: Sharpe inputs are per-observation-period, not annualised.
+  L41: Use daily (or other consistent period) Sharpe, not annualised Sharpe.
+
+Total matching lines: 4768
+
+=================================================================
+CONSTITUENTS
+=================================================================
+
+FILE: analytics\audit_10y_price_coverage.py
+  L268: "proxy, not proof of complete historical index membership."
+
+FILE: analytics\audit_active_history_coverage.py
+  L6: from analytics.database_adapter import get_latest_constituents
+  L11: constituents = get_latest_constituents()
+  L12: company_ids = constituents["company_id"].astype(int).tolist()
+  L42: for company in constituents.to_dict("records"):
+
+FILE: analytics\audit_benchmark_date_coverage.py
+  L2: """GREEDY STOCKS — NIFTY 50 benchmark date coverage audit.
+  L27: / "nifty50_historical_pr_combined.csv"
+  L40: """Read unique dates from the original NIFTY 50 PR CSV."""
+  L65: """Read NIFTY 50 benchmark dates from MySQL."""
+  L72: WHERE index_symbol = 'NIFTY 50'
+
+FILE: analytics\audit_extreme_price_moves.py
+  L4: get_latest_constituents,
+  L8: constituents = get_latest_constituents()
+  L11: for company in constituents.to_dict("records"):
+  L45: kotak = constituents.loc[
+  L46: constituents["symbol"] == "KOTAKBANK"
+
+FILE: analytics\audit_greedy_universe.py
+  L10: from database_adapter import get_latest_constituents, get_company_prices
+  L15: constituents = get_latest_constituents()
+  L18: for _, row in constituents.iterrows():
+  L39: print("\nNIFTY 50 HISTORICAL PRICE COVERAGE")
+  L41: print("Companies:", len(constituents))
+
+FILE: analytics\audit_trading_session_coverage.py
+  L1: """Read-only trading-session coverage audit for latest NIFTY 50 snapshot."""
+  L6: from analytics.database_adapter import get_latest_constituents
+  L15: constituents = get_latest_constituents()
+  L17: if len(constituents) != 50:
+  L19: f"Expected 50 latest-snapshot companies; found {len(constituents)}"
+
+FILE: analytics\audit_walk_forward_results.backup_20261109_130619.py
+  L130: "EQUAL_WEIGHT_UNIVERSE",
+  L133: "TOP10_INDEX_WEIGHT_SELECTED uses latest constituent weights; "
+  L136: "universe_warning": (
+  L137: "Latest eligible universe creates survivorship bias."
+  L144: "Latest constituent universe creates survivorship bias.",
+
+FILE: analytics\audit_walk_forward_results.py
+  L130: "EQUAL_WEIGHT_UNIVERSE",
+  L133: "TOP10_INDEX_WEIGHT_SELECTED uses latest constituent weights; "
+  L136: "universe_warning": (
+  L137: "Latest eligible universe creates survivorship bias."
+  L144: "Latest constituent universe creates survivorship bias.",
+
+FILE: analytics\benchmark_analytics.py
+  L2: """GREEDY STOCKS — NIFTY 50 benchmark analytics.
+  L30: """Calculate historical NIFTY 50 PR benchmark metrics."""
+  L44: "No NIFTY 50 benchmark prices found for the requested period."
+  L50: price_basis="NSE_NIFTY_50_INDEX_CLOSE",
+  L56: "benchmark_name": "NIFTY 50",
+
+FILE: analytics\database_adapter.py
+  L10: INDEX_SYMBOL = "NIFTY 50"
+  L13: def get_latest_constituents() -> pd.DataFrame:
+  L14: """Return companies from the latest available NIFTY 50 snapshot.
+  L17: effective-membership intervals.
+  L29: FROM index_constituent_snapshots s
+
+FILE: analytics\greedy_v2_data.py
+  L19: constituents,
+  L26: self.constituents = constituents
+  L65: return _normalise_price_series(benchmark, "NIFTY_50")
+  L75: constituents = get_all_companies_with_prices(
+  L80: missing = required - set(constituents.columns)
+
+FILE: analytics\historical_rankings.py
+  L1: """Historical NIFTY 50 stock rankings.
+  L3: Universe:
+  L4: Latest available NIFTY 50 monthly constituent snapshot.
+  L11: Monthly constituent snapshots are not exact daily membership records.
+  L51: FROM index_constituent_snapshots
+
+FILE: analytics\index_adapter.py
+  L2: """GREEDY STOCKS — Read-only NIFTY 50 benchmark adapter."""
+  L15: INDEX_SYMBOL = "NIFTY 50"
+  L23: """Retrieve NIFTY 50 daily OHLC values from MySQL.
+  L71: raise ValueError("Duplicate NIFTY 50 trading dates found.")
+  L89: raise ValueError("Missing or invalid NIFTY 50 OHLC values.")
+
+FILE: analytics\market_ideas.py
+  L4: NIFTY 50 only.
+  L111: "It ranked among the strongest NIFTY 50 "
+  L182: "volatility and drawdown within the available universe."
+  L211: """Compare NIFTY 50 sector constituent performance historically."""
+  L252: "The sector's median constituent return was positive "
+
+FILE: analytics\portfolio_analytics.py
+  L484: "benchmark_basis": "NIFTY_50_PRICE_RETURN",
+
+FILE: analytics\reconcile_nifty50_index_prices.py
+  L17: / "nifty50_historical_pr_combined.csv"
+  L53: WHERE index_symbol = 'NIFTY 50'
+  L89: print("\n--- NIFTY 50 SOURCE RECONCILIATION ---")
+
+FILE: analytics\reconcile_nse_source_prices.py
+  L10: from analytics.database_adapter import get_latest_constituents
+  L97: constituents = get_latest_constituents()
+  L99: if len(constituents) != 50:
+  L101: f"Expected 50 latest constituents; found {len(constituents)}"
+  L104: selected = constituents[
+
+FILE: analytics\run_common_window_analysis.py
+  L4: get_latest_constituents,
+  L12: constituents = get_latest_constituents()
+  L16: for company in constituents.to_dict("records"):
+  L59: print("\nGREEDY STOCKS — COMPARABLE NIFTY 50 SNAPSHOT RANKING")
+
+FILE: analytics\run_greedy_selection.py
+  L11: from database_adapter import get_latest_constituents, get_company_prices
+  L26: constituents = get_latest_constituents()
+  L28: if len(constituents) != 50:
+  L29: raise ValueError(f"Expected 50 constituents, got {len(constituents)}")
+  L31: sectors = dict(zip(constituents["symbol"], constituents["sector"]))
+
+FILE: analytics\run_greedy_v2_baselines.py
+  L192: # All 50 NIFTY constituents, equal weighted.
+
+FILE: analytics\run_greedy_v2_experiment.backup_20261109_124456.py
+  L140: f"Expected 50 NIFTY 50 companies, found {prices.shape[1]}."
+  L163: # Use precisely the same dates for NIFTY 50.
+  L325: "benchmark": "NIFTY_50_PRICE_RETURN",
+  L326: "membership_basis": "LATEST_MONTHLY_SNAPSHOT",
+  L403: f"  NIFTY 50 return:  "
+
+FILE: analytics\run_greedy_v2_experiment.backup_sparse_20261109_124756.py
+  L159: f"Expected 50 NIFTY 50 companies, found {prices.shape[1]}."
+  L182: # Use precisely the same dates for NIFTY 50.
+  L367: "membership_basis": "LATEST_MONTHLY_SNAPSHOT",
+  L416: "benchmark": "NIFTY_50_PRICE_RETURN",
+  L417: "membership_basis": "LATEST_MONTHLY_SNAPSHOT",
+
+FILE: analytics\run_greedy_v2_experiment.py
+  L184: # Use precisely the same dates for NIFTY 50.
+  L369: "membership_basis": "LATEST_MONTHLY_SNAPSHOT",
+  L418: "benchmark": "NIFTY_50_PRICE_RETURN",
+  L419: "membership_basis": "LATEST_MONTHLY_SNAPSHOT",
+  L496: f"  NIFTY 50 return:  "
+
+FILE: analytics\run_greedy_validation.py
+  L11: from database_adapter import get_latest_constituents, get_company_prices
+  L96: constituents = get_latest_constituents()
+  L98: if len(constituents) != 50:
+  L99: raise ValueError("Expected exactly 50 latest constituents.")
+  L101: sectors = dict(zip(constituents["symbol"], constituents["sector"]))
+
+FILE: analytics\run_greedy_walk_forward.py
+  L11: from database_adapter import get_latest_constituents, get_company_prices
+  L69: constituents = get_latest_constituents()
+  L71: if len(constituents) != 50:
+  L72: raise ValueError("Expected 50 NIFTY 50 constituents.")
+  L74: sectors = dict(zip(constituents["symbol"], constituents["sector"]))
+
+FILE: analytics\run_indian_delivery_cost_model.py
+  L9: PRICE = ROOT / "database/processed/point_in_time/corporate_action_adjusted/nifty50_daily_adjusted_price_returns.csv"
+  L267: "membership": "Historical membership and Tata demerger limitations remain",
+
+FILE: analytics\run_multi_strategy_validation.py
+  L34: def select_top_weight(constituents, eligible, count=10, sector_cap=3):
+  L36: if not required.issubset(constituents.columns):
+  L38: f"Constituent data missing columns: {required - set(constituents.columns)}"
+  L44: rows = constituents.sort_values("weightage", ascending=False)
+  L194: dataset.constituents,
+
+FILE: analytics\run_real_portfolio.py
+  L11: from database_adapter import get_latest_constituents, get_company_prices
+  L22: def select_stocks(constituents):
+  L23: """Select highest-weight constituents within sector constraints."""
+  L25: ranked = constituents.sort_values(
+  L56: # 1. Load latest NIFTY 50 universe.
+
+FILE: analytics\run_registered_greedy_v2_experiment.py
+  L61: "membership_basis": "LATEST_MONTHLY_SNAPSHOT",
+
+FILE: analytics\run_strategy_baseline_comparison.py
+  L11: from database_adapter import get_latest_constituents, get_company_prices
+  L62: def top_weight_select(constituents):
+  L66: for _, row in constituents.sort_values(
+  L129: constituents = get_latest_constituents()
+  L131: if len(constituents) != 50:
+
+FILE: analytics\run_walk_forward_cost_validation.backup_20261109_130430.py
+  L25: def select_top_weight(constituents, eligible):
+  L27: if not required.issubset(constituents.columns):
+  L28: raise ValueError(f"Missing constituent columns: {required - set(constituents.columns)}")
+  L31: for _, row in constituents.sort_values(
+  L126: # Use a fixed universe eligible at the first 120-observation checkpoint.
+
+FILE: analytics\run_walk_forward_cost_validation.py
+  L25: def select_top_weight(constituents, eligible):
+  L27: if not required.issubset(constituents.columns):
+  L28: raise ValueError(f"Missing constituent columns: {required - set(constituents.columns)}")
+  L31: for _, row in constituents.sort_values(
+  L126: # Use a fixed universe eligible at the first 120-observation checkpoint.
+
+FILE: analytics\test_benchmark_analytics.py
+  L23: name="nifty50_close",
+  L32: self.assertEqual(result["benchmark"], "NIFTY 50")
+  L108: name="nifty50_close",
+  L111: with self.assertRaisesRegex(ValueError, "No NIFTY 50"):
+
+FILE: analytics\test_market_ideas.py
+  L61: "index": "NIFTY 50",
+  L65: "membership_basis": "LATEST_MONTHLY_SNAPSHOT",
+  L400: self.assertEqual(report["metadata"]["index"], "NIFTY 50")
+  L402: self.assertEqual(report["metadata"]["universe_size"], 7)
+
+FILE: analytics\validate_historical_rankings.py
+  L1: """Quality checks for historical NIFTY 50 rankings.
+  L126: result.attrs.get("membership_basis") == "LATEST_MONTHLY_SNAPSHOT",
+  L127: "Latest-snapshot universe methodology is disclosed",
+  L165: "[WARN] Latest monthly constituent snapshot is not exact daily "
+  L166: "historical membership."
+
+FILE: backend\audit_all_constituents.py
+  L11: REPORT_DIR = Path("database/raw/constituents")
+  L14: "NIFTY50": "nifty50_mcwb.csv",
+  L168: print("\nFULL HISTORICAL CONSTITUENT AUDIT")
+  L239: # MONTH-TO-MONTH MEMBERSHIP CHANGES
+  L242: print("\nMONTH-TO-MONTH MEMBERSHIP CHANGES")
+
+FILE: backend\audit_dummy_constituents.py
+  L7: folder = Path("database/raw/constituents")
+
+FILE: backend\audit_nifty50_bhavcopy_coverage.py
+  L11: CONSTITUENT_FILE = (
+  L13: "constituents" / "nifty50_constituent_snapshots.csv"
+  L25: constituents = pd.read_csv(
+  L26: CONSTITUENT_FILE,
+  L31: constituents["Security Symbol"]
+
+FILE: backend\audit_nifty50_isin_changes.py
+  L65: detail_file = output_dir / "nifty50_isin_series_details.csv"
+
+FILE: backend\audit_nifty50_membership_changes.py
+  L6: DATA_DIR = ROOT / "database" / "processed" / "constituents"
+  L8: SOURCE = DATA_DIR / "nifty50_constituent_snapshots.csv"
+  L9: OUTPUT = DATA_DIR / "nifty50_membership_changes.csv"
+  L32: print("GREEDY STOCKS — NIFTY 50 MEMBERSHIP CHANGE AUDIT")
+  L52: print("No constituent changes.")
+
+FILE: backend\audit_nifty50_membership_periods.py
+  L10: ROOT / "database" / "processed" / "constituents"
+  L14: DATA_DIR / "nifty50_constituent_snapshots.csv"
+  L18: DATA_DIR / "nifty50_membership_events_reconciled.csv"
+  L22: DATA_DIR / "nifty50_membership_observation_audit_v2.csv"
+  L171: print("NIFTY 50 MEMBERSHIP AUDIT V2")
+
+FILE: backend\audit_phase2_final.py
+  L20: "index_constituent_snapshots",
+  L21: "index_constituent_observation_spans",
+  L22: "index_membership_events", "index_constituents",
+  L59: # 2. Monthly constituent snapshots
+  L64: FROM index_constituent_snapshots
+
+FILE: backend\backfill_nse_historical.py
+  L20: IMPORTER = ROOT / "backend" / "import_nifty50_historical_prices.py"
+
+FILE: backend\build_nifty50_company_master.py
+  L6: DATA_DIR = ROOT / "database" / "processed" / "constituents"
+  L8: SOURCE = DATA_DIR / "nifty50_constituent_snapshots.csv"
+  L9: OUTPUT = DATA_DIR / "nifty50_company_master.csv"
+  L79: print("NIFTY 50 COMPANY MASTER — VERSION 2")
+
+FILE: backend\build_nifty50_historical_universe.py
+  L13: "nse-historical-membership/main/"
+  L14: "index_history/data/index_membership_history.csv"
+  L17: HISTORY_FILE = DATA / "nse_historical_index_membership_source.csv"
+  L18: OUTPUT = DATA / "nifty50_membership_2016_2026.csv"
+  L19: UNIQUE_OUTPUT = DATA / "nifty50_unique_companies_2016_2026.csv"
+
+FILE: backend\build_nifty50_membership_review.py
+  L7: MEMBERSHIP = ROOT / "nifty50_membership_2016_2026.csv"
+  L8: IDENTITY_AUDIT = ROOT / "nifty50_combined_historical_symbol_audit.csv"
+  L9: OUT_LEDGER = ROOT / "nifty50_membership_review_ledger.csv"
+  L10: OUT_IDENTITY = ROOT / "nifty50_symbol_identity_master.csv"
+  L11: OUT_ISSUES = ROOT / "nifty50_membership_review_issues.csv"
+
+FILE: backend\certify_nifty50_pr_candidate.py
+  L5: REVIEW = Path("database/raw/index/nifty50_historical_pr_10y_review.csv")
+  L6: OLD = Path("database/raw/index/nifty50_historical_pr_combined.csv")
+  L7: OUT = Path("database/raw/index/nifty50_historical_pr_10y_candidate.csv")
+  L8: AUDIT = Path("database/raw/index/nifty50_pr_source_corrections.csv")
+
+FILE: backend\chat_routes.py
+  L54: - You cover ONLY NIFTY 50 companies and the NIFTY 50 index.
+  L83: - If the user asks about a company outside NIFTY 50, explain
+  L84: that the product currently focuses only on NIFTY 50.
+  L89: - Latest monthly constituent snapshots may be used.
+  L90: - Historical membership may not be fully reconstructed.
+
+FILE: backend\company_routes.py
+  L182: "Historical price coverage does not establish historical NIFTY 50 membership.",
+
+FILE: backend\compare_constituents.py
+  L9: REPORT_DIR = Path("database/raw/constituents")
+  L93: for index_name in ("nifty50", "niftynext50"):
+  L127: print("\nCONSTITUENT REPORT VALIDATION")
+  L158: print("\nMONTH-TO-MONTH MEMBERSHIP CHANGES")
+  L161: for index_name in ("nifty50", "niftynext50"):
+
+FILE: backend\download_nifty50_pr_candidate.py
+  L8: OUT = Path("database/raw/index/nifty50_historical_pr_10y_candidate.csv")
+  L9: EXISTING = Path("database/raw/index/nifty50_historical_pr_combined.csv")
+  L23: "indexType": "NIFTY 50",
+  L58: if x.get("EOD_INDEX_NAME") != "NIFTY 50":
+  L73: "Index Name": "NIFTY 50",
+
+FILE: backend\extract_nifty50_constituents.py
+  L10: SOURCE_DIR = PROJECT_ROOT / "database" / "raw" / "constituents"
+  L11: OUTPUT_DIR = PROJECT_ROOT / "database" / "processed" / "constituents"
+  L26: print("GREEDY STOCKS - NIFTY 50 CONSTITUENT EXTRACTION")
+  L55: # IMPORTANT: Only NIFTY 50. Never read NIFTY Next 50.
+  L59: if Path(name).name.lower() == "nifty50_mcwb.csv"
+
+FILE: backend\import_nifty50_company_master.py
+  L12: # NIFTY 50 COMPANY MASTER IMPORTER
+  L17: CONSTITUENT_DIR = (
+  L18: ROOT / "database" / "processed" / "constituents"
+  L22: CONSTITUENT_DIR / "nifty50_company_master_v2.csv"
+  L26: CONSTITUENT_DIR / "nifty50_sector_review.csv"
+
+FILE: backend\import_nifty50_index_prices.py
+  L14: CSV_PATH = ROOT / "database/raw/index/nifty50_historical_pr_10y_candidate.csv"
+  L15: INDEX_SYMBOL = "NIFTY 50"
+  L154: print("\\n--- NIFTY 50 PR IMPORT REVIEW ---")
+
+FILE: backend\import_nifty50_isin_identifiers.py
+  L9: SOURCE = Path("database/processed/audit/nifty50_isin_series_details.csv")
+  L12: "nifty50_isin_series_details.csv; EQ-series observations; "
+
+FILE: backend\import_nifty50_membership_events.py
+  L12: # NIFTY 50 MEMBERSHIP EVENT IMPORTER
+  L21: / "constituents"
+  L22: / "nifty50_membership_events_reconciled.csv"
+  L26: INDEX_SYMBOL = "NIFTY 50"
+  L34: CREATE TABLE IF NOT EXISTS index_membership_events (
+
+FILE: backend\import_nifty50_observation_spans.py
+  L10: "database/processed/constituents/"
+  L11: "nifty50_membership_observation_audit_v2.csv"
+  L48: CREATE TABLE IF NOT EXISTS index_constituent_observation_spans (
+  L50: index_symbol VARCHAR(30) NOT NULL DEFAULT 'NIFTY 50',
+  L112: "source_name": "NIFTY 50 Monthly Constituent Reports",
+
+FILE: backend\import_nifty50_snapshots.py
+  L17: / "constituents"
+  L18: / "nifty50_constituent_snapshots.csv"
+  L40: INSERT INTO index_constituent_snapshots (
+  L125: f"Constituent CSV not found: {DATA_FILE}"
+  L202: # Exactly 50 real constituents per month.
+
+FILE: backend\inspect_constituent_reports.py
+  L5: REPORT_DIR = Path("database/raw/constituents")
+
+FILE: backend\log_phase2_reconciliation.py
+  L15: ("MONTHLY_SNAPSHOTS", "950 constituent observations across 19 months; 50 rows per month."),
+  L18: ("MEMBERSHIP_EVENTS", "Four events; zero unresolved company links."),
+  L25: ("MEMBERSHIP_DATE_SEMANTICS", "No exact effective membership periods inferred from monthly observations."),
+
+FILE: backend\main.py
+  L54: "AI-powered, beginner-friendly NIFTY 50 "
+  L150: Generate evidence-based NIFTY 50 Market Ideas.
+
+FILE: backend\main_backup.py
+  L14: description="AI-powered NIFTY 50 learning assistant",
+
+FILE: backend\migrate_missing_nifty50_universe.py
+  L13: from import_nifty50_historical_prices import (
+  L19: AUDIT = ROOT / "nifty50_missing_symbol_isin_audit.csv"
+  L60: print("GREEDY STOCKS — HISTORICAL UNIVERSE MIGRATION")
+
+FILE: backend\portfolio_routes.py
+  L199: "membership_basis": dataset.metadata["membership_basis"],
+  L205: "benchmark_basis": "NIFTY_50_PRICE_RETURN",
+  L206: "historical_membership_survivorship_bias": True,
+  L336: raise ValueError("Historical NIFTY 50 benchmark prices are unavailable.")
+  L464: "membership_basis": dataset.metadata["membership_basis"],
+
+FILE: backend\prepare_nifty50_company_master_v2.py
+  L9: "constituents" / "nifty50_company_master.csv"
+  L13: ROOT / "database" / "processed" / "constituents"
+  L16: OUTPUT_FILE = OUTPUT_DIR / "nifty50_company_master_v2.csv"
+  L90: print("NIFTY 50 COMPANY MASTER V2 PREPARATION")
+
+FILE: backend\prepare_sector_review.py
+  L9: "constituents" / "nifty50_company_master_v2.csv"
+  L14: "constituents" / "nifty50_sector_review.csv"
+
+FILE: backend\reconcile_nifty50_membership_changes.py
+  L6: DATA_DIR = ROOT / "database" / "processed" / "constituents"
+  L8: SOURCE = DATA_DIR / "nifty50_membership_changes.csv"
+  L9: OUTPUT = DATA_DIR / "nifty50_membership_events_reconciled.csv"
+  L60: print("NIFTY 50 MEMBERSHIP EVENT RECONCILIATION")
+
+FILE: backend\recover_missing_nse_dates.py
+  L25: IMPORTER = ROOT / "backend" / "import_nifty50_historical_prices.py"
+
+FILE: backend\run_daily_nse_pipeline.py
+  L18: IMPORTER = ROOT / "backend" / "import_nifty50_historical_prices.py"
+
+FILE: backend\sector_routes.py
+  L11: router = APIRouter(tags=["NIFTY 50 Sectors"])
+  L41: FROM index_constituent_snapshots
+  L42: WHERE index_symbol = 'NIFTY 50'
+  L49: detail="NIFTY 50 constituent snapshot is unavailable.",
+  L62: FROM index_constituent_snapshots snap
+
+FILE: backend\validate_nifty50_extraction.py
+  L6: DATA_DIR = ROOT / "database" / "processed" / "constituents"
+  L8: REAL_FILE = DATA_DIR / "nifty50_constituent_snapshots.csv"
+  L9: DUMMY_FILE = DATA_DIR / "nifty50_dummy_adjustments.csv"
+  L31: print("GREEDY STOCKS — NIFTY 50 EXTRACTION VALIDATION")
+
+FILE: database\market_data_schema.sql
+  L4: -- 1. HISTORICAL INDEX CONSTITUENTS
+  L5: CREATE TABLE IF NOT EXISTS index_constituents (
+  L7: index_symbol VARCHAR(30) NOT NULL DEFAULT 'NIFTY 50',
+  L16: UNIQUE KEY uq_constituent_period (
+  L22: INDEX idx_constituent_dates (
+
+FILE: database\nifty50_snapshot_schema.sql
+  L4: CREATE TABLE IF NOT EXISTS index_constituent_snapshots (
+  L7: index_symbol VARCHAR(30) NOT NULL DEFAULT 'NIFTY 50',
+
+FILE: database\schema.sql
+  L68: -- 6. NIFTY 50 COMPANIES
+
+FILE: database\processed\analytics\greedy_v2_baseline_comparison.json
+  L28: "constituent_count": 50,
+  L88: "membership_basis": "LATEST_MONTHLY_SNAPSHOT",
+
+FILE: database\processed\analytics\greedy_v2_experiment.json
+  L37: "constituent_count": 75,
+  L44: "universe_basis": "ALL_COMPANIES_WITH_PRICE_HISTORY",
+  L130: "membership_basis": "NOT_RESTRICTED_TO_INDEX_MEMBERSHIP",
+  L695: "benchmark": "NIFTY_50_PRICE_RETURN",
+  L696: "membership_basis": "LATEST_MONTHLY_SNAPSHOT",
+
+FILE: database\processed\analytics\market_ideas_3m.json
+  L5: "index": "NIFTY 50",
+  L10: "membership_basis": "LATEST_MONTHLY_SNAPSHOT",
+  L13: "universe_size": 50,
+  L24: "why": "It ranked among the strongest NIFTY 50 historical performers for the selected period.",
+  L45: "why": "It ranked among the strongest NIFTY 50 historical performers for the selected period.",
+
+FILE: database\processed\analytics\multi_strategy_validation_report.json
+  L114: "strategy": "EQUAL_WEIGHT_UNIVERSE",
+  L188: "strategy": "EQUAL_WEIGHT_UNIVERSE",
+  L256: "selected_strategy": "EQUAL_WEIGHT_UNIVERSE",
+  L278: "selected_strategy": "EQUAL_WEIGHT_UNIVERSE",
+  L300: "selected_strategy": "EQUAL_WEIGHT_UNIVERSE",
+
+FILE: database\processed\analytics\walk_forward_clean_report.json
+  L19: "EQUAL_WEIGHT_UNIVERSE"
+  L21: "hindsight_baseline": "TOP10_INDEX_WEIGHT_SELECTED uses latest constituent weights; excluded from valid historical superiority claims.",
+  L22: "universe_warning": "Latest eligible universe creates survivorship bias.",
+  L26: "Latest constituent universe creates survivorship bias.",
+  L35: "strategy": "EQUAL_WEIGHT_UNIVERSE",
+
+FILE: database\processed\analytics\walk_forward_validation_report.json
+  L9: "universe": [
+  L63: "EQUAL_WEIGHT_UNIVERSE"
+  L79: "Historical latest-constituent universe; survivorship bias remains.",
+
+FILE: database\processed\point_in_time\DAY4_RESEARCH_DATASET_CANDIDATE\manifest.json
+  L4: "source": "database/processed/point_in_time/nifty50_point_in_time_daily_panel_v2.csv",
+  L31: "source": "database/processed/point_in_time/corporate_action_adjusted/nifty50_point_in_time_adjusted_prices.csv",
+  L62: "source": "database/processed/point_in_time/corporate_action_adjusted/nifty50_daily_adjusted_price_returns.csv",
+  L92: "source": "database/processed/point_in_time/corporate_action_adjusted/nifty50_benchmark_daily_price_returns.csv",
+  L99: "nifty50_price_return"
+
+FILE: database\processed\analytics\greedy_10y_point_in_time\summary.json
+  L15: "nifty50": {
+  L25: "Tata successor membership remains unresolved and is not silently stitched.",
+  L26: "Stocks require complete prices and verified membership throughout each training window.",
+
+FILE: database\processed\analytics\greedy_10y_point_in_time\experiment4_final_unique_date_costs\indian_delivery_cost_results\delivery_cost_assumptions.json
+  L29: "membership": "Historical membership and Tata demerger limitations remain",
+
+FILE: analytics\ask_greedy\financial_education.py
+  L209: "NIFTY 50 BASICS",
+  L210: "The NIFTY 50 is an index representing 50 selected large "
+
+FILE: analytics\ask_greedy\greedy_v2_evidence.py
+  L186: "Latest-constituent universe can introduce survivorship bias.",
+
+FILE: analytics\ask_greedy\historical_intelligence.py
+  L76: # Restrict analysis to the latest available NIFTY 50 snapshot.
+  L77: constituents = database_adapter.get_latest_constituents()
+  L79: constituents["symbol"].astype(str).str.strip().str.upper()
+  L83: f"{symbol} is not in the latest available NIFTY 50 constituent snapshot."
+  L253: "benchmark_basis": "NIFTY 50 index close price return",
+
+FILE: analytics\ask_greedy\research_planner.py
+  L47: Analyse a clearly identified NIFTY 50 company using the existing
+
+FILE: analytics\ask_greedy\test_financial_education.py
+  L155: context = build_education_context("Explain NIFTY 50")
+
+FILE: analytics\ask_greedy\test_research_planner.py
+  L17: "query": "Research NIFTY 50",
+
+Total matching lines: 627
+
+=================================================================
+CORPORATE ACTIONS
+=================================================================
+
+FILE: analytics\adjusted_prices.py
+  L1: """Corporate-action adjusted historical price calculations.
+  L4: Verified split and bonus adjustments are applied to pre-ex-date prices only.
+  L5: This is a split/bonus-adjusted price series, NOT a total-return series.
+  L15: SUPPORTED_ACTIONS = {"STOCK_SPLIT", "BONUS"}
+  L21: left, right = str(ratio).split(":")
+
+FILE: analytics\adjusted_price_adapter.py
+  L2: """Read-only database adapter for split/bonus-adjusted prices.
+  L5: Dividends, rights, mergers and demergers are not adjusted.
+  L21: """Load supported corporate actions up to the requested date."""
+  L30: FROM corporate_actions
+  L32: AND action_type IN ('STOCK_SPLIT', 'BONUS')
+
+FILE: analytics\audit_10y_price_coverage.py
+  L47: ["adjusted_close", "adj_close", "close_adj", "close_price", "close", "closing_price"]
+
+FILE: analytics\audit_walk_forward_results.backup_20261109_130619.py
+  L147: "Dividends excluded.",
+  L148: "Corporate-action coverage partial.",
+
+FILE: analytics\audit_walk_forward_results.py
+  L147: "Dividends excluded.",
+  L148: "Corporate-action coverage partial.",
+
+FILE: analytics\benchmark_analytics.py
+  L9: - No dividend adjustment is included.
+  L59: "dividend_adjusted": False,
+  L67: "Returns exclude dividends.",
+  L87: print("Dividend adjusted:", result["dividend_adjusted"])
+
+FILE: analytics\greedy_v2_data.py
+  L121: result["adjusted_close"].to_numpy(),
+  L174: "price_basis": "SPLIT_BONUS_ADJUSTED",
+  L176: "dividend_adjusted": False,
+  L177: "corporate_action_coverage": "PARTIAL",
+
+FILE: analytics\greedy_v2_engine.py
+  L295: "price_basis": "SPLIT_BONUS_ADJUSTED",
+
+FILE: analytics\greedy_v2_splits.py
+  L1: """Chronological train/validation/test splits for Greedy V2."""
+  L9: class DataSplits:
+  L16: def chronological_split(
+  L21: ) -> DataSplits:
+  L22: """Chronological split; optionally exclude incomplete training candidates.
+
+FILE: analytics\historical_rankings.py
+  L7: Split/bonus-adjusted close using currently imported corporate actions.
+  L8: This is NOT a dividend-adjusted total-return series.
+  L12: Corporate-action coverage is currently partial.
+  L108: FROM corporate_actions
+  L169: # expected session must have exactly one valid adjusted close.
+
+FILE: analytics\market_ideas.py
+  L13: Split/bonus-adjusted prices are not total-return prices.
+  L14: Corporate-action coverage is partial.
+  L532: "dividend_adjusted": ranking.attrs.get("dividend_adjusted"),
+  L534: "corporate_action_coverage": ranking.attrs.get(
+  L535: "corporate_action_coverage"
+
+FILE: analytics\portfolio_analytics.py
+  L342: "dividend_adjusted": False,
+  L343: "corporate_action_coverage": "PARTIAL",
+
+FILE: analytics\run_adjusted_price_validation.py
+  L1: """Validate split/bonus-adjusted prices against imported MySQL data."""
+  L67: FROM corporate_actions
+  L82: print("Price basis: split/bonus adjusted; no dividend reinvestment")
+  L94: print(f"[FAIL] {symbol}: no corporate actions found")
+  L102: print(f"Corporate actions: {len(actions)}")
+
+FILE: analytics\run_five_greedy_strategies.py
+  L14: from analytics.greedy_v2_splits import chronological_split
+  L56: max_per_sector=MAX_PER_SECTOR, price_basis="SPLIT_BONUS_ADJUSTED",
+  L98: chunks = [prices[trial].iloc[idx].copy() for idx in np.array_split(np.arange(len(prices)), 3) if len(idx) >= MIN_TRAIN_OBS]
+  L140: max_per_sector=MAX_PER_SECTOR, price_basis="SPLIT_BONUS_ADJUSTED",
+  L162: splits = chronological_split(prices, train_fraction=0.60, validation_fraction=0.20, allow_sparse_evaluation=True)
+
+FILE: analytics\run_greedy_selection.py
+  L196: print("Price basis: Raw unadjusted close")
+  L197: print("Dividends: Excluded")
+  L198: print("Corporate-action coverage: Partial")
+
+FILE: analytics\run_greedy_stability.py
+  L9: from greedy_v2_splits import chronological_split
+  L24: splits = chronological_split(
+  L31: full_train = splits.train
+
+FILE: analytics\run_greedy_v2_baselines.py
+  L13: from analytics.greedy_v2_splits import chronological_split
+  L27: PRICE_BASIS = "SPLIT_BONUS_ADJUSTED"
+  L280: splits = chronological_split(
+  L286: train_benchmark = benchmark.loc[splits.train.index]
+  L287: validation_benchmark = benchmark.loc[splits.validation.index]
+
+FILE: analytics\run_greedy_v2_experiment.backup_20261109_124456.py
+  L11: from analytics.greedy_v2_splits import chronological_split
+  L26: PRICE_BASIS = "SPLIT_BONUS_ADJUSTED"
+  L154: # 2. Chronological split
+  L157: splits = chronological_split(
+  L164: train_benchmark = benchmark.loc[splits.train.index]
+
+FILE: analytics\run_greedy_v2_experiment.backup_sparse_20261109_124756.py
+  L11: from analytics.greedy_v2_splits import chronological_split
+  L27: PRICE_BASIS = "SPLIT_BONUS_ADJUSTED"
+  L173: # 2. Chronological split
+  L176: splits = chronological_split(
+  L183: train_benchmark = benchmark.loc[splits.train.index]
+
+FILE: analytics\run_greedy_v2_experiment.py
+  L11: from analytics.greedy_v2_splits import chronological_split
+  L27: PRICE_BASIS = "SPLIT_BONUS_ADJUSTED"
+  L174: # 2. Chronological split
+  L177: splits = chronological_split(
+  L185: train_benchmark = benchmark.loc[splits.train.index]
+
+FILE: analytics\run_greedy_validation.py
+  L119: split = int(len(prices) * TRAIN_RATIO)
+  L122: train_prices = prices.iloc[:split].copy()
+  L125: test_prices = prices.iloc[split - 1:].copy()
+  L250: print("Prices are unadjusted; dividends are excluded.")
+  L251: print("Corporate-action coverage is partial.")
+
+FILE: analytics\run_greedy_walk_forward.py
+  L247: print("Dividends excluded; corporate-action coverage partial.")
+
+FILE: analytics\run_indian_delivery_cost_model.py
+  L9: PRICE = ROOT / "database/processed/point_in_time/corporate_action_adjusted/nifty50_daily_adjusted_price_returns.csv"
+  L62: lambda x: [s.strip() for s in str(x).split(",") if s.strip()]
+  L264: "dividends": "Excluded",
+  L266: "corporate_actions": "Only currently incorporated known events; not proven exhaustive",
+
+FILE: analytics\run_multi_strategy_validation.py
+  L19: from greedy_v2_splits import chronological_split
+  L30: PRICE_BASIS = "SPLIT_BONUS_ADJUSTED"
+  L128: # 1. Prepare data and chronological splits.
+  L144: splits = chronological_split(
+  L153: print("Training:", len(splits.train))
+
+FILE: analytics\run_real_portfolio.py
+  L170: print("Corporate actions: partial split/bonus adjustment coverage.")
+  L171: print("Dividends: not included.")
+
+FILE: analytics\run_registered_greedy_v2_experiment.py
+  L24: splits = state["splits"]
+  L33: prices=splits.test,
+
+FILE: analytics\run_strategy_baseline_comparison.py
+  L255: print("Dividends excluded; corporate-action coverage partial.")
+
+FILE: analytics\run_walk_forward_cost_validation.backup_20261109_130430.py
+  L350: "Dividends excluded.",
+  L351: "Corporate-action coverage is partial.",
+
+FILE: analytics\run_walk_forward_cost_validation.py
+  L356: "Dividends excluded.",
+  L357: "Corporate-action coverage is partial.",
+
+FILE: analytics\test_adjusted_prices.py
+  L15: def test_split_factor(self):
+  L18: "action_type": "STOCK_SPLIT",
+  L25: def test_bonus_factor(self):
+  L28: "action_type": "BONUS",
+  L35: def test_fractional_bonus_factor(self):
+
+FILE: analytics\test_adjusted_price_adapter.py
+  L29: "action_type": "BONUS",
+  L43: self.assertEqual(result[0]["action_type"], "BONUS")
+  L84: "action_type": "BONUS",
+  L98: # The 1:1 bonus adjusts the earlier price by a factor of 2.
+  L100: self.assertAlmostEqual(result.iloc[0]["adjusted_close"], 75.0)
+
+FILE: analytics\test_benchmark_analytics.py
+  L41: self.assertFalse(result["dividend_adjusted"])
+
+FILE: analytics\test_greedy_v2_splits.py
+  L6: from analytics.greedy_v2_splits import chronological_split
+  L9: class GreedyV2SplitTests(unittest.TestCase):
+  L22: def test_chronological_split_sizes(self):
+  L23: result = chronological_split(self.prices)
+  L29: def test_splits_are_chronological(self):
+
+FILE: analytics\test_market_ideas.py
+  L63: "price_basis": "SPLIT_BONUS_ADJUSTED",
+  L64: "dividend_adjusted": False,
+  L66: "corporate_action_coverage": "PARTIAL",
+
+FILE: analytics\validate_historical_rankings.py
+  L113: result["corporate_action_coverage"].eq("PARTIAL").all()
+  L114: and result.attrs.get("corporate_action_coverage") == "PARTIAL",
+  L115: "Partial corporate-action coverage is disclosed",
+  L118: result.attrs.get("dividend_adjusted") is False,
+  L119: "Results are not misrepresented as dividend-adjusted",
+
+FILE: backend\audit_139_missing_dates.py
+  L57: """.split())
+
+FILE: backend\audit_all_constituents.py
+  L85: lines = content.splitlines()
+
+FILE: backend\audit_phase2_final.py
+  L23: "stock_prices", "corporate_actions",
+  L319: # 11. Corporate actions
+  L321: "SELECT COUNT(*) FROM corporate_actions"
+  L325: "Corporate-action coverage",
+
+FILE: backend\build_nifty50_company_master.py
+  L21: # Historical identity and corporate-action mapping.
+  L86: print("\nCORPORATE ACTION / SYMBOL MAPPING:")
+
+FILE: backend\build_nifty50_historical_universe.py
+  L179: print("Symbol changes and mergers require separate corporate-action mapping.")
+
+FILE: backend\build_nifty50_membership_review.py
+  L138: # If the source uses a renamed/canonical ticker, split the interval
+
+FILE: backend\chat_routes.py
+  L91: - Corporate-action coverage may be partial.
+  L92: - Dividends may be excluded.
+  L453: "Corporate-action coverage: "
+  L454: f"{metadata.get('corporate_action_coverage')}"
+  L456: f"Dividend adjusted: {metadata.get('dividend_adjusted')}",
+
+FILE: backend\company_routes.py
+  L105: dividend_amount,
+  L108: FROM corporate_actions
+  L163: "corporate_actions": [
+  L179: "Corporate action coverage is limited to imported records.",
+  L180: "Dividend-adjusted total-return history is not provided.",
+
+FILE: backend\compare_constituents.py
+  L34: lines = content.splitlines()
+
+FILE: backend\extract_nifty50_constituents.py
+  L32: parts = archive.stem.lower().replace("mcwb_", "").split("_")
+  L120: # Keep dummy corporate-action entries separate.
+
+FILE: backend\import_verified_corporate_actions.py
+  L1: """Import verified corporate actions into GREEDY STOCKS.
+  L20: "action_type": "STOCK_SPLIT",
+  L31: "source_name": "NSE corporate actions / issuer announcement",
+  L39: "action_type": "BONUS",
+  L46: "Four bonus shares for every one existing share. "
+
+FILE: backend\log_phase2_reconciliation.py
+  L30: ("CORPORATE_ACTION_COVERAGE",
+  L31: "Zero corporate-action records. Adjusted-price and total-return history is not established."),
+
+FILE: backend\migrate_missing_nifty50_universe.py
+  L167: x.strip() for x in str(rec["company_names"]).split("|")
+
+FILE: backend\portfolio_routes.py
+  L17: from analytics.greedy_v2_splits import chronological_split
+  L72: split = chronological_split(
+  L79: train_prices=split.train,
+  L118: validation_prices = split.validation
+  L119: validation_benchmark = dataset.benchmark_prices.reindex(split.validation.index)
+
+FILE: backend\sector_routes.py
+  L259: "dividend_adjusted": False,
+  L266: "Raw unadjusted closing prices are used; corporate actions are not adjusted in this endpoint.",
+  L267: "Dividend-adjusted total returns are not available.",
+
+FILE: database\market_data_schema.sql
+  L81: -- 4. CORPORATE ACTIONS
+  L82: CREATE TABLE IF NOT EXISTS corporate_actions (
+  L87: 'DIVIDEND',
+  L88: 'STOCK_SPLIT',
+  L89: 'BONUS',
+
+FILE: database\processed\analytics\greedy_v2_baseline_comparison.json
+  L84: "price_basis": "SPLIT_BONUS_ADJUSTED",
+  L86: "dividend_adjusted": false,
+  L87: "corporate_action_coverage": "PARTIAL",
+  L98: "price_basis": "SPLIT_BONUS_ADJUSTED",
+  L99: "dividend_adjusted": false
+
+FILE: database\processed\analytics\greedy_v2_experiment.json
+  L126: "price_basis": "SPLIT_BONUS_ADJUSTED",
+  L128: "dividend_adjusted": false,
+  L129: "corporate_action_coverage": "PARTIAL",
+  L588: "split_metadata": {
+  L691: "price_basis": "SPLIT_BONUS_ADJUSTED",
+
+FILE: database\processed\analytics\market_ideas_3m.json
+  L8: "price_basis": "SPLIT_BONUS_ADJUSTED",
+  L9: "dividend_adjusted": false,
+  L11: "corporate_action_coverage": "PARTIAL",
+  L533: "Prices are split/bonus adjusted where imported actions apply.",
+  L534: "Corporate-action coverage is partial.",
+
+FILE: database\processed\analytics\multi_strategy_validation_report.json
+  L201: "splits": 20,
+  L205: "split_results": [
+  L446: "splits": 20,
+  L452: "Dividends are excluded.",
+  L453: "Corporate-action coverage is partial.",
+
+FILE: database\processed\analytics\walk_forward_clean_report.json
+  L29: "Dividends excluded.",
+  L30: "Corporate-action coverage partial."
+
+FILE: database\processed\analytics\walk_forward_validation_report.json
+  L80: "Dividends excluded.",
+  L81: "Corporate-action coverage is partial.",
+
+FILE: database\processed\point_in_time\DAY4_RESEARCH_DATASET_CANDIDATE\manifest.json
+  L31: "source": "database/processed/point_in_time/corporate_action_adjusted/nifty50_point_in_time_adjusted_prices.csv",
+  L51: "adjusted_close_price",
+  L62: "source": "database/processed/point_in_time/corporate_action_adjusted/nifty50_daily_adjusted_price_returns.csv",
+  L81: "adjusted_close_price",
+  L92: "source": "database/processed/point_in_time/corporate_action_adjusted/nifty50_benchmark_daily_price_returns.csv",
+
+FILE: database\processed\analytics\five_strategy_experiment\five_strategy_comparison.json
+  L23: "dividend_adjusted": false,
+  L24: "corporate_action_coverage": "PARTIAL",
+
+FILE: database\processed\analytics\greedy_10y_point_in_time\summary.json
+  L23: "Split/bonus adjusted price return; dividends excluded.",
+  L24: "Corporate action coverage is partial.",
+
+FILE: database\processed\analytics\greedy_10y_point_in_time\experiment4_final_unique_date_costs\indian_delivery_cost_config.json
+  L23: "include_dividends":  false,
+
+FILE: database\processed\analytics\greedy_10y_point_in_time\experiment4_final_unique_date_costs\indian_delivery_cost_results\delivery_cost_assumptions.json
+  L26: "dividends": "Excluded",
+  L28: "corporate_actions": "Only currently incorporated known events; not proven exhaustive",
+
+FILE: analytics\ask_greedy\greedy_knowledge.py
+  L18: "greedy_v2_splits.py",
+
+FILE: analytics\ask_greedy\greedy_v2_evidence.py
+  L114: for item in str(raw).split(",")
+
+FILE: analytics\ask_greedy\historical_intelligence.py
+  L105: if frame.empty or "adjusted_close" not in frame.columns:
+  L111: frame["adjusted_close"], errors="coerce"
+  L156: "start_adjusted_close": round(float(group.iloc[0]), 4),
+  L157: "end_adjusted_close": round(float(group.iloc[-1]), 4),
+  L180: price_basis="SPLIT_BONUS_ADJUSTED",
+
+FILE: analytics\validation\pbo_cscv.py
+  L25: PBO is the fraction of splits where the IS winner ranks below
+  L43: blocks = np.array_split(np.arange(len(returns)), n_slices)
+  L47: split_results = []
+  L75: split_results.append({
+  L83: pbo = sum(x["overfit"] for x in split_results) / len(split_results)
+
+FILE: analytics\validation\test_validation.py
+  L76: assert result["splits"] == 20
+
+Total matching lines: 613
+
+=================================================================
+MARKET DATA SOURCES
+=================================================================
+
+FILE: analytics\adjusted_prices.py
+  L3: Raw NSE prices are never modified.
+  L122: # NSE trading dates are calendar dates; discard any time component.
+
+FILE: analytics\audit_10y_price_coverage.py
+  L9: sys.path.insert(0, str(ROOT))
+  L66: # Resolve company IDs to ticker symbols.
+  L67: symbol_col = pick(price_cols, ["symbol", "ticker", "stock_symbol"])
+  L83: company_cols, ["symbol", "ticker", "stock_symbol"]
+  L105: raise RuntimeError("No ticker symbol or company_id column found.")
+
+FILE: analytics\audit_active_history_coverage.py
+  L138: "verified official NSE trading calendar."
+
+FILE: analytics\audit_benchmark_date_coverage.py
+  L4: Read-only comparison of NSE index dates and original Bhavcopy ZIP dates.
+  L6: This is a source-date comparison, NOT an official NSE trading-calendar audit.
+  L20: sys.path.insert(0, str(ROOT / "backend"))
+  L30: BHAVCOPY_DIR = ROOT / "database" / "raw" / "bhavcopy"
+  L83: def load_bhavcopy_archive_dates():
+
+FILE: analytics\audit_corporate_action_source_rows.py
+  L6: ROOT = Path("database/raw/bhavcopy")
+  L73: print("\nORIGINAL NSE BHAVCOPY RECORDS")
+
+FILE: analytics\audit_greedy_universe.py
+  L7: sys.path.insert(0, str(ROOT / "analytics"))
+
+FILE: analytics\audit_trading_session_coverage.py
+  L201: "- It does NOT certify completeness against the official NSE calendar."
+
+FILE: analytics\benchmark_analytics.py
+  L4: Uses the official NSE Indices Historical Price Return (PR) dataset
+  L50: price_basis="NSE_NIFTY_50_INDEX_CLOSE",
+
+FILE: analytics\financial_metrics.py
+  L213: # This convention assumes observed returns represent consecutive
+
+FILE: analytics\greedy_v2_engine.py
+  L30: sys.path.insert(0, str(ANALYTICS_DIR))
+  L231: # Deterministic tie-breaking by ticker.
+  L280: print("\nSELECTION COMPLETE")
+
+FILE: analytics\historical_rankings.py
+  L14: it is not an independently certified NSE trading calendar.
+  L24: sys.path.insert(0, str(ROOT))
+  L25: sys.path.insert(1, str(ROOT / "backend"))
+  L126: imported stock record, so it is not a substitute for an official NSE
+
+FILE: analytics\index_adapter.py
+  L11: sys.path.insert(0, str(ROOT / "backend"))
+  L16: INDEX_DATA_SOURCE = "NSE Indices Historical PR"
+
+FILE: analytics\market_ideas.py
+  L25: sys.path.insert(0, str(ROOT))
+  L369: "overfit and may not generalise to unseen periods. "
+
+FILE: analytics\reconcile_bhavcopy_database_dates.py
+  L1: """Compare NSE Bhavcopy archive dates against MySQL stock-price dates."""
+  L13: BHAVCOPY_DIR = ROOT / "database" / "raw" / "bhavcopy"
+  L18: print("NSE BHAVCOPY vs MYSQL — DATE RECONCILIATION")
+  L21: archives = sorted(BHAVCOPY_DIR.glob("*.zip"))
+  L25: f"No Bhavcopy ZIP archives found: {BHAVCOPY_DIR}"
+
+FILE: analytics\reconcile_nifty50_index_prices.py
+  L11: sys.path.insert(0, str(ROOT / "backend"))
+
+FILE: analytics\reconcile_nse_source_prices.py
+  L1: """Read-only NSE EQ source-to-MySQL price reconciliation."""
+  L15: BHAVCOPY_DIR = ROOT / "database" / "raw" / "bhavcopy"
+  L94: print("NSE EQ SOURCE-TO-MYSQL PRICE RECONCILIATION")
+  L110: # Build direct symbol mapping and dated historical ticker aliases.
+  L121: WHERE ci.identifier_type = 'TICKER'
+
+FILE: analytics\run_adjusted_price_validation.py
+  L10: sys.path.insert(0, str(ROOT))
+  L11: sys.path.insert(1, str(ROOT / "backend"))
+  L170: print("No database rows were inserted, updated, or deleted.")
+
+FILE: analytics\run_common_window_analysis.py
+  L57: ranking.insert(0, "rank", range(1, len(ranking) + 1))
+
+FILE: analytics\run_five_greedy_strategies.py
+  L71: # therefore use a transparent conservative daily turnover assumption.
+  L180: log.insert(0, "strategy", strategy)
+
+FILE: analytics\run_greedy_selection.py
+  L7: sys.path.insert(0, str(ROOT / "analytics"))
+  L202: print(f"\nSelection log saved: {log_path}")
+
+FILE: analytics\run_greedy_stability.py
+  L6: sys.path.insert(0, str(ROOT / "analytics"))
+
+FILE: analytics\run_greedy_v2_baselines.py
+  L400: frame.insert(0, "period", period_name)
+
+FILE: analytics\run_greedy_v2_experiment.backup_20261109_124456.py
+  L254: print("\nSelected stocks:")
+
+FILE: analytics\run_greedy_v2_experiment.backup_sparse_20261109_124756.py
+  L273: print("\nSelected stocks:")
+
+FILE: analytics\run_greedy_v2_experiment.py
+  L275: print("\nSelected stocks:")
+
+FILE: analytics\run_greedy_validation.py
+  L7: sys.path.insert(0, str(ROOT / "analytics"))
+  L153: # Evaluate the fixed selection on unseen test data.
+
+FILE: analytics\run_greedy_walk_forward.py
+  L7: sys.path.insert(0, str(ROOT / "analytics"))
+  L130: # Evaluate fixed selections on unseen data.
+
+FILE: analytics\run_indian_delivery_cost_model.py
+  L16: # Zerodha resident-individual NSE equity delivery reference tariff
+  L251: "model": "NSE equity delivery, Zerodha resident-individual reference",
+  L255: "NSE_transaction_pct_each_side": 0.00307,
+
+FILE: analytics\run_multi_strategy_validation.py
+  L16: sys.path.insert(0, str(ANALYTICS))
+
+FILE: analytics\run_real_portfolio.py
+  L9: sys.path.insert(0, str(ROOT / "analytics"))
+  L67: print("\nSELECTED STOCKS")
+  L151: print("\nSECTOR ALLOCATION")
+
+FILE: analytics\run_registered_greedy_v2_experiment.py
+  L9: sys.path.insert(0, str(ANALYTICS))
+
+FILE: analytics\run_strategy_baseline_comparison.py
+  L7: sys.path.insert(0, str(ROOT / "analytics"))
+
+FILE: analytics\run_walk_forward_cost_validation.backup_20261109_130430.py
+  L7: sys.path.insert(0, str(ROOT / "analytics"))
+
+FILE: analytics\run_walk_forward_cost_validation.py
+  L7: sys.path.insert(0, str(ROOT / "analytics"))
+
+FILE: analytics\test_adjusted_price_adapter.py
+  L32: "source_name": "NSE",
+
+FILE: analytics\test_benchmark_analytics.py
+  L39: "NSE Indices Historical PR",
+
+FILE: analytics\test_financial_metrics.py
+  L8: sys.path.insert(0, str(ROOT))
+
+FILE: analytics\test_portfolio_analytics.py
+  L9: sys.path.insert(0, str(ROOT / "analytics"))
+
+FILE: analytics\validate_historical_rankings.py
+  L11: sys.path.insert(0, str(ROOT))
+  L176: "independently certified NSE calendar."
+
+FILE: analytics\_bootstrap.py
+  L10: sys.path.insert(0, path_string)
+
+FILE: backend\anomaly_by_series.py
+  L10: FOLDER = ROOT / "database" / "raw" / "bhavcopy"
+  L85: print(f"\nSERIES: {series}")
+
+FILE: backend\audit_139_missing_dates.py
+  L8: sys.path.insert(0, str(ROOT))
+  L12: MANIFEST = ROOT / "database" / "raw" / "bhavcopy" / "backfill_manifest.json"
+  L13: OUTPUT = ROOT / "database" / "raw" / "bhavcopy" / "missing_dates_audit.csv"
+  L15: # NSE Capital Market weekday holidays, 2016–2026.
+  L16: # Historical lists are cross-checked against published NSE calendars.
+
+FILE: backend\audit_bhavcopy.py
+  L9: DATA_FOLDER = PROJECT_ROOT / "database" / "raw" / "bhavcopy"
+  L27: print("GREEDY STOCKS - NSE BHAVCOPY READ-ONLY AUDIT")
+
+FILE: backend\audit_date_coverage.py
+  L10: DATA_DIR = Path("database/raw/bhavcopy")
+
+FILE: backend\audit_eq_quality.py
+  L8: DATA_DIR = Path("database/raw/bhavcopy")
+
+FILE: backend\audit_nifty50_bhavcopy_coverage.py
+  L9: BHAVCOPY_DIR = ROOT / "database" / "raw" / "bhavcopy"
+  L37: archives = sorted(BHAVCOPY_DIR.glob("*.zip"))
+  L41: f"No ZIP archives found in {BHAVCOPY_DIR}"
+  L59: print(f"Bhavcopy archives discovered: {len(archives)}")
+  L142: print("NIFTY 50 HISTORICAL BHAVCOPY COVERAGE")
+
+FILE: backend\audit_nifty50_isin_changes.py
+  L7: BHAVCOPY_DIR = ROOT / "database" / "raw" / "bhavcopy"
+  L20: archives = sorted(BHAVCOPY_DIR.glob("*.zip"))
+
+FILE: backend\audit_phase2_final.py
+  L2: sys.path.insert(0, "backend")
+  L151: SUM(identifier_type = 'TICKER') AS ticker_count
+  L175: f"{identifiers['ticker_count']} ticker aliases; "
+
+FILE: backend\backfill_nse_historical.py
+  L18: ARCHIVE_DIR = ROOT / "database" / "raw" / "bhavcopy"
+  L22: LEGACY_CUTOFF = date(2024, 7, 8)  # UDiFF archive era begins 08-Jul-2024
+  L23: LEGACY_BASE = "https://archives.nseindia.com/content/historical/EQUITIES/"
+  L24: UDIFF_BASE = "https://nsearchives.nseindia.com/content/cm/"
+  L29: "Referer": "https://www.nseindia.com/",
+
+FILE: backend\build_benchmark_discrepancy_register.py
+  L7: INPUT = ROOT / "database" / "raw" / "index" / "missing_bhavcopy_recovery.csv"
+  L8: BHAVCOPY_DIR = ROOT / "database" / "raw" / "bhavcopy"
+  L25: archive_exists = any(BHAVCOPY_DIR.rglob(archive_name))
+  L29: evidence = "NSE Circular NSE/CMTR/72349 dated 2026-01-16"
+
+FILE: backend\build_nifty50_historical_universe.py
+  L8: DATA = ROOT / "database" / "raw" / "bhavcopy"
+  L13: "nse-historical-membership/main/"
+  L17: HISTORY_FILE = DATA / "nse_historical_index_membership_source.csv"
+  L20: MATCH_OUTPUT = DATA / "nifty50_bhavcopy_match_2016_2026.csv"
+  L29: with urllib.request.urlopen(request, timeout=60) as response:
+
+FILE: backend\build_nifty50_membership_review.py
+  L6: ROOT = Path("database/raw/bhavcopy")
+  L70: "first_bhavcopy_date": item["first"].isoformat() if item["first"] else "",
+  L71: "last_bhavcopy_date": item["last"].isoformat() if item["last"] else "",
+  L72: "bhavcopy_rows": item["rows"],
+  L74: "identity_evidence": "NSE_BHAVCOPY_ISIN" if item["isin"] else "SYMBOL_ONLY",
+
+FILE: backend\catch_up_nse_data.py
+  L16: sys.path.insert(0, str(ROOT / "backend"))
+  L19: from nse_trading_calendar import get_session_status
+  L22: PIPELINE = ROOT / "backend" / "run_daily_nse_pipeline.py"
+  L38: LOG_DIR / "nse_catch_up.log",
+  L151: if status in ("WEEKEND_CLOSED", "NSE_HOLIDAY"):
+
+FILE: backend\certify_nifty50_pr_candidate.py
+  L48: "NSE_Verified_Value": b,
+  L49: "Reason": "Independent NSE API re-fetch confirmed 25448.55"
+
+FILE: backend\chat_routes.py
+  L21: sys.path.insert(0, str(PROJECT_ROOT))
+  L97: RESPONSE STYLE:
+  L113: class ChatResponse(BaseModel):
+  L139: INSERT INTO app_users (
+  L740: logger.warning("Gemini returned an empty response.")
+
+FILE: backend\discover_nse_symbols.py
+  L9: DATA = ROOT / "database" / "raw" / "bhavcopy"
+  L10: OUTPUT = DATA / "nse_all_symbols_2016_2026.csv"
+
+FILE: backend\download_nifty50_pr_candidate.py
+  L7: URL = "https://www.nseindia.com/api/historicalOR/indicesHistory"
+  L16: "Referer": "https://www.nseindia.com/reports-indices-historical-index-data",
+  L19: s.get("https://www.nseindia.com" + path, timeout=30).raise_for_status()
+  L35: raise RuntimeError(f"Unexpected API cap/response: {len(data)} rows")
+
+FILE: backend\download_nse_cm_bhavcopy.py
+  L21: ARCHIVE_DIR = ROOT / "database" / "raw" / "bhavcopy"
+  L24: BASE_URL = "https://nsearchives.nseindia.com/content/cm/"
+  L40: "Referer": "https://www.nseindia.com/all-reports",
+  L53: LOG_DIR / "nse_cm_downloader.log",
+  L139: f"BhavCopy_NSE_CM_0_0_0_{target_date}_F_0000.csv.zip"
+
+FILE: backend\extract_nifty50_constituents.py
+  L116: df.insert(0, "report_month", report_month)
+  L117: df.insert(1, "source_archive", archive.name)
+  L118: df.insert(2, "source_csv", target_file)
+
+FILE: backend\fix_eternal_historical_ticker.py
+  L2: sys.path.insert(0, "backend")
+  L13: ROOT = Path("database/raw/bhavcopy")
+  L22: INSERT_PRICE = text("""
+  L23: INSERT INTO stock_prices (
+  L32: 'NSE CM-UDiFF EQ - historical ticker ZOMATO'
+
+FILE: backend\import_eternal_isin.py
+  L2: sys.path.insert(0, "backend")
+  L12: ROOT = Path("database/raw/bhavcopy")
+  L99: INSERT INTO company_identifiers (
+  L111: "source_name": "NSE CM-UDiFF Common Bhavcopy Final",
+  L118: status = "Inserted"
+
+FILE: backend\import_nifty50_company_master.py
+  L277: inserted_sector_count = 0
+  L278: inserted_company_count = 0
+  L305: # Insert missing sectors, reuse exact matches
+  L316: INSERT INTO sectors (name)
+  L327: inserted_sector_count += 1
+
+FILE: backend\import_nifty50_historical_prices.py
+  L3: sys.path.insert(0, "backend")
+  L13: ROOT = Path("database/raw/bhavcopy")
+  L15: UDIFF_REQUIRED = {
+  L24: UDIFF_MAP = {
+  L38: INSERT_SQL = text("""
+
+FILE: backend\import_nifty50_historical_prices_before_datefix.py
+  L3: sys.path.insert(0, "backend")
+  L13: ROOT = Path("database/raw/bhavcopy")
+  L15: UDIFF_REQUIRED = {
+  L24: UDIFF_MAP = {
+  L38: INSERT_SQL = text("""
+
+FILE: backend\import_nifty50_historical_prices_before_legacy.py
+  L5: sys.path.insert(0, "backend")
+  L18: ROOT = Path("database/raw/bhavcopy")
+  L41: INSERT_SQL = text("""
+  L42: INSERT INTO stock_prices (
+  L51: :total_traded_value, :total_trades, 'NSE CM-UDiFF EQ'
+
+FILE: backend\import_nifty50_index_prices.py
+  L11: sys.path.insert(0, str(ROOT / "backend"))
+  L16: DATA_SOURCE = "NSE Indices Historical PR"
+  L32: INSERT_SQL = text("""
+  L33: INSERT INTO index_prices (
+  L119: inserts = []
+
+FILE: backend\import_nifty50_isin_identifiers.py
+  L2: sys.path.insert(0, "backend")
+  L10: SOURCE_NAME = "NSE CM-UDiFF Common Bhavcopy Final"
+  L69: inserted = 0
+  L102: INSERT INTO company_identifiers (
+  L124: inserted += 1
+
+FILE: backend\import_nifty50_membership_events.py
+  L234: inserted = 0
+  L322: INSERT INTO index_membership_events (
+  L361: inserted += 1
+  L380: return inserted, already_present
+  L457: inserted, existing = import_events(events)
+
+FILE: backend\import_nifty50_observation_spans.py
+  L2: sys.path.insert(0, "backend")
+  L92: inserted = 0
+  L147: INSERT INTO index_constituent_observation_spans (
+  L165: inserted += 1
+  L181: print("Inserted:", inserted)
+
+FILE: backend\import_nifty50_snapshots.py
+  L39: INSERT_SQL = text("""
+  L40: INSERT INTO index_constituent_snapshots (
+  L288: # All inserts and verification run in one transaction.
+  L304: "No records were inserted."
+  L311: print("Inserting records...")
+
+FILE: backend\import_verified_corporate_actions.py
+  L11: sys.path.insert(0, str(ROOT / "backend"))
+  L31: "source_name": "NSE corporate actions / issuer announcement",
+  L33: "https://www.nseindia.com/get-quote/equity/"
+  L51: "source_name": "NSE corporate actions / issuer announcement",
+  L53: "https://www.nseindia.com/get-quote/equity/"
+
+FILE: backend\inspect_archives.py
+  L6: DATA_FOLDER = PROJECT_ROOT / "database" / "raw" / "bhavcopy"
+
+FILE: backend\inspect_price_anomalies.py
+  L8: FOLDER = ROOT / "database" / "raw" / "bhavcopy"
+
+FILE: backend\log_phase2_reconciliation.py
+  L2: sys.path.insert(0, "backend")
+  L19: ("IDENTIFIER_REGISTER", "Eight identifiers; seven ISIN records and one ticker alias; ETERNAL ISIN verified."),
+  L26: ("ETERNAL_HISTORICAL_IDENTITY", "Historical ZOMATO ticker and ETERNAL ISIN mapping verified.")
+  L56: INSERT INTO data_import_logs (
+  L73: INSERT INTO validation_logs (
+
+FILE: backend\main.py
+  L6: sys.path.insert(0, str(BACKEND_DIR))
+  L27: sys.path.insert(0, str(PROJECT_ROOT))
+
+FILE: backend\migrate_missing_nifty50_universe.py
+  L10: sys.path.insert(0, "backend")
+  L14: read_bhavcopy, normalize_rows, existing_rows_for_date,
+  L15: values_match, INSERT_SQL
+  L18: ROOT = Path("database/raw/bhavcopy")
+  L20: SOURCE = "NSE CM Bhavcopy historical identity and price archive"
+
+FILE: backend\nse_trading_calendar.py
+  L7: # Official NSE Capital Market (Equity) holidays for 2026.
+  L8: # Source: NSE Circular NSE/CMTR/71775, December 12, 2025.
+  L10: NSE_HOLIDAYS = {
+  L41: Return the NSE Capital Market session status for a date.
+  L46: NSE_HOLIDAY
+
+FILE: backend\portfolio_routes.py
+  L14: sys.path.insert(0, str(ROOT))
+  L236: sys.path.insert(0, str(ROOT))
+
+FILE: backend\reconcile_nifty50_membership_changes.py
+  L22: "verification": "NSE circular NSE/FAOP/70882"
+  L33: "verification": "NSE Indices press release, 22 Aug 2025"
+  L41: "verification": "NSE Indices press release, 22 Aug 2025"
+  L49: "verification": "NSE Indices press release, 10 Aug 2026"
+
+FILE: backend\recover_missing_nse_dates.py
+  L18: sys.path.insert(0, str(ROOT))
+  L23: FOLDER = ROOT / "database" / "raw" / "bhavcopy"
+  L48: "https://archives.nseindia.com/content/historical/"
+  L52: name = f"BhavCopy_NSE_CM_0_0_0_{d:%Y%m%d}_F_0000.csv.zip"
+  L53: url = f"https://nsearchives.nseindia.com/content/cm/{name}"
+
+FILE: backend\run_daily_nse_pipeline.py
+  L12: from nse_trading_calendar import get_session_status
+  L17: DOWNLOADER = ROOT / "backend" / "download_nse_cm_bhavcopy.py"
+  L20: ARCHIVE_DIR = ROOT / "database" / "raw" / "bhavcopy"
+  L33: LOG_DIR / "nse_daily_pipeline.log",
+  L58: "NSE calendar status: %s",
+
+FILE: backend\validate_bhavcopy.py
+  L10: FOLDER = ROOT / "database" / "raw" / "bhavcopy"
+  L132: print("\nSECURITY SERIES")
+
+FILE: database\market_data_schema.sql
+  L45: price_source VARCHAR(100) DEFAULT 'NSE',
+  L70: data_source VARCHAR(100) DEFAULT 'NSE',
+
+FILE: database\schema.sql
+  L75: exchange VARCHAR(10) DEFAULT 'NSE',
+
+FILE: frontend\package-lock.json
+  L35: "license": "MIT",
+  L48: "license": "MIT",
+  L63: "license": "MIT",
+  L73: "license": "MIT",
+  L104: "license": "MIT",
+
+FILE: frontend\.next\images-manifest.json
+  L33: "maximumResponseBody": 50000000,
+
+FILE: frontend\.next\next-minimal-server.js.nft.json
+  L1: {"files":["../node_modules/client-only/index.js","../node_modules/client-only/package.json","../node_modules/next/dist/compiled/@opentelemetry/api/index.js","../node_modules/next/dist/compiled/@opentelemetry/api/package.
+
+FILE: frontend\.next\next-server.js.nft.json
+  L1: {"files":["../node_modules/@img/colour/color.cjs","../node_modules/@img/colour/index.cjs","../node_modules/@img/colour/package.json","../node_modules/@img/sharp-win32-x64/index.cjs","../node_modules/@img/sharp-win32-x64/
+
+FILE: frontend\.next\prerender-manifest.json
+  L7: "response": "initial",
+  L43: "response": "complete",
+  L80: "response": "complete",
+  L121: "response": "complete",
+  L153: "response": "initial",
+
+FILE: frontend\.next\required-server-files.json
+  L56: "maximumResponseBody": 50000000,
+  L188: "imgOptTimeoutInSeconds": 7,
+
+FILE: frontend\.next\server\app\page.js.nft.json
+  L1: {"files":["../../../node_modules/@swc/helpers/cjs/_interop_require_default.cjs","../../../node_modules/@swc/helpers/esm/_interop_require_default.js","../../../node_modules/@swc/helpers/package.json","../../../node_module
+
+FILE: frontend\.next\server\app\favicon.ico\route.js.nft.json
+  L1: {"files":["../../../../node_modules/@swc/helpers/cjs/_interop_require_default.cjs","../../../../node_modules/@swc/helpers/esm/_interop_require_default.js","../../../../node_modules/@swc/helpers/package.json","../../../..
+
+FILE: frontend\.next\server\app\_global-error\page.js.nft.json
+  L1: {"files":["../../../../node_modules/@swc/helpers/cjs/_interop_require_default.cjs","../../../../node_modules/@swc/helpers/esm/_interop_require_default.js","../../../../node_modules/@swc/helpers/package.json","../../../..
+
+FILE: frontend\.next\server\app\_not-found\page.js.nft.json
+  L1: {"files":["../../../../node_modules/@swc/helpers/cjs/_interop_require_default.cjs","../../../../node_modules/@swc/helpers/esm/_interop_require_default.js","../../../../node_modules/@swc/helpers/package.json","../../../..
+
+FILE: frontend\.next\server\app\companies\[symbol]\page.js.nft.json
+  L1: {"files":["../../../../../node_modules/@swc/helpers/cjs/_interop_require_default.cjs","../../../../../node_modules/@swc/helpers/esm/_interop_require_default.js","../../../../../node_modules/@swc/helpers/package.json","..
+
+FILE: database\raw\bhavcopy\backfill_manifest.before_recovery.json
+  L11: "url": "https://archives.nseindia.com/content/historical/EQUITIES/2016/NOV/cm08NOV2016bhav.csv.zip"
+  L21: "url": "https://archives.nseindia.com/content/historical/EQUITIES/2016/NOV/cm09NOV2016bhav.csv.zip"
+  L31: "url": "https://archives.nseindia.com/content/historical/EQUITIES/2016/NOV/cm10NOV2016bhav.csv.zip"
+  L41: "url": "https://archives.nseindia.com/content/historical/EQUITIES/2016/NOV/cm11NOV2016bhav.csv.zip"
+  L47: "url": "https://archives.nseindia.com/content/historical/EQUITIES/2016/NOV/cm14NOV2016bhav.csv.zip"
+
+FILE: database\raw\bhavcopy\backfill_manifest.json
+  L11: "url": "https://archives.nseindia.com/content/historical/EQUITIES/2016/NOV/cm08NOV2016bhav.csv.zip"
+  L21: "url": "https://archives.nseindia.com/content/historical/EQUITIES/2016/NOV/cm09NOV2016bhav.csv.zip"
+  L31: "url": "https://archives.nseindia.com/content/historical/EQUITIES/2016/NOV/cm10NOV2016bhav.csv.zip"
+  L41: "url": "https://archives.nseindia.com/content/historical/EQUITIES/2016/NOV/cm11NOV2016bhav.csv.zip"
+  L47: "url": "https://archives.nseindia.com/content/historical/EQUITIES/2016/NOV/cm14NOV2016bhav.csv.zip"
+
+FILE: database\processed\analytics\greedy_v2_baseline_comparison.json
+  L89: "session_reference": "Common dates from available stock-price records; not independently certified NSE calendar",
+
+FILE: database\processed\analytics\greedy_v2_experiment.json
+  L18: "Aerospace & Defense": 1,
+
+FILE: database\processed\analytics\market_ideas_3m.json
+  L320: "risk": "These selections were optimised using historical training data. Training-period optimisation can overfit and may not generalise to unseen periods. These are not live or out-of-sample picks.",
+  L340: "risk": "These selections were optimised using historical training data. Training-period optimisation can overfit and may not generalise to unseen periods. These are not live or out-of-sample picks.",
+  L360: "risk": "These selections were optimised using historical training data. Training-period optimisation can overfit and may not generalise to unseen periods. These are not live or out-of-sample picks.",
+  L380: "risk": "These selections were optimised using historical training data. Training-period optimisation can overfit and may not generalise to unseen periods. These are not live or out-of-sample picks.",
+  L400: "risk": "These selections were optimised using historical training data. Training-period optimisation can overfit and may not generalise to unseen periods. These are not live or out-of-sample picks.",
+
+FILE: database\processed\analytics\five_strategy_experiment\five_strategy_comparison.json
+  L43: "Aerospace & Defense": 1,
+  L108: "Aerospace & Defense": 1,
+  L173: "Aerospace & Defense": 1,
+  L238: "Aerospace & Defense": 1,
+  L302: "Aerospace & Defense": 1,
+
+FILE: database\processed\analytics\greedy_10y_point_in_time\experiment4_final_unique_date_costs\indian_delivery_cost_config.json
+  L2: "model_name":  "NSE_EQUITY_DELIVERY_ZERODHA_REFERENCE",
+  L4: "exchange":  "NSE",
+  L10: "nse_transaction_pct_each_side":  0.00307,
+  L24: "notes":  "Reference assumptions only. Verify broker tariff before live use. NSE transaction rate includes IPFT contribution.",
+  L26: "https://www.nseindia.com/static/invest/first-time-investor-sebi-turnover-fees-stt-other-levies",
+
+FILE: database\processed\analytics\greedy_10y_point_in_time\experiment4_final_unique_date_costs\indian_delivery_cost_results\delivery_cost_assumptions.json
+  L2: "model": "NSE equity delivery, Zerodha resident-individual reference",
+  L6: "NSE_transaction_pct_each_side": 0.00307,
+
+FILE: analytics\ask_greedy\financial_education.py
+  L244: "Data limitation: this response does not contain a "
+
+FILE: analytics\ask_greedy\greedy_v2_evidence.py
+  L195: "No unambiguous ticker was identified in the question. "
+  L196: "Ask the user for the NSE ticker if stock-specific evidence is required."
+
+FILE: analytics\ask_greedy\historical_intelligence.py
+  L22: '{"symbol":"NSE ticker or null","start_date":"YYYY-MM-DD or null",'
+  L44: response = client.models.generate_content(
+  L48: p = _json(getattr(response, "text", ""))
+  L53: raise ValueError("Invalid ticker format")
+  L273: "Ask which supported NIFTY 50 ticker the user means."
+
+FILE: analytics\ask_greedy\research_planner.py
+  L69: - Never invent ticker symbols, financial inputs or historical values.
+  L92: raise ValueError("Planner response must be an object.")
+  L179: """Conservative deterministic fallback when Gemini planning fails."""
+
+FILE: analytics\ask_greedy\test_chat_integration.py
+  L138: def test_gemini_empty_response_uses_fallback(monkeypatch):
+
+Total matching lines: 6321

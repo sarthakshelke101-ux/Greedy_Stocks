@@ -1,0 +1,1 @@
+"""GREEDY STOCKS analytics package."""

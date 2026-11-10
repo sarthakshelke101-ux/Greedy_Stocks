@@ -1,0 +1,1288 @@
+
+========== frontend\src\app\portfolio-builder.tsx ==========
+   1: "use client";
+   2: 
+   3: import { useEffect, useState } from "react";
+   4: import {
+   5:   BriefcaseBusiness,
+   6:   RefreshCw,
+   7:   TrendingUp,
+   8:   Wallet,
+   9:   AlertTriangle,
+  10: } from "lucide-react";
+  11: 
+  12: const API_BASE_URL =
+  13:   process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
+  14: 
+  15: type Holding = {
+  16:   symbol: string;
+  17:   price: number;
+  18:   quantity: number;
+  19:   invested: number;
+  20:   weight: number;
+  21:   sector?: string;
+  22: };
+  23: 
+  24: type PeriodResult = {
+  25:   start?: string;
+  26:   end?: string;
+  27:   observations?: number;
+  28:   metrics?: {
+  29:     period_return_pct?: number;
+  30:     cagr_pct?: number;
+  31:     annualized_volatility_pct?: number;
+  32:     maximum_drawdown_pct?: number;
+  33:     sharpe_ratio?: number;
+  34:   };
+  35:   benchmark?: {
+  36:     portfolio_return_pct?: number;
+  37:     benchmark_return_pct?: number;
+  38:     excess_return_pct?: number;
+  39:   };
+  40: };
+  41: 
+  42: type PortfolioResult = {
+  43:   status: string;
+  44:   selection_method: string;
+  45:   portfolio: {
+  46:     capital: number;
+  47:     invested: number;
+  48:     cash_remaining: number;
+  49:     stock_count: number;
+  50:     holdings: Holding[];
+  51:   };
+  52:   selection_log: {
+  53:     step: number;
+  54:     symbol: string;
+  55:     portfolio_sharpe: number;
+  56:     marginal_sharpe_change: number | null;
+  57:   }[];
+  58:   training: {
+  59:     start: string;
+  60:     end: string;
+  61:     observations: number;
+  62:     selection_sharpe: number;
+  63:   };
+  64:   validation: PeriodResult;
+  65:   test: PeriodResult;
+  66:   data_limitations: {
+  67:     historical_membership_survivorship_bias?: boolean;
+  68:     dividend_adjusted?: boolean;
+  69:     corporate_action_coverage?: string;
+  70:     validation_test_missing_prices_filled?: boolean;
+  71:   };
+  72:   assumptions: {
+  73:     selection_method: string;
+  74:     daily_rebalancing: boolean;
+  75:     selection_uses_training_data_only: boolean;
+  76:     globally_optimal: boolean;
+  77:   };
+  78: };
+  79: 
+  80: const money = (value?: number) =>
+  81:   typeof value === "number"
+  82:     ? value.toLocaleString("en-IN", {
+  83:         style: "currency",
+  84:         currency: "INR",
+  85:         maximumFractionDigits: 2,
+  86:       })
+  87:     : "?";
+  88: 
+  89: const pct = (value?: number) =>
+  90:   typeof value === "number" ? `${value.toFixed(2)}%` : "?";
+  91: 
+  92: function Metric({
+  93:   label,
+  94:   value,
+  95:   detail,
+  96: }: {
+  97:   label: string;
+  98:   value: string;
+  99:   detail?: string;
+ 100: }) {
+ 101:   return (
+ 102:     <div className="rounded-xl border border-[#343434] bg-[#000000] p-4">
+ 103:       <p className="text-xs text-[#a3a3a3]">{label}</p>
+ 104:       <p className="mt-2 text-xl font-semibold text-white">{value}</p>
+ 105:       {detail && <p className="mt-1 text-xs text-[#888]">{detail}</p>}
+ 106:     </div>
+ 107:   );
+ 108: }
+ 109: 
+ 110: function Performance({
+ 111:   title,
+ 112:   period,
+ 113: }: {
+ 114:   title: string;
+ 115:   period: PeriodResult;
+ 116: }) {
+ 117:   const m = period.metrics;
+ 118:   const b = period.benchmark;
+ 119: 
+ 120:   return (
+ 121:     <section className="rounded-2xl border border-[#343434] bg-[#171717] p-5">
+ 122:       <div className="flex flex-wrap items-center justify-between gap-2">
+ 123:         <h3 className="text-lg font-semibold text-white">{title}</h3>
+ 124:         <span className="text-xs text-[#999]">
+ 125:           {period.start ?? "?"} to {period.end ?? "?"}
+ 126:         </span>
+ 127:       </div>
+ 128:       <div className="mt-4 grid grid-cols-2 gap-3 lg:grid-cols-3">
+ 129:         <Metric label="Period return" value={pct(m?.period_return_pct)} />
+ 130:         <Metric label="CAGR" value={pct(m?.cagr_pct)} />
+ 131:         <Metric label="Sharpe ratio" value={m?.sharpe_ratio?.toFixed(3) ?? "?"} />
+ 132:         <Metric
+ 133:           label="Annualized volatility"
+ 134:           value={pct(m?.annualized_volatility_pct)}
+ 135:         />
+ 136:         <Metric
+ 137:           label="Maximum drawdown"
+ 138:           value={pct(m?.maximum_drawdown_pct)}
+ 139:         />
+ 140:         <Metric
+ 141:           label="NIFTY 50 return"
+ 142:           value={pct(b?.benchmark_return_pct)}
+ 143:           detail={`Excess return: ${pct(b?.excess_return_pct)}`}
+ 144:         />
+ 145:       </div>
+ 146:     </section>
+ 147:   );
+ 148: }
+ 149: 
+ 150: export default function PortfolioBuilder({ initialSelectedStock = "" }: { initialSelectedStock?: string }) {
+ 151:   const [capital, setCapital] = useState("100000");
+ 152:   const [stockCount, setStockCount] = useState("5");
+ 153:   const [maxPerSector, setMaxPerSector] = useState("3");
+ 154:   const [trainingYears, setTrainingYears] = useState("10");
+ 155:   const [riskFreeRate, setRiskFreeRate] = useState("0");
+ 156:   const [result, setResult] = useState<PortfolioResult | null>(null);
+ 157:   const [loading, setLoading] = useState(false);
+ 158:   const [error, setError] = useState("");
+ 159:   const [addedStocks, setAddedStocks] = useState<string[]>([]);
+ 160: 
+ 161:   useEffect(() => {
+ 162:     const key = "greedy-stocks-selected";
+ 163:     let saved: string[] = [];
+ 164: 
+ 165:     try {
+ 166:       const parsed = JSON.parse(localStorage.getItem(key) || "[]");
+ 167:       if (Array.isArray(parsed)) {
+ 168:         saved = parsed.filter(
+ 169:           (item): item is string => typeof item === "string"
+ 170:         ).map((item) => item.toUpperCase());
+ 171:       }
+ 172:     } catch {
+ 173:       saved = [];
+ 174:     }
+ 175: 
+ 176:     const merged = Array.from(new Set([
+ 177:       ...saved,
+ 178:       ...(initialSelectedStock ? [initialSelectedStock.toUpperCase()] : []),
+ 179:     ]));
+ 180: 
+ 181:     setAddedStocks(merged);
+ 182:     localStorage.setItem(key, JSON.stringify(merged));
+ 183:   }, [initialSelectedStock]);
+ 184: 
+ 185:   function removeAddedStock(symbol: string) {
+ 186:     const updated = addedStocks.filter((item) => item !== symbol);
+ 187:     setAddedStocks(updated);
+ 188:     localStorage.setItem("greedy-stocks-selected", JSON.stringify(updated));
+ 189:   }
+ 190: 
+ 191:   async function generatePortfolio(event: React.FormEvent<HTMLFormElement>) {
+ 192:     event.preventDefault();
+ 193:     setLoading(true);
+ 194:     setError("");
+ 195:     setResult(null);
+ 196: 
+ 197:     try {
+ 198:       const response = await fetch(`${API_BASE_URL}/portfolio/generate`, {
+ 199:         method: "POST",
+ 200:         headers: { "Content-Type": "application/json" },
+ 201:         body: JSON.stringify({
+ 202:           capital: Number(capital),
+ 203:           stock_count: Number(stockCount),
+ 204:           training_years: Number(trainingYears),
+ 205:           max_per_sector: Number(maxPerSector),
+ 206:           risk_free_rate: Number(riskFreeRate) / 100,
+ 207:         }),
+ 208:       });
+ 209: 
+ 210:       const data = await response.json();
+ 211: 
+ 212:       if (!response.ok) {
+ 213:         throw new Error(
+ 214:           typeof data.detail === "string"
+ 215:             ? data.detail
+ 216:             : JSON.stringify(data.detail ?? "Portfolio generation failed.")
+ 217:         );
+ 218:       }
+ 219: 
+ 220:       setResult(data as PortfolioResult);
+ 221:     } catch (err) {
+ 222:       setError(
+ 223:         err instanceof Error
+ 224:           ? err.message
+ 225:           : "Could not connect to GREEDY STOCKS API."
+ 226:       );
+ 227:     } finally {
+ 228:       setLoading(false);
+ 229:     }
+ 230:   }
+ 231: 
+ 232:   return (
+ 233:     <main className="mx-auto max-w-[1500px] space-y-6 p-5 md:p-8">
+ 234:       <header>
+ 235:         <div className="mb-2 flex items-center gap-2 text-xs text-[#aaa]">
+ 236:           <BriefcaseBusiness size={15} />
+ 237:           GREEDY V2 PORTFOLIO ENGINE
+ 238:         </div>
+ 239:         <h1 className="text-3xl font-bold tracking-tight text-white">
+ 240:           Portfolio Builder
+ 241:         </h1>
+ 242:         <p className="mt-2 max-w-3xl text-sm leading-6 text-[#aaa]">
+ 243:           Generate a whole-share portfolio using sequential greedy Sharpe
+ 244:           selection and evaluate it against NIFTY 50.
+ 245:         </p>
+ 246:       </header>
+ 247: 
+ 248:       {addedStocks.length > 0 && (
+ 249:         <section className="rounded-2xl border border-cyan-400/30 bg-cyan-400/5 p-5">
+ 250:           <div className="flex flex-wrap items-center justify-between gap-2">
+ 251:             <p className="text-xs font-semibold uppercase tracking-wider text-cyan-300">
+ 252:               Added from Company Explorer
+ 253:             </p>
+ 254:             <span className="rounded-full bg-cyan-400/10 px-3 py-1 text-xs font-semibold text-cyan-200">
+ 255:               {addedStocks.length} {addedStocks.length === 1 ? "stock" : "stocks"} saved
+ 256:             </span>
+ 257:           </div>
+ 258: 
+ 259:           <div className="mt-4 flex flex-wrap gap-2">
+ 260:             {addedStocks.map((symbol) => (
+ 261:               <span key={symbol} className="inline-flex items-center gap-3 rounded-lg border border-cyan-400/30 bg-cyan-400/10 px-4 py-2 font-semibold text-cyan-200">
+ 262:                 {symbol}
+ 263:                 <button
+ 264:                   type="button"
+ 265:                   onClick={() => removeAddedStock(symbol)}
+ 266:                   aria-label={`Remove ${symbol}`}
+ 267:                   className="text-lg leading-none text-cyan-200/70 transition hover:text-red-300"
+ 268:                 >
+ 269:                   ×
+ 270:                 </button>
+ 271:               </span>
+ 272:             ))}
+ 273:           </div>
+ 274: 
+ 275:           <p className="mt-3 text-xs leading-5 text-[#aaa]">
+ 276:             Your research list is saved in this browser and survives navigation and refreshes.
+ 277:             Greedy V2 independently selects holdings; these stocks are not forced into the generated portfolio.
+ 278:           </p>
+ 279:         </section>
+ 280:       )}
+ 281:       <form
+ 282:         onSubmit={generatePortfolio}
+ 283:         className="grid gap-4 rounded-2xl border border-[#303030] bg-[#171717] p-5 md:grid-cols-2 xl:grid-cols-5"
+ 284:       >
+ 285:         <label className="text-sm text-[#bbb]">
+ 286:           Investment capital (INR)
+ 287:           <input
+ 288:             required
+ 289:             type="number"
+ 290:             min="1"
+ 291:             max="100000000000"
+ 292:             step="0.01"
+ 293:             value={capital}
+ 294:             onChange={(e) => setCapital(e.target.value)}
+ 295:             className="mt-2 w-full rounded-lg border border-[#444] bg-[#171717] px-3 py-3 text-white outline-none focus:border-[#888]"
+ 296:           />
+ 297:         </label>
+ 298: 
+ 299:         <label className="text-sm text-[#bbb]">
+ 300:           Number of stocks
+ 301:           <select
+ 302:             value={stockCount}
+ 303:             onChange={(e) => setStockCount(e.target.value)}
+ 304:             className="mt-2 w-full rounded-lg border border-[#444] bg-[#171717] px-3 py-3 text-white"
+ 305:           >
+ 306:             {Array.from({ length: 10 }, (_, i) => i + 1).map((n) => (
+ 307:               <option key={n} value={n}>{n} stocks</option>
+ 308:             ))}
+ 309:           </select>
+ 310:         </label>
+ 311: 
+ 312:         <label className="text-sm text-[#bbb]">
+ 313:           Maximum stocks per sector
+ 314:           <select
+ 315:             value={maxPerSector}
+ 316:             onChange={(e) => setMaxPerSector(e.target.value)}
+ 317:             className="mt-2 w-full rounded-lg border border-[#444] bg-[#171717] px-3 py-3 text-white"
+ 318:           >
+ 319:             {Array.from({ length: 10 }, (_, i) => i + 1).map((n) => (
+ 320:               <option key={n} value={n}>{n}</option>
+ 321:             ))}
+ 322:           </select>
+ 323:         </label>
+ 324: 
+ 325:         <label className="text-sm text-[#bbb]">
+ 326:           Training history
+ 327:           <select
+ 328:             value={trainingYears}
+ 329:             onChange={(e) => setTrainingYears(e.target.value)}
+ 330:             className="mt-2 w-full rounded-lg border border-[#444] bg-[#171717] px-3 py-3 text-white"
+ 331:           >
+ 332:             {[1, 2, 3, 5, 7, 10].map((n) => (
+ 333:               <option key={n} value={n}>{n} years</option>
+ 334:             ))}
+ 335:           </select>
+ 336:         </label>
+ 337: 
+ 338:         <label className="text-sm text-[#bbb]">
+ 339:           Annual risk-free rate (%)
+ 340:           <input
+ 341:             type="number"
+ 342:             min="0"
+ 343:             max="100"
+ 344:             step="0.1"
+ 345:             value={riskFreeRate}
+ 346:             onChange={(e) => setRiskFreeRate(e.target.value)}
+ 347:             className="mt-2 w-full rounded-lg border border-[#444] bg-[#171717] px-3 py-3 text-white"
+ 348:           />
+ 349:         </label>
+ 350: 
+ 351:         <div className="flex items-end md:col-span-2 xl:col-span-5">
+ 352:           <button
+ 353:             type="submit"
+ 354:             disabled={loading}
+ 355:             className="flex w-full items-center justify-center gap-2 rounded-xl bg-white px-5 py-3 font-semibold text-black transition hover:bg-[#ddd] disabled:cursor-not-allowed disabled:opacity-50 md:w-auto"
+ 356:           >
+ 357:             {loading ? (
+ 358:               <RefreshCw size={17} className="animate-spin" />
+ 359:             ) : (
+ 360:               <TrendingUp size={17} />
+ 361:             )}
+ 362:             {loading ? "Generating portfolio..." : "Generate Greedy V2 Portfolio"}
+ 363:           </button>
+ 364:         </div>
+ 365:       </form>
+ 366: 
+ 367:       {error && (
+ 368:         <div className="flex items-start gap-3 rounded-xl border border-red-900 bg-red-950/30 p-4 text-sm text-red-300">
+ 369:           <AlertTriangle size={18} className="mt-0.5 shrink-0" />
+ 370:           <span>{error}</span>
+ 371:         </div>
+ 372:       )}
+ 373: 
+ 374:       {!result && !loading && !error && (
+ 375:         <div className="rounded-2xl border border-dashed border-[#444] p-10 text-center">
+ 376:           <Wallet size={30} className="mx-auto text-[#888]" />
+ 377:           <h3 className="mt-3 font-semibold text-white">
+ 378:             Your portfolio will appear here
+ 379:           </h3>
+ 380:           <p className="mt-2 text-sm text-[#999]">
+ 381:             Set your investment preferences and generate a portfolio.
+ 382:           </p>
+ 383:         </div>
+ 384:       )}
+ 385: 
+ 386:       {result && (
+ 387:         <>
+ 388:           <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+ 389:             <Metric label="Starting capital" value={money(result.portfolio.capital)} />
+ 390:             <Metric label="Amount invested" value={money(result.portfolio.invested)} />
+ 391:             <Metric label="Cash remaining" value={money(result.portfolio.cash_remaining)} />
+ 392:             <Metric
+ 393:               label="Selected stocks"
+ 394:               value={String(result.portfolio.stock_count)}
+ 395:               detail="Whole-share allocation"
+ 396:             />
+ 397:           </section>
+ 398: 
+ 399:           <section className="overflow-hidden rounded-2xl border border-[#303030] bg-[#171717]">
+ 400:             <div className="border-b border-[#303030] p-5">
+ 401:               <h2 className="text-lg font-semibold text-white">Your holdings</h2>
+ 402:               <p className="mt-1 text-xs text-[#999]">
+ 403:                 Latest available raw closing prices; quantities are whole shares.
+ 404:               </p>
+ 405:             </div>
+ 406:             <div className="overflow-x-auto">
+ 407:               <table className="w-full min-w-[650px] text-left text-sm">
+ 408:                 <thead className="bg-[#292929] text-xs text-[#aaa]">
+ 409:                   <tr>
+ 410:                     <th className="px-5 py-3">Stock</th>
+ 411:                     <th className="px-5 py-3">Sector</th>
+ 412:                     <th className="px-5 py-3 text-right">Price</th>
+ 413:                     <th className="px-5 py-3 text-right">Quantity</th>
+ 414:                     <th className="px-5 py-3 text-right">Investment</th>
+ 415:                     <th className="px-5 py-3 text-right">Weight</th>
+ 416:                   </tr>
+ 417:                 </thead>
+ 418:                 <tbody>
+ 419:                   {result.portfolio.holdings.map((holding) => (
+ 420:                     <tr key={holding.symbol} className="border-t border-[#353535] text-[#eee]">
+ 421:                       <td className="px-5 py-4 font-semibold">{holding.symbol}</td>
+ 422:                       <td className="px-5 py-4 text-[#aaa]">{holding.sector ?? "?"}</td>
+ 423:                       <td className="px-5 py-4 text-right">{money(holding.price)}</td>
+ 424:                       <td className="px-5 py-4 text-right">{holding.quantity}</td>
+ 425:                       <td className="px-5 py-4 text-right">{money(holding.invested)}</td>
+ 426:                       <td className="px-5 py-4 text-right">{(holding.weight * 100).toFixed(2)}%</td>
+ 427:                     </tr>
+ 428:                   ))}
+ 429:                 </tbody>
+ 430:               </table>
+ 431:             </div>
+ 432:           </section>
+ 433: 
+ 434:           <section className="rounded-2xl border border-[#303030] bg-[#171717] p-5">
+ 435:             <h2 className="text-lg font-semibold text-white">Greedy selection journey</h2>
+ 436:             <p className="mt-1 text-xs text-[#999]">
+ 437:               Training period: {result.training.start} to {result.training.end}
+ 438:               {" ? "}{result.training.observations.toLocaleString("en-IN")} observations
+ 439:               {" ? "}Selection Sharpe: {result.training.selection_sharpe.toFixed(3)}
+ 440:             </p>
+ 441:             <div className="mt-4 space-y-3">
+ 442:               {result.selection_log.map((step) => (
+ 443:                 <div key={step.step} className="flex flex-wrap items-center justify-between gap-2 rounded-lg bg-[#292929] p-3 text-sm">
+ 444:                   <div>
+ 445:                     <span className="mr-3 text-[#888]">#{step.step}</span>
+ 446:                     <span className="font-semibold text-white">{step.symbol}</span>
+ 447:                   </div>
+ 448:                   <div className="text-right text-[#bbb]">
+ 449:                     Sharpe {step.portfolio_sharpe.toFixed(3)}
+ 450:                     {step.marginal_sharpe_change !== null && (
+ 451:                       <span className={step.marginal_sharpe_change >= 0 ? "ml-3 text-green-400" : "ml-3 text-red-400"}>
+ 452:                         {step.marginal_sharpe_change >= 0 ? "+" : ""}
+ 453:                         {step.marginal_sharpe_change.toFixed(3)}
+ 454:                       </span>
+ 455:                     )}
+ 456:                   </div>
+ 457:                 </div>
+ 458:               ))}
+ 459:             </div>
+ 460:           </section>
+ 461: 
+ 462:           <div className="grid gap-4 xl:grid-cols-2">
+ 463:             <Performance title="Validation performance" period={result.validation} />
+ 464:             <Performance title="Out-of-sample test performance" period={result.test} />
+ 465:           </div>
+ 466: 
+ 467:           <section className="rounded-2xl border border-[#303030] bg-[#171717] p-5">
+ 468:             <h2 className="text-lg font-semibold text-white">Methodology and data limitations</h2>
+ 469:             <ul className="mt-3 grid gap-2 text-sm text-[#bbb] md:grid-cols-2">
+ 470:               <li>? Selection method: {result.assumptions.selection_method}</li>
+ 471:               <li>? Daily rebalancing: {result.assumptions.daily_rebalancing ? "Yes" : "No"}</li>
+ 472:               <li>? Selection uses training data only: {result.assumptions.selection_uses_training_data_only ? "Yes" : "No"}</li>
+ 473:               <li>? Globally optimal: {result.assumptions.globally_optimal ? "Yes" : "No"}</li>
+ 474:               <li>? Dividend adjusted: {result.data_limitations.dividend_adjusted ? "Yes" : "No"}</li>
+ 475:               <li>? Corporate-action coverage: {result.data_limitations.corporate_action_coverage ?? "Not specified"}</li>
+ 476:               <li>? Survivorship bias: {result.data_limitations.historical_membership_survivorship_bias ? "Present" : "Not flagged"}</li>
+ 477:               <li>? Missing evaluation prices filled: {result.data_limitations.validation_test_missing_prices_filled ? "Yes" : "No"}</li>
+ 478:             </ul>
+ 479:             <p className="mt-4 border-t border-[#303030] pt-4 text-xs leading-6 text-[#999]">
+ 480:               Historical validation and test metrics represent a daily-rebalanced,
+ 481:               equal-weight research portfolio. They are not the realized buy-and-hold
+ 482:               performance of the whole-share holdings shown above. Historical results
+ 483:               do not guarantee future returns. For educational research only, not
+ 484:               investment advice.
+ 485:             </p>
+ 486:           </section>
+ 487:         </>
+ 488:       )}
+ 489:     </main>
+ 490:   );
+ 491: }
+ 492: 
+
+========== frontend\src\app\page.tsx ==========
+  51: 
+  52: const navigation = [
+  53:   { name: "Dashboard", icon: LayoutDashboard },
+  54:   { name: "Ask GREEDY", icon: MessageSquare },
+  55:   { name: "Explore & Discover", icon: Compass },
+  56:   { name: "Portfolio Builder", icon: BriefcaseBusiness },
+  57:   { name: "Greedy Lab", icon: FlaskConical },
+  58:   { name: "Learn", icon: BookOpen },
+  59: ];
+  60: 
+  61: // --------------------------------------------------
+  62: // ILLUSTRATIVE DASHBOARD DATA
+  63: // --------------------------------------------------
+  64: 
+  65: const chartData = [
+----------
+ 588:   const router = useRouter();
+ 589:   const searchParams = useSearchParams();
+ 590: 
+ 591:   const questionFromUrl = searchParams.get("question") || "";
+ 592:   const conversationParam = searchParams.get("conversation") || "";
+ 593:   const stockFromUrl = (searchParams.get("addStock") || "").toUpperCase().trim();
+ 594: 
+ 595:   const parsedConversationId =
+ 596:     /^\d+$/.test(conversationParam) &&
+ 597:     Number.isSafeInteger(Number(conversationParam)) &&
+ 598:     Number(conversationParam) > 0
+ 599:       ? Number(conversationParam)
+ 600:       : null;
+ 601: 
+ 602:   const [activeNav, setActiveNav] = useState(
+----------
+ 691: 
+ 692:   const currentNav =
+ 693:     questionFromUrl || parsedConversationId
+ 694:       ? "Ask GREEDY"
+ 695:       : stockFromUrl
+ 696:         ? "Portfolio Builder"
+ 697:         : activeNav;
+ 698: 
+ 699:   function handleNavigation(name: string) {
+ 700:     setActiveNav(name);
+ 701:     setMobileMenu(false);
+ 702: 
+ 703:     if (
+ 704:       name !== "Ask GREEDY" &&
+ 705:       (questionFromUrl || conversationParam || stockFromUrl)
+----------
+1027:               initialConversationId={parsedConversationId}
+1028:               onConversationUpdated={() => void refreshConversations()}
+1029:             />
+1030:           ) : currentNav === "Explore & Discover" ? (
+1031:             <ExploreDiscover />
+1032: ) : currentNav === "Portfolio Builder" ? (
+1033:             <PortfolioBuilder initialSelectedStock={stockFromUrl} />
+1034:           ) : currentNav === "Learn" ? (
+1035:             <LearnPage />
+1036:           ) : (
+1037: 
+1038:             /* DASHBOARD */
+1039: 
+1040:             <div className="mx-auto max-w-[1500px] p-5 md:p-8">
+1041: 
+----------
+1028:               onConversationUpdated={() => void refreshConversations()}
+1029:             />
+1030:           ) : currentNav === "Explore & Discover" ? (
+1031:             <ExploreDiscover />
+1032: ) : currentNav === "Portfolio Builder" ? (
+1033:             <PortfolioBuilder initialSelectedStock={stockFromUrl} />
+1034:           ) : currentNav === "Learn" ? (
+1035:             <LearnPage />
+1036:           ) : (
+1037: 
+1038:             /* DASHBOARD */
+1039: 
+1040:             <div className="mx-auto max-w-[1500px] p-5 md:p-8">
+1041: 
+1042:               {/* DASHBOARD HEADING */}
+----------
+
+========== frontend\src\app\companies\[symbol]\page.tsx ==========
+ 363:         </div>
+ 364: 
+ 365:         <div className="mb-7 flex flex-wrap gap-3">
+ 366:           <button
+ 367:             onClick={() => {
+ 368:               const key = "greedy-stocks-selected";
+ 369:               const saved = JSON.parse(localStorage.getItem(key) || "[]") as string[];
+ 370:               const updated = Array.from(new Set([...saved, company.symbol.toUpperCase()]));
+ 371:               localStorage.setItem(key, JSON.stringify(updated));
+ 372:               router.push(`/?addStock=${encodeURIComponent(company.symbol)}`);
+ 373:             }}
+ 374:             className="inline-flex items-center gap-2 rounded-xl bg-cyan-400 px-5 py-3 text-sm font-bold text-[#07111f] transition hover:bg-cyan-300"
+ 375:           >
+ 376:             <BriefcaseBusiness size={17} />
+ 377:             Add to Portfolio Builder
+----------
+ 367:             onClick={() => {
+ 368:               const key = "greedy-stocks-selected";
+ 369:               const saved = JSON.parse(localStorage.getItem(key) || "[]") as string[];
+ 370:               const updated = Array.from(new Set([...saved, company.symbol.toUpperCase()]));
+ 371:               localStorage.setItem(key, JSON.stringify(updated));
+ 372:               router.push(`/?addStock=${encodeURIComponent(company.symbol)}`);
+ 373:             }}
+ 374:             className="inline-flex items-center gap-2 rounded-xl bg-cyan-400 px-5 py-3 text-sm font-bold text-[#07111f] transition hover:bg-cyan-300"
+ 375:           >
+ 376:             <BriefcaseBusiness size={17} />
+ 377:             Add to Portfolio Builder
+ 378:           </button>
+ 379:         </div>
+ 380:         {/* KEY METRICS */}
+ 381:         <div className="mb-7 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+----------
+ 372:               router.push(`/?addStock=${encodeURIComponent(company.symbol)}`);
+ 373:             }}
+ 374:             className="inline-flex items-center gap-2 rounded-xl bg-cyan-400 px-5 py-3 text-sm font-bold text-[#07111f] transition hover:bg-cyan-300"
+ 375:           >
+ 376:             <BriefcaseBusiness size={17} />
+ 377:             Add to Portfolio Builder
+ 378:           </button>
+ 379:         </div>
+ 380:         {/* KEY METRICS */}
+ 381:         <div className="mb-7 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+ 382:           <Metric
+ 383:             label="Trading observations"
+ 384:             value={formatNumber(
+ 385:               coverage?.observations ??
+ 386:                 coverage?.total_observations
+----------
+
+========== backend\portfolio_routes.py ==========
+   1: """GREEDY STOCKS ? configurable Greedy V2 portfolio API."""
+   2: 
+   3: import logging
+   4: import math
+   5: import sys
+   6: from datetime import date, timedelta
+   7: from pathlib import Path
+   8: 
+   9: from fastapi import APIRouter, HTTPException
+  10: from pydantic import BaseModel, Field, FiniteFloat
+  11: 
+  12: ROOT = Path(__file__).resolve().parent.parent
+  13: if str(ROOT) not in sys.path:
+  14:     sys.path.insert(0, str(ROOT))
+  15: 
+  16: from analytics.greedy_v2_data import prepare_greedy_v2_dataset
+  17: from analytics.greedy_v2_splits import chronological_split
+  18: from analytics.greedy_v2_engine import greedy_select_stocks
+  19: from analytics.portfolio_analytics import (
+  20:     calculate_portfolio,
+  21:     compare_with_benchmark,
+  22: )
+  23: from analytics.portfolio_allocation import allocate_capital
+  24: 
+  25: router = APIRouter(tags=["Portfolio"])
+  26: logger = logging.getLogger("greedy_stocks_portfolio")
+  27: 
+  28: 
+  29: class PortfolioRequest(BaseModel):
+  30:     capital: FiniteFloat = Field(gt=0, le=100_000_000_000)
+  31:     stock_count: int = Field(default=5, ge=1, le=10)
+  32:     training_years: int = Field(default=10, ge=1, le=10)
+  33:     max_per_sector: int = Field(default=3, ge=1, le=10)
+  34:     risk_free_rate: FiniteFloat = Field(default=0.0, ge=0, le=1)
+  35: 
+  36: 
+  37: def _clean(value):
+  38:     if hasattr(value, "item"):
+  39:         value = value.item()
+  40:     if isinstance(value, (date,)):
+  41:         return value.isoformat()
+  42:     if hasattr(value, "isoformat") and not isinstance(value, str):
+  43:         return value.isoformat()
+  44:     if isinstance(value, float) and not math.isfinite(value):
+  45:         return None
+  46:     return value
+  47: 
+  48: 
+  49: def _metrics(result):
+  50:     return {
+  51:         str(key): _clean(value)
+  52:         for key, value in result["metrics"].items()
+  53:         if isinstance(value, (str, int, float, bool))
+  54:         or value is None
+  55:     }
+  56: 
+  57: 
+  58: @router.post("/portfolio/generate")
+  59: def generate_portfolio(request: PortfolioRequest):
+  60:     """Generate a capital-constrained portfolio using original Greedy V2."""
+  61:     try:
+  62:         today = date.today()
+  63:         end_date = today.isoformat()
+  64:         start_date = (today - timedelta(days=365 * request.training_years)).isoformat()
+  65: 
+  66:         dataset = prepare_greedy_v2_dataset(
+  67:             start_date=start_date,
+  68:             end_date=end_date,
+  69:         )
+  70: 
+  71:         split = chronological_split(
+  72:             dataset.adjusted_prices,
+  73:             allow_sparse_evaluation=True,
+  74:         )
+  75: 
+  76:         # Greedy selection sees training data only.
+  77:         selection = greedy_select_stocks(
+  78:             train_prices=split.train,
+  79:             sectors=dataset.sectors,
+  80:             target_stocks=request.stock_count,
+  81:             max_per_sector=request.max_per_sector,
+  82:             risk_free_rate=request.risk_free_rate,
+  83:         )
+  84: 
+  85:         symbols = selection["selected_symbols"]
+  86: 
+  87:         # Latest raw close is used for executable share quantities.
+  88:         latest_prices = {}
+  89: 
+  90:         for symbol in symbols:
+  91:             raw_column = (
+  92:                 symbol if symbol in dataset.raw_prices.columns
+  93:                 else f"{symbol}_RAW"
+  94:             )
+  95: 
+  96:             if raw_column not in dataset.raw_prices.columns:
+  97:                 raise ValueError(
+  98:                     f"Raw price history unavailable for {symbol} "
+  99:                     f"(expected column: {raw_column})."
+ 100:                 )
+ 101: 
+ 102:             available = dataset.raw_prices[raw_column].dropna()
+ 103: 
+ 104:             if available.empty:
+ 105:                 raise ValueError(f"No usable raw price is available for {symbol}.")
+ 106: 
+ 107:             latest_prices[symbol] = float(available.iloc[-1])
+ 108: 
+ 109:         allocation = allocate_capital(
+ 110:             symbols=symbols,
+ 111:             prices=latest_prices,
+ 112:             capital=float(request.capital),
+ 113:         )
+ 114: 
+ 115:         # Validation-period metrics are kept separate from training selection.
+ 116:         validation_prices = split.validation
+ 117:         validation_benchmark = dataset.benchmark_prices.reindex(split.validation.index)
+ 118: 
+ 119:         validation_result = calculate_portfolio(
+ 120:             prices=validation_prices,
+ 121:             sectors=dataset.sectors,
+ 122:             symbols=symbols,
+ 123:             risk_free_rate=request.risk_free_rate,
+ 124:             max_stocks=request.stock_count,
+ 125:             max_per_sector=request.max_per_sector,
+ 126:             price_basis="SPLIT_BONUS_ADJUSTED",
+ 127:             return_type="PRICE_RETURN",
+ 128:         )
+ 129: 
+ 130:         test_prices = split.test
+ 131:         test_benchmark = dataset.benchmark_prices.reindex(test_prices.index)
+ 132: 
+ 133:         test_result = calculate_portfolio(
+ 134:             prices=test_prices,
+ 135:             sectors=dataset.sectors,
+ 136:             symbols=symbols,
+ 137:             risk_free_rate=request.risk_free_rate,
+ 138:             max_stocks=request.stock_count,
+ 139:             max_per_sector=request.max_per_sector,
+ 140:             price_basis="SPLIT_BONUS_ADJUSTED",
+ 141:             return_type="PRICE_RETURN",
+ 142:         )
+ 143: 
+ 144:         test_comparison = compare_with_benchmark(
+ 145:             test_result["daily_returns"],
+ 146:             test_benchmark,
+ 147:         )
+ 148: 
+ 149:         comparison = compare_with_benchmark(
+ 150:             validation_result["daily_returns"],
+ 151:             validation_benchmark,
+ 152:         )
+ 153: 
+ 154:         holdings = allocation["holdings"]
+ 155:         for holding in holdings:
+ 156:             holding["sector"] = dataset.sectors[holding["symbol"]]
+ 157: 
+ 158:         return {
+ 159:             "status": "success",
+ 160:             "selection_method": "SEQUENTIAL_GREEDY_SHARPE",
+ 161:             "portfolio": allocation,
+ 162:             "holdings": holdings,
+ 163:             "selection_log": selection["selection_log"].to_dict(
+ 164:                 orient="records"
+ 165:             ),
+ 166:             "training": {
+ 167:                 "start": str(split.train.index.min().date()),
+ 168:                 "end": str(split.train.index.max().date()),
+ 169:                 "observations": len(split.train),
+ 170:                 "selection_sharpe": _clean(
+ 171:                     selection["portfolio_result"]["metrics"].get("sharpe_ratio")
+ 172:                 ),
+ 173:             },
+ 174:             "validation": {
+ 175:                 "start": str(validation_prices.index.min().date()),
+ 176:                 "end": str(validation_prices.index.max().date()),
+ 177:                 "observations": len(validation_prices),
+ 178:                 "metrics": _metrics(validation_result),
+ 179:                 "benchmark": {
+ 180:                     key: _clean(value)
+ 181:                     for key, value in comparison.items()
+ 182:                     if key != "comparison_returns"
+ 183:                 },
+ 184:             },
+ 185:             "test": {
+ 186:                 "start": str(test_prices.index[1].date()),
+ 187:                 "end": str(test_prices.index[-1].date()),
+ 188:                 "observations": len(test_prices) - 1,
+ 189:                 "metrics": _metrics(test_result),
+ 190:                 "benchmark": {
+ 191:                     key: _clean(value)
+ 192:                     for key, value in test_comparison.items()
+ 193:                     if key != "comparison_returns"
+ 194:                 },
+ 195:             },
+ 196:             "data_limitations": {
+ 197:                 "membership_basis": dataset.metadata["membership_basis"],
+ 198:                 "corporate_action_coverage": dataset.metadata[
+ 199:                     "corporate_action_coverage"
+ 200:                 ],
+ 201:                 "dividend_adjusted": dataset.metadata["dividend_adjusted"],
+ 202:                 "price_basis": dataset.metadata["price_basis"],
+ 203:                 "benchmark_basis": "NIFTY_50_PRICE_RETURN",
+ 204:                 "historical_membership_survivorship_bias": True,
+ 205:                 "historical_metrics_are_daily_rebalanced": True,
+ 206:                 "live_holdings_use_latest_raw_close": True,
+ 207:             },
+ 208:             "assumptions": selection["assumptions"],
+ 209:         }
+ 210: 
+ 211:     except ValueError as exc:
+ 212:         raise HTTPException(status_code=400, detail=str(exc)) from exc
+ 213:     except Exception as exc:
+ 214:         logger.exception("Portfolio generation failed.")
+ 215:         raise HTTPException(
+ 216:             status_code=500,
+ 217:             detail="Portfolio generation failed. Check backend logs.",
+ 218:         ) from exc
+ 219: """GREEDY STOCKS - Configurable Greedy V2 portfolio API."""
+ 220: 
+ 221: import logging
+ 222: import math
+ 223: import sys
+ 224: from datetime import date, timedelta
+ 225: from pathlib import Path
+ 226: 
+ 227: import numpy as np
+ 228: import pandas as pd
+ 229: from fastapi import APIRouter, HTTPException
+ 230: from pydantic import BaseModel, Field, FiniteFloat
+ 231: 
+ 232: ROOT = Path(__file__).resolve().parent.parent
+ 233: if str(ROOT) not in sys.path:
+ 234:     sys.path.insert(0, str(ROOT))
+ 235: 
+ 236: from analytics.greedy_v2_data import prepare_greedy_v2_dataset
+ 237: from analytics.greedy_v2_splits import chronological_split
+ 238: from analytics.greedy_v2_engine import greedy_select_stocks
+ 239: from analytics.portfolio_analytics import (
+ 240:     calculate_portfolio,
+ 241:     compare_with_benchmark,
+ 242: )
+ 243: from analytics.portfolio_allocation import allocate_capital
+ 244: 
+ 245: router = APIRouter(tags=["Portfolio"])
+ 246: logger = logging.getLogger("greedy_stocks_portfolio")
+ 247: 
+ 248: 
+ 249: class PortfolioRequest(BaseModel):
+ 250:     capital: FiniteFloat = Field(gt=0, le=100_000_000_000)
+ 251:     stock_count: int = Field(default=5, ge=1, le=10)
+ 252:     training_years: int = Field(default=10, ge=1, le=10)
+ 253:     max_per_sector: int = Field(default=3, ge=1, le=10)
+ 254:     risk_free_rate: FiniteFloat = Field(default=0.0, ge=0, le=1)
+ 255: 
+ 256: 
+ 257: def _clean(value):
+ 258:     """Convert NumPy/Pandas values into JSON-safe Python values."""
+ 259:     if value is None:
+ 260:         return None
+ 261: 
+ 262:     if value is pd.NaT or value is pd.NA:
+ 263:         return None
+ 264: 
+ 265:     if isinstance(value, (pd.Timestamp, date)):
+ 266:         return value.isoformat()
+ 267: 
+ 268:     if isinstance(value, np.generic):
+ 269:         value = value.item()
+ 270: 
+ 271:     if isinstance(value, float) and not math.isfinite(value):
+ 272:         return None
+ 273: 
+ 274:     if isinstance(value, dict):
+ 275:         return {str(k): _clean(v) for k, v in value.items()}
+ 276: 
+ 277:     if isinstance(value, (list, tuple)):
+ 278:         return [_clean(v) for v in value]
+ 279: 
+ 280:     return value
+ 281: 
+ 282: 
+ 283: def _metrics(result):
+ 284:     return _clean(result.get("metrics", {}))
+ 285: 
+ 286: 
+ 287: def _period_summary(prices, include_baseline=True):
+ 288:     if prices is None or prices.empty:
+ 289:         raise ValueError("Insufficient historical observations for this period.")
+ 290: 
+ 291:     start_index = 0 if include_baseline else 1
+ 292: 
+ 293:     if len(prices) <= start_index:
+ 294:         raise ValueError("Insufficient historical observations for this period.")
+ 295: 
+ 296:     measured = prices.iloc[start_index:]
+ 297: 
+ 298:     return {
+ 299:         "start": str(measured.index.min().date()),
+ 300:         "end": str(measured.index.max().date()),
+ 301:         "observations": len(measured),
+ 302:     }
+ 303: 
+ 304: 
+ 305: def _benchmark_summary(comparison):
+ 306:     return {
+ 307:         str(key): _clean(value)
+ 308:         for key, value in comparison.items()
+ 309:         if key != "comparison_returns"
+ 310:     }
+ 311: 
+ 312: 
+ 313: @router.post("/portfolio/generate")
+ 314: def generate_portfolio(request: PortfolioRequest):
+ 315:     """Generate a capital-constrained portfolio using original Greedy V2."""
+ 316: 
+ 317:     try:
+ 318:         today = date.today()
+ 319:         end_date = today.isoformat()
+ 320:         start_date = (
+ 321:             today - timedelta(days=365 * request.training_years)
+ 322:         ).isoformat()
+ 323: 
+ 324:         dataset = prepare_greedy_v2_dataset(
+ 325:             start_date=start_date,
+ 326:             end_date=end_date,
+ 327:         )
+ 328: 
+ 329:         if dataset.adjusted_prices is None or dataset.adjusted_prices.empty:
+ 330:             raise ValueError("No adjusted historical stock prices are available.")
+ 331: 
+ 332:         if dataset.benchmark_prices is None or dataset.benchmark_prices.empty:
+ 333:             raise ValueError("Historical NIFTY 50 benchmark prices are unavailable.")
+ 334: 
+ 335:         # Chronological split: selection uses training data only.
+ 336:         split = chronological_split(dataset.adjusted_prices, allow_sparse_evaluation=True)
+ 337: 
+ 338:         if split.train.empty or split.validation.empty or split.test.empty:
+ 339:             raise ValueError(
+ 340:                 "Insufficient historical data to create train, validation and test periods."
+ 341:             )
+ 342: 
+ 343:         # Preserve the original sequential Greedy V2 selection algorithm.
+ 344:         selection = greedy_select_stocks(
+ 345:             train_prices=split.train,
+ 346:             sectors=dataset.sectors,
+ 347:             target_stocks=request.stock_count,
+ 348:             max_per_sector=request.max_per_sector,
+ 349:             risk_free_rate=request.risk_free_rate,
+ 350:         )
+ 351: 
+ 352:         symbols = selection["selected_symbols"]
+ 353: 
+ 354:         if not symbols:
+ 355:             raise ValueError("Greedy V2 did not select any stocks.")
+ 356: 
+ 357:         # Latest available raw close is used for executable share quantities.
+ 358:         latest_prices = {}
+ 359: 
+ 360:         for symbol in symbols:
+ 361:             raw_column = (
+ 362:                 symbol if symbol in dataset.raw_prices.columns
+ 363:                 else f"{symbol}_RAW"
+ 364:             )
+ 365:             if raw_column not in dataset.raw_prices.columns:
+ 366:                 raise ValueError(
+ 367:                     f"Raw price history is unavailable for {symbol}."
+ 368:                 )
+ 369: 
+ 370:             available = dataset.raw_prices[raw_column].dropna()
+ 371: 
+ 372:             if available.empty:
+ 373:                 raise ValueError(f"No usable raw price is available for {symbol}.")
+ 374: 
+ 375:             latest_prices[symbol] = float(available.iloc[-1])
+ 376: 
+ 377:         allocation = allocate_capital(
+ 378:             symbols=symbols,
+ 379:             prices=latest_prices,
+ 380:             capital=float(request.capital),
+ 381:         )
+ 382: 
+ 383:         holdings = allocation["holdings"]
+ 384: 
+ 385:         for holding in holdings:
+ 386:             symbol = holding["symbol"]
+ 387:             holding["sector"] = dataset.sectors.get(symbol, "Unknown")
+ 388: 
+ 389:         # Validation period: evaluate selected symbols without re-selection.
+ 390:         validation_prices = split.validation
+ 391:         validation_benchmark = dataset.benchmark_prices.reindex(
+ 392:             validation_prices.index
+ 393:         )
+ 394: 
+ 395:         validation_result = calculate_portfolio(
+ 396:             prices=validation_prices,
+ 397:             sectors=dataset.sectors,
+ 398:             symbols=symbols,
+ 399:             risk_free_rate=request.risk_free_rate,
+ 400:             max_stocks=request.stock_count,
+ 401:             max_per_sector=request.max_per_sector,
+ 402:             price_basis="SPLIT_BONUS_ADJUSTED",
+ 403:             return_type="PRICE_RETURN",
+ 404:         )
+ 405: 
+ 406:         validation_comparison = compare_with_benchmark(
+ 407:             validation_result["daily_returns"],
+ 408:             validation_benchmark,
+ 409:         )
+ 410: 
+ 411:         # Final test period remains separate from training and validation.
+ 412:         test_prices = split.test
+ 413:         test_benchmark = dataset.benchmark_prices.reindex(test_prices.index)
+ 414: 
+ 415:         test_result = calculate_portfolio(
+ 416:             prices=test_prices,
+ 417:             sectors=dataset.sectors,
+ 418:             symbols=symbols,
+ 419:             risk_free_rate=request.risk_free_rate,
+ 420:             max_stocks=request.stock_count,
+ 421:             max_per_sector=request.max_per_sector,
+ 422:             price_basis="SPLIT_BONUS_ADJUSTED",
+ 423:             return_type="PRICE_RETURN",
+ 424:         )
+ 425: 
+ 426:         test_comparison = compare_with_benchmark(
+ 427:             test_result["daily_returns"],
+ 428:             test_benchmark,
+ 429:         )
+ 430: 
+ 431:         training_period = _period_summary(split.train)
+ 432:         validation_period = _period_summary(validation_prices, include_baseline=False)
+ 433:         test_period = _period_summary(test_prices, include_baseline=False)
+ 434: 
+ 435:         return _clean({
+ 436:             "status": "success",
+ 437:             "selection_method": "SEQUENTIAL_GREEDY_SHARPE",
+ 438:             "portfolio": allocation,
+ 439:             "holdings": holdings,
+ 440:             "selection_log": selection["selection_log"].to_dict(
+ 441:                 orient="records"
+ 442:             ),
+ 443:             "training": {
+ 444:                 **training_period,
+ 445:                 "selection_sharpe": selection["portfolio_result"][
+ 446:                     "metrics"
+ 447:                 ].get("sharpe_ratio"),
+ 448:             },
+ 449:             "validation": {
+ 450:                 **validation_period,
+ 451:                 "metrics": _metrics(validation_result),
+ 452:                 "benchmark": _benchmark_summary(validation_comparison),
+ 453:             },
+ 454:             "test": {
+ 455:                 **test_period,
+ 456:                 "metrics": _metrics(test_result),
+ 457:                 "benchmark": _benchmark_summary(test_comparison),
+ 458:             },
+ 459:             "data_limitations": {
+ 460:                 "membership_basis": dataset.metadata["membership_basis"],
+ 461:                 "corporate_action_coverage": dataset.metadata[
+ 462:                     "corporate_action_coverage"
+ 463:                 ],
+ 464:                 "dividend_adjusted": dataset.metadata["dividend_adjusted"],
+ 465:                 "price_basis": dataset.metadata["price_basis"],
+ 466:                 "benchmark_basis": "NIFTY_50_PRICE_RETURN",
+ 467:                 "historical_membership_survivorship_bias": True,
+ 468:                 "historical_metrics_are_daily_rebalanced": True,
+ 469:                 "live_holdings_use_latest_raw_close": True,
+ 470:                 "actual_holdings_buy_and_hold_metrics_calculated": False,
+ 471:                 "training_candidate_count": len(split.metadata["eligible_training_symbols"]),
+ 472:                 "excluded_incomplete_training_symbols": split.metadata[
+ 473:                     "excluded_incomplete_training_symbols"
+ 474:                 ],
+ 475:                 "validation_test_missing_prices_filled": False,
+ 476:             },
+ 477:             "assumptions": selection["assumptions"],
+ 478:         })
+ 479: 
+ 480:     except ValueError as exc:
+ 481:         logger.warning("Portfolio request rejected: %s", exc)
+ 482:         raise HTTPException(status_code=400, detail=str(exc)) from exc
+ 483: 
+ 484:     except Exception as exc:
+ 485:         logger.exception("Portfolio generation failed.")
+ 486:         # Diagnostic detail is temporary. Replace with a generic message
+ 487:         # before deploying this endpoint publicly.
+ 488:         raise HTTPException(
+ 489:             status_code=500,
+ 490:             detail=f"{type(exc).__name__}: {exc}",
+ 491:         ) from exc
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\backend\portfolio_routes.py:31: stock_count: int = Field(default=5, ge=1, le=10)
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\backend\portfolio_routes.py:33: max_per_sector: int = Field(default=3, ge=1, le=10)
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\backend\portfolio_routes.py:59: def generate_portfolio(request: PortfolioRequest):
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\backend\portfolio_routes.py:80: target_stocks=request.stock_count,
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\backend\portfolio_routes.py:81: max_per_sector=request.max_per_sector,
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\backend\portfolio_routes.py:85: symbols = selection["selected_symbols"]
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\backend\portfolio_routes.py:124: max_stocks=request.stock_count,
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\backend\portfolio_routes.py:125: max_per_sector=request.max_per_sector,
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\backend\portfolio_routes.py:138: max_stocks=request.stock_count,
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\backend\portfolio_routes.py:139: max_per_sector=request.max_per_sector,
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\backend\portfolio_routes.py:251: stock_count: int = Field(default=5, ge=1, le=10)
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\backend\portfolio_routes.py:253: max_per_sector: int = Field(default=3, ge=1, le=10)
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\backend\portfolio_routes.py:314: def generate_portfolio(request: PortfolioRequest):
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\backend\portfolio_routes.py:347: target_stocks=request.stock_count,
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\backend\portfolio_routes.py:348: max_per_sector=request.max_per_sector,
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\backend\portfolio_routes.py:352: symbols = selection["selected_symbols"]
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\backend\portfolio_routes.py:400: max_stocks=request.stock_count,
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\backend\portfolio_routes.py:401: max_per_sector=request.max_per_sector,
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\backend\portfolio_routes.py:420: max_stocks=request.stock_count,
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\backend\portfolio_routes.py:421: max_per_sector=request.max_per_sector,
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\greedy_v2_engine.py:39: max_per_sector: int = 3,
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\greedy_v2_engine.py:68: if not isinstance(max_per_sector, int) or isinstance(max_per_sector, bool):
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\greedy_v2_engine.py:69: raise ValueError("max_per_sector must be an integer.")
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\greedy_v2_engine.py:74: if max_per_sector < 1:
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\greedy_v2_engine.py:75: raise ValueError("max_per_sector must be at least 1.")
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\greedy_v2_engine.py:116: max_per_sector,
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\greedy_v2_engine.py:137: print("Maximum stocks per sector:", max_per_sector)
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\greedy_v2_engine.py:157: if current_sector_count >= max_per_sector:
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\greedy_v2_engine.py:168: max_per_sector=max_per_sector,
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\greedy_v2_engine.py:239: max_per_sector=max_per_sector,
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\greedy_v2_engine.py:252: "selected_symbols": selected,
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\greedy_v2_engine.py:262: "max_per_sector": max_per_sector,
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\portfolio_allocation.py:62: "stock_count": len(symbols),
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\portfolio_analytics.py:78: max_per_sector: int = 3,
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\portfolio_analytics.py:83: _validate_positive_integer(max_per_sector, "max_per_sector")
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\portfolio_analytics.py:132: sector_counts > max_per_sector
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\portfolio_analytics.py:137: f"Maximum {max_per_sector} stocks per sector exceeded: "
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\portfolio_analytics.py:148: max_per_sector=3,
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\portfolio_analytics.py:161: max_per_sector: Maximum number of stocks per sector.
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\portfolio_analytics.py:174: _validate_positive_integer(max_per_sector, "max_per_sector")
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\portfolio_analytics.py:198: max_per_sector=max_per_sector,
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_greedy_selection.py:19: MAX_PER_SECTOR = 3
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_greedy_selection.py:79: if current_sector_count >= MAX_PER_SECTOR:
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_greedy_selection.py:128: "sector_limit": MAX_PER_SECTOR,
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_greedy_stability.py:58: max_per_sector=cap,
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_greedy_stability.py:62: symbols = result["selected_symbols"]
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_greedy_stability.py:81: "selected_symbols": ",".join(symbols),
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_greedy_v2_baselines.py:25: MAX_PER_SECTOR = 3
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_greedy_v2_baselines.py:66: max_per_sector,
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_greedy_v2_baselines.py:74: max_per_sector=max_per_sector,
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_greedy_v2_baselines.py:122: amount <= MAX_PER_SECTOR
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_greedy_v2_baselines.py:189: MAX_PER_SECTOR,
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_greedy_v2_baselines.py:204: max_per_sector=max(sector_counts.values()),
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_greedy_v2_baselines.py:217: MAX_PER_SECTOR,
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_greedy_v2_baselines.py:295: max_per_sector=MAX_PER_SECTOR,
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_greedy_v2_baselines.py:299: greedy_symbols = selection.get("selected_symbols")
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_greedy_v2_baselines.py:346: "greedy_selected_symbols": greedy_symbols,
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_greedy_v2_baselines.py:351: "max_per_sector": MAX_PER_SECTOR,
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_greedy_v2_experiment.backup_20261109_124456.py:23: MAX_PER_SECTOR = 3
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_greedy_v2_experiment.backup_20261109_124456.py:73: max_per_sector=MAX_PER_SECTOR,
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_greedy_v2_experiment.backup_20261109_124456.py:202: max_per_sector=MAX_PER_SECTOR,
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_greedy_v2_experiment.backup_20261109_124456.py:206: selected_symbols = selection.get("selected_symbols")
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_greedy_v2_experiment.backup_20261109_124456.py:208: if selected_symbols is None:
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_greedy_v2_experiment.backup_20261109_124456.py:209: selected_symbols = selection.get("selected_stocks")
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_greedy_v2_experiment.backup_20261109_124456.py:211: if selected_symbols is None:
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_greedy_v2_experiment.backup_20261109_124456.py:217: selected_symbols = list(selected_symbols)
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_greedy_v2_experiment.backup_20261109_124456.py:219: if len(selected_symbols) != TARGET_STOCKS:
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_greedy_v2_experiment.backup_20261109_124456.py:222: f"received {len(selected_symbols)}."
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_greedy_v2_experiment.backup_20261109_124456.py:225: if len(set(selected_symbols)) != len(selected_symbols):
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_greedy_v2_experiment.backup_20261109_124456.py:232: for symbol in selected_symbols
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_greedy_v2_experiment.backup_20261109_124456.py:240: for symbol in selected_symbols:
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_greedy_v2_experiment.backup_20261109_124456.py:247: count > MAX_PER_SECTOR
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_greedy_v2_experiment.backup_20261109_124456.py:256: for symbol in selected_symbols:
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_greedy_v2_experiment.backup_20261109_124456.py:270: selected_symbols,
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_greedy_v2_experiment.backup_20261109_124456.py:280: selected_symbols,
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_greedy_v2_experiment.backup_20261109_124456.py:290: selected_symbols,
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_greedy_v2_experiment.backup_20261109_124456.py:303: "selected_symbols": selected_symbols,
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_greedy_v2_experiment.backup_20261109_124456.py:308: "max_per_sector": MAX_PER_SECTOR,
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_greedy_v2_experiment.backup_sparse_20261109_124756.py:24: MAX_PER_SECTOR = 3
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_greedy_v2_experiment.backup_sparse_20261109_124756.py:74: max_per_sector=MAX_PER_SECTOR,
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_greedy_v2_experiment.backup_sparse_20261109_124756.py:221: max_per_sector=MAX_PER_SECTOR,
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_greedy_v2_experiment.backup_sparse_20261109_124756.py:225: selected_symbols = selection.get("selected_symbols")
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_greedy_v2_experiment.backup_sparse_20261109_124756.py:227: if selected_symbols is None:
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_greedy_v2_experiment.backup_sparse_20261109_124756.py:228: selected_symbols = selection.get("selected_stocks")
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_greedy_v2_experiment.backup_sparse_20261109_124756.py:230: if selected_symbols is None:
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_greedy_v2_experiment.backup_sparse_20261109_124756.py:236: selected_symbols = list(selected_symbols)
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_greedy_v2_experiment.backup_sparse_20261109_124756.py:238: if len(selected_symbols) != TARGET_STOCKS:
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_greedy_v2_experiment.backup_sparse_20261109_124756.py:241: f"received {len(selected_symbols)}."
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_greedy_v2_experiment.backup_sparse_20261109_124756.py:244: if len(set(selected_symbols)) != len(selected_symbols):
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_greedy_v2_experiment.backup_sparse_20261109_124756.py:251: for symbol in selected_symbols
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_greedy_v2_experiment.backup_sparse_20261109_124756.py:259: for symbol in selected_symbols:
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_greedy_v2_experiment.backup_sparse_20261109_124756.py:266: count > MAX_PER_SECTOR
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_greedy_v2_experiment.backup_sparse_20261109_124756.py:275: for symbol in selected_symbols:
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_greedy_v2_experiment.backup_sparse_20261109_124756.py:289: selected_symbols,
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_greedy_v2_experiment.backup_sparse_20261109_124756.py:299: selected_symbols,
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_greedy_v2_experiment.backup_sparse_20261109_124756.py:309: selected_symbols,
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_greedy_v2_experiment.backup_sparse_20261109_124756.py:316: sectors={s: sectors[s] for s in selected_symbols},
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_greedy_v2_experiment.backup_sparse_20261109_124756.py:317: symbols=selected_symbols,
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_greedy_v2_experiment.backup_sparse_20261109_124756.py:320: max_per_sector=MAX_PER_SECTOR,
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_greedy_v2_experiment.backup_sparse_20261109_124756.py:333: "max_per_sector": MAX_PER_SECTOR,
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_greedy_v2_experiment.backup_sparse_20261109_124756.py:337: "selected_symbols": list(selected_symbols),
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_greedy_v2_experiment.backup_sparse_20261109_124756.py:394: "selected_symbols": selected_symbols,
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_greedy_v2_experiment.backup_sparse_20261109_124756.py:399: "max_per_sector": MAX_PER_SECTOR,
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_greedy_v2_experiment.py:24: MAX_PER_SECTOR = 3
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_greedy_v2_experiment.py:74: max_per_sector=MAX_PER_SECTOR,
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_greedy_v2_experiment.py:222: max_per_sector=MAX_PER_SECTOR,
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_greedy_v2_experiment.py:226: selected_symbols = selection.get("selected_symbols")
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_greedy_v2_experiment.py:228: if selected_symbols is None:
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_greedy_v2_experiment.py:229: selected_symbols = selection.get("selected_stocks")
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_greedy_v2_experiment.py:231: if selected_symbols is None:
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_greedy_v2_experiment.py:237: selected_symbols = list(selected_symbols)
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_greedy_v2_experiment.py:239: if len(selected_symbols) != TARGET_STOCKS:
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_greedy_v2_experiment.py:242: f"received {len(selected_symbols)}."
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_greedy_v2_experiment.py:245: if len(set(selected_symbols)) != len(selected_symbols):
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_greedy_v2_experiment.py:252: for symbol in selected_symbols
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_greedy_v2_experiment.py:260: for symbol in selected_symbols:
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_greedy_v2_experiment.py:267: count > MAX_PER_SECTOR
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_greedy_v2_experiment.py:276: for symbol in selected_symbols:
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_greedy_v2_experiment.py:290: selected_symbols,
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_greedy_v2_experiment.py:300: selected_symbols,
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_greedy_v2_experiment.py:310: selected_symbols,
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_greedy_v2_experiment.py:317: sectors={s: sectors[s] for s in selected_symbols},
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_greedy_v2_experiment.py:318: symbols=selected_symbols,
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_greedy_v2_experiment.py:321: max_per_sector=MAX_PER_SECTOR,
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_greedy_v2_experiment.py:334: "max_per_sector": MAX_PER_SECTOR,
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_greedy_v2_experiment.py:338: "selected_symbols": list(selected_symbols),
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_greedy_v2_experiment.py:395: "selected_symbols": selected_symbols,
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_greedy_v2_experiment.py:400: "max_per_sector": MAX_PER_SECTOR,
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_greedy_validation.py:19: MAX_PER_SECTOR = 3
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_greedy_validation.py:38: if sector_count >= MAX_PER_SECTOR:
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_greedy_walk_forward.py:22: MAX_PER_SECTOR = 3
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_greedy_walk_forward.py:39: if sector_count >= MAX_PER_SECTOR:
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_multi_strategy_validation.py:74: max_per_sector=cap,
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_multi_strategy_validation.py:79: result.get("selected_symbols")
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_multi_strategy_validation.py:95: max_per_sector=max(
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_multi_strategy_validation.py:185: "max_per_sector": cap,
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_multi_strategy_validation.py:189: "selected_symbols": selected,
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_multi_strategy_validation.py:203: "config": {"selected_symbols": top10, "sector_cap": 3},
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_multi_strategy_validation.py:210: "config": {"selected_symbols": equal_symbols},
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_multi_strategy_validation.py:225: "stock_count": len(symbols),
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_multi_strategy_validation.py:226: "selected_symbols": ",".join(symbols),
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_real_portfolio.py:19: MAX_PER_SECTOR = 3
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_real_portfolio.py:35: if sector_counts.get(sector, 0) >= MAX_PER_SECTOR:
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_registered_greedy_v2_experiment.py:27: selection.get("selected_symbols")
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_registered_greedy_v2_experiment.py:38: max_per_sector=state["MAX_PER_SECTOR"],
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_registered_greedy_v2_experiment.py:49: "max_per_sector": state["MAX_PER_SECTOR"],
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_registered_greedy_v2_experiment.py:53: "selected_symbols": symbols,
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_strategy_baseline_comparison.py:22: MAX_PER_SECTOR = 3
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_strategy_baseline_comparison.py:37: >= MAX_PER_SECTOR
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_strategy_baseline_comparison.py:72: if counts.get(sector, 0) >= MAX_PER_SECTOR:
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_strategy_baseline_comparison.py:94: max_per_sector = 50
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_strategy_baseline_comparison.py:97: max_per_sector = MAX_PER_SECTOR
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_strategy_baseline_comparison.py:105: max_per_sector=max_per_sector,
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_walk_forward_cost_validation.backup_20261109_130430.py:209: max_per_sector=SECTOR_CAP,
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_walk_forward_cost_validation.backup_20261109_130430.py:213: greedy_symbols = result["selected_symbols"]
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_walk_forward_cost_validation.backup_20261109_130430.py:266: "stock_count": len(symbols),
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_walk_forward_cost_validation.py:215: max_per_sector=SECTOR_CAP,
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_walk_forward_cost_validation.py:219: greedy_symbols = result["selected_symbols"]
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_walk_forward_cost_validation.py:272: "stock_count": len(symbols),
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\test_greedy_v2_engine.py:62: self.assertEqual(len(result["selected_symbols"]), 3)
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\test_greedy_v2_engine.py:69: max_per_sector=2,
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\test_greedy_v2_engine.py:72: selected = result["selected_symbols"]
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\test_greedy_v2_engine.py:81: def test_selected_symbols_are_unique(self):
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\test_greedy_v2_engine.py:88: selected = result["selected_symbols"]
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\test_greedy_v2_engine.py:196: max_per_sector=1,
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\ask_greedy\greedy_v2_evidence.py:98: known.update(_symbol_tokens(experiment.get("selected_symbols", [])))
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\ask_greedy\greedy_v2_evidence.py:100: for key in ("symbol", "selected_symbol", "selected_stocks", "selected_symbols"):
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\ask_greedy\greedy_v2_evidence.py:147: values = experiment.get("selected_symbols", [])
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\ask_greedy\greedy_v2_evidence.py:161: "symbol_found_in_experiment_selected_symbols": in_main_experiment,

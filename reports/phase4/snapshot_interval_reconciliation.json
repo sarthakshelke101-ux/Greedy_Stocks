@@ -1,0 +1,1860 @@
+{
+  "audit": "GREEDY STOCKS snapshot vs effective interval reconciliation",
+  "read_only": true,
+  "methodology": [
+    "Snapshot symbols are mapped to company IDs using current symbols and explicitly typed symbol identifiers.",
+    "Membership intervals are evaluated inclusively at their start and end dates.",
+    "Both month-start and month-end conventions are tested because report-month date semantics must be established from source archives.",
+    "A mismatch is a reconciliation finding, not automatic proof of incorrect source data."
+  ],
+  "summary": {
+    "month_start": {
+      "months_compared": 19,
+      "exact_matches": 5,
+      "months_with_mismatches": 14,
+      "total_missing_members": 16,
+      "total_unexpected_members": 16,
+      "total_unresolved_symbols": 0
+    },
+    "month_end": {
+      "months_compared": 19,
+      "exact_matches": 6,
+      "months_with_mismatches": 13,
+      "total_missing_members": 13,
+      "total_unexpected_members": 13,
+      "total_unresolved_symbols": 0
+    }
+  },
+  "month_start_results": [
+    {
+      "index_symbol": "NIFTY 50",
+      "report_month": "2025-04-01",
+      "comparison_date": "2025-04-01",
+      "snapshot_symbol_count": 50,
+      "expected_interval_company_count": 50,
+      "matched_company_count": 50,
+      "missing_from_snapshot_company_ids": [],
+      "unexpected_in_snapshot_company_ids": [],
+      "unresolved_snapshot_symbols": [],
+      "exact_match": true
+    },
+    {
+      "index_symbol": "NIFTY 50",
+      "report_month": "2025-05-01",
+      "comparison_date": "2025-05-01",
+      "snapshot_symbol_count": 50,
+      "expected_interval_company_count": 50,
+      "matched_company_count": 50,
+      "missing_from_snapshot_company_ids": [],
+      "unexpected_in_snapshot_company_ids": [],
+      "unresolved_snapshot_symbols": [],
+      "exact_match": true
+    },
+    {
+      "index_symbol": "NIFTY 50",
+      "report_month": "2025-06-01",
+      "comparison_date": "2025-06-01",
+      "snapshot_symbol_count": 50,
+      "expected_interval_company_count": 50,
+      "matched_company_count": 50,
+      "missing_from_snapshot_company_ids": [],
+      "unexpected_in_snapshot_company_ids": [],
+      "unresolved_snapshot_symbols": [],
+      "exact_match": true
+    },
+    {
+      "index_symbol": "NIFTY 50",
+      "report_month": "2025-07-01",
+      "comparison_date": "2025-07-01",
+      "snapshot_symbol_count": 50,
+      "expected_interval_company_count": 50,
+      "matched_company_count": 50,
+      "missing_from_snapshot_company_ids": [],
+      "unexpected_in_snapshot_company_ids": [],
+      "unresolved_snapshot_symbols": [],
+      "exact_match": true
+    },
+    {
+      "index_symbol": "NIFTY 50",
+      "report_month": "2025-08-01",
+      "comparison_date": "2025-08-01",
+      "snapshot_symbol_count": 50,
+      "expected_interval_company_count": 50,
+      "matched_company_count": 50,
+      "missing_from_snapshot_company_ids": [],
+      "unexpected_in_snapshot_company_ids": [],
+      "unresolved_snapshot_symbols": [],
+      "exact_match": true
+    },
+    {
+      "index_symbol": "NIFTY 50",
+      "report_month": "2025-09-01",
+      "comparison_date": "2025-09-01",
+      "snapshot_symbol_count": 50,
+      "expected_interval_company_count": 50,
+      "matched_company_count": 48,
+      "missing_from_snapshot_company_ids": [
+        21,
+        26
+      ],
+      "unexpected_in_snapshot_company_ids": [
+        25,
+        35
+      ],
+      "unresolved_snapshot_symbols": [],
+      "exact_match": false
+    },
+    {
+      "index_symbol": "NIFTY 50",
+      "report_month": "2025-10-01",
+      "comparison_date": "2025-10-01",
+      "snapshot_symbol_count": 50,
+      "expected_interval_company_count": 50,
+      "matched_company_count": 49,
+      "missing_from_snapshot_company_ids": [
+        50
+      ],
+      "unexpected_in_snapshot_company_ids": [
+        51
+      ],
+      "unresolved_snapshot_symbols": [],
+      "exact_match": false
+    },
+    {
+      "index_symbol": "NIFTY 50",
+      "report_month": "2025-11-01",
+      "comparison_date": "2025-11-01",
+      "snapshot_symbol_count": 50,
+      "expected_interval_company_count": 50,
+      "matched_company_count": 49,
+      "missing_from_snapshot_company_ids": [
+        50
+      ],
+      "unexpected_in_snapshot_company_ids": [
+        51
+      ],
+      "unresolved_snapshot_symbols": [],
+      "exact_match": false
+    },
+    {
+      "index_symbol": "NIFTY 50",
+      "report_month": "2025-12-01",
+      "comparison_date": "2025-12-01",
+      "snapshot_symbol_count": 50,
+      "expected_interval_company_count": 50,
+      "matched_company_count": 49,
+      "missing_from_snapshot_company_ids": [
+        50
+      ],
+      "unexpected_in_snapshot_company_ids": [
+        51
+      ],
+      "unresolved_snapshot_symbols": [],
+      "exact_match": false
+    },
+    {
+      "index_symbol": "NIFTY 50",
+      "report_month": "2026-01-01",
+      "comparison_date": "2026-01-01",
+      "snapshot_symbol_count": 50,
+      "expected_interval_company_count": 50,
+      "matched_company_count": 49,
+      "missing_from_snapshot_company_ids": [
+        50
+      ],
+      "unexpected_in_snapshot_company_ids": [
+        51
+      ],
+      "unresolved_snapshot_symbols": [],
+      "exact_match": false
+    },
+    {
+      "index_symbol": "NIFTY 50",
+      "report_month": "2026-02-01",
+      "comparison_date": "2026-02-01",
+      "snapshot_symbol_count": 50,
+      "expected_interval_company_count": 50,
+      "matched_company_count": 49,
+      "missing_from_snapshot_company_ids": [
+        50
+      ],
+      "unexpected_in_snapshot_company_ids": [
+        51
+      ],
+      "unresolved_snapshot_symbols": [],
+      "exact_match": false
+    },
+    {
+      "index_symbol": "NIFTY 50",
+      "report_month": "2026-03-01",
+      "comparison_date": "2026-03-01",
+      "snapshot_symbol_count": 50,
+      "expected_interval_company_count": 50,
+      "matched_company_count": 49,
+      "missing_from_snapshot_company_ids": [
+        50
+      ],
+      "unexpected_in_snapshot_company_ids": [
+        51
+      ],
+      "unresolved_snapshot_symbols": [],
+      "exact_match": false
+    },
+    {
+      "index_symbol": "NIFTY 50",
+      "report_month": "2026-04-01",
+      "comparison_date": "2026-04-01",
+      "snapshot_symbol_count": 50,
+      "expected_interval_company_count": 50,
+      "matched_company_count": 49,
+      "missing_from_snapshot_company_ids": [
+        50
+      ],
+      "unexpected_in_snapshot_company_ids": [
+        51
+      ],
+      "unresolved_snapshot_symbols": [],
+      "exact_match": false
+    },
+    {
+      "index_symbol": "NIFTY 50",
+      "report_month": "2026-05-01",
+      "comparison_date": "2026-05-01",
+      "snapshot_symbol_count": 50,
+      "expected_interval_company_count": 50,
+      "matched_company_count": 49,
+      "missing_from_snapshot_company_ids": [
+        50
+      ],
+      "unexpected_in_snapshot_company_ids": [
+        51
+      ],
+      "unresolved_snapshot_symbols": [],
+      "exact_match": false
+    },
+    {
+      "index_symbol": "NIFTY 50",
+      "report_month": "2026-06-01",
+      "comparison_date": "2026-06-01",
+      "snapshot_symbol_count": 50,
+      "expected_interval_company_count": 50,
+      "matched_company_count": 49,
+      "missing_from_snapshot_company_ids": [
+        50
+      ],
+      "unexpected_in_snapshot_company_ids": [
+        51
+      ],
+      "unresolved_snapshot_symbols": [],
+      "exact_match": false
+    },
+    {
+      "index_symbol": "NIFTY 50",
+      "report_month": "2026-07-01",
+      "comparison_date": "2026-07-01",
+      "snapshot_symbol_count": 50,
+      "expected_interval_company_count": 50,
+      "matched_company_count": 49,
+      "missing_from_snapshot_company_ids": [
+        50
+      ],
+      "unexpected_in_snapshot_company_ids": [
+        51
+      ],
+      "unresolved_snapshot_symbols": [],
+      "exact_match": false
+    },
+    {
+      "index_symbol": "NIFTY 50",
+      "report_month": "2026-08-01",
+      "comparison_date": "2026-08-01",
+      "snapshot_symbol_count": 50,
+      "expected_interval_company_count": 50,
+      "matched_company_count": 49,
+      "missing_from_snapshot_company_ids": [
+        50
+      ],
+      "unexpected_in_snapshot_company_ids": [
+        51
+      ],
+      "unresolved_snapshot_symbols": [],
+      "exact_match": false
+    },
+    {
+      "index_symbol": "NIFTY 50",
+      "report_month": "2026-09-01",
+      "comparison_date": "2026-09-01",
+      "snapshot_symbol_count": 50,
+      "expected_interval_company_count": 50,
+      "matched_company_count": 48,
+      "missing_from_snapshot_company_ids": [
+        50,
+        54
+      ],
+      "unexpected_in_snapshot_company_ids": [
+        11,
+        51
+      ],
+      "unresolved_snapshot_symbols": [],
+      "exact_match": false
+    },
+    {
+      "index_symbol": "NIFTY 50",
+      "report_month": "2026-10-01",
+      "comparison_date": "2026-10-01",
+      "snapshot_symbol_count": 50,
+      "expected_interval_company_count": 50,
+      "matched_company_count": 49,
+      "missing_from_snapshot_company_ids": [
+        50
+      ],
+      "unexpected_in_snapshot_company_ids": [
+        51
+      ],
+      "unresolved_snapshot_symbols": [],
+      "exact_match": false
+    }
+  ],
+  "month_end_results": [
+    {
+      "index_symbol": "NIFTY 50",
+      "report_month": "2025-04-01",
+      "comparison_date": "2025-04-30",
+      "snapshot_symbol_count": 50,
+      "expected_interval_company_count": 50,
+      "matched_company_count": 50,
+      "missing_from_snapshot_company_ids": [],
+      "unexpected_in_snapshot_company_ids": [],
+      "unresolved_snapshot_symbols": [],
+      "exact_match": true
+    },
+    {
+      "index_symbol": "NIFTY 50",
+      "report_month": "2025-05-01",
+      "comparison_date": "2025-05-31",
+      "snapshot_symbol_count": 50,
+      "expected_interval_company_count": 50,
+      "matched_company_count": 50,
+      "missing_from_snapshot_company_ids": [],
+      "unexpected_in_snapshot_company_ids": [],
+      "unresolved_snapshot_symbols": [],
+      "exact_match": true
+    },
+    {
+      "index_symbol": "NIFTY 50",
+      "report_month": "2025-06-01",
+      "comparison_date": "2025-06-30",
+      "snapshot_symbol_count": 50,
+      "expected_interval_company_count": 50,
+      "matched_company_count": 50,
+      "missing_from_snapshot_company_ids": [],
+      "unexpected_in_snapshot_company_ids": [],
+      "unresolved_snapshot_symbols": [],
+      "exact_match": true
+    },
+    {
+      "index_symbol": "NIFTY 50",
+      "report_month": "2025-07-01",
+      "comparison_date": "2025-07-31",
+      "snapshot_symbol_count": 50,
+      "expected_interval_company_count": 50,
+      "matched_company_count": 50,
+      "missing_from_snapshot_company_ids": [],
+      "unexpected_in_snapshot_company_ids": [],
+      "unresolved_snapshot_symbols": [],
+      "exact_match": true
+    },
+    {
+      "index_symbol": "NIFTY 50",
+      "report_month": "2025-08-01",
+      "comparison_date": "2025-08-31",
+      "snapshot_symbol_count": 50,
+      "expected_interval_company_count": 50,
+      "matched_company_count": 50,
+      "missing_from_snapshot_company_ids": [],
+      "unexpected_in_snapshot_company_ids": [],
+      "unresolved_snapshot_symbols": [],
+      "exact_match": true
+    },
+    {
+      "index_symbol": "NIFTY 50",
+      "report_month": "2025-09-01",
+      "comparison_date": "2025-09-30",
+      "snapshot_symbol_count": 50,
+      "expected_interval_company_count": 50,
+      "matched_company_count": 50,
+      "missing_from_snapshot_company_ids": [],
+      "unexpected_in_snapshot_company_ids": [],
+      "unresolved_snapshot_symbols": [],
+      "exact_match": true
+    },
+    {
+      "index_symbol": "NIFTY 50",
+      "report_month": "2025-10-01",
+      "comparison_date": "2025-10-31",
+      "snapshot_symbol_count": 50,
+      "expected_interval_company_count": 50,
+      "matched_company_count": 49,
+      "missing_from_snapshot_company_ids": [
+        50
+      ],
+      "unexpected_in_snapshot_company_ids": [
+        51
+      ],
+      "unresolved_snapshot_symbols": [],
+      "exact_match": false
+    },
+    {
+      "index_symbol": "NIFTY 50",
+      "report_month": "2025-11-01",
+      "comparison_date": "2025-11-30",
+      "snapshot_symbol_count": 50,
+      "expected_interval_company_count": 50,
+      "matched_company_count": 49,
+      "missing_from_snapshot_company_ids": [
+        50
+      ],
+      "unexpected_in_snapshot_company_ids": [
+        51
+      ],
+      "unresolved_snapshot_symbols": [],
+      "exact_match": false
+    },
+    {
+      "index_symbol": "NIFTY 50",
+      "report_month": "2025-12-01",
+      "comparison_date": "2025-12-31",
+      "snapshot_symbol_count": 50,
+      "expected_interval_company_count": 50,
+      "matched_company_count": 49,
+      "missing_from_snapshot_company_ids": [
+        50
+      ],
+      "unexpected_in_snapshot_company_ids": [
+        51
+      ],
+      "unresolved_snapshot_symbols": [],
+      "exact_match": false
+    },
+    {
+      "index_symbol": "NIFTY 50",
+      "report_month": "2026-01-01",
+      "comparison_date": "2026-01-31",
+      "snapshot_symbol_count": 50,
+      "expected_interval_company_count": 50,
+      "matched_company_count": 49,
+      "missing_from_snapshot_company_ids": [
+        50
+      ],
+      "unexpected_in_snapshot_company_ids": [
+        51
+      ],
+      "unresolved_snapshot_symbols": [],
+      "exact_match": false
+    },
+    {
+      "index_symbol": "NIFTY 50",
+      "report_month": "2026-02-01",
+      "comparison_date": "2026-02-28",
+      "snapshot_symbol_count": 50,
+      "expected_interval_company_count": 50,
+      "matched_company_count": 49,
+      "missing_from_snapshot_company_ids": [
+        50
+      ],
+      "unexpected_in_snapshot_company_ids": [
+        51
+      ],
+      "unresolved_snapshot_symbols": [],
+      "exact_match": false
+    },
+    {
+      "index_symbol": "NIFTY 50",
+      "report_month": "2026-03-01",
+      "comparison_date": "2026-03-31",
+      "snapshot_symbol_count": 50,
+      "expected_interval_company_count": 50,
+      "matched_company_count": 49,
+      "missing_from_snapshot_company_ids": [
+        50
+      ],
+      "unexpected_in_snapshot_company_ids": [
+        51
+      ],
+      "unresolved_snapshot_symbols": [],
+      "exact_match": false
+    },
+    {
+      "index_symbol": "NIFTY 50",
+      "report_month": "2026-04-01",
+      "comparison_date": "2026-04-30",
+      "snapshot_symbol_count": 50,
+      "expected_interval_company_count": 50,
+      "matched_company_count": 49,
+      "missing_from_snapshot_company_ids": [
+        50
+      ],
+      "unexpected_in_snapshot_company_ids": [
+        51
+      ],
+      "unresolved_snapshot_symbols": [],
+      "exact_match": false
+    },
+    {
+      "index_symbol": "NIFTY 50",
+      "report_month": "2026-05-01",
+      "comparison_date": "2026-05-31",
+      "snapshot_symbol_count": 50,
+      "expected_interval_company_count": 50,
+      "matched_company_count": 49,
+      "missing_from_snapshot_company_ids": [
+        50
+      ],
+      "unexpected_in_snapshot_company_ids": [
+        51
+      ],
+      "unresolved_snapshot_symbols": [],
+      "exact_match": false
+    },
+    {
+      "index_symbol": "NIFTY 50",
+      "report_month": "2026-06-01",
+      "comparison_date": "2026-06-30",
+      "snapshot_symbol_count": 50,
+      "expected_interval_company_count": 50,
+      "matched_company_count": 49,
+      "missing_from_snapshot_company_ids": [
+        50
+      ],
+      "unexpected_in_snapshot_company_ids": [
+        51
+      ],
+      "unresolved_snapshot_symbols": [],
+      "exact_match": false
+    },
+    {
+      "index_symbol": "NIFTY 50",
+      "report_month": "2026-07-01",
+      "comparison_date": "2026-07-31",
+      "snapshot_symbol_count": 50,
+      "expected_interval_company_count": 50,
+      "matched_company_count": 49,
+      "missing_from_snapshot_company_ids": [
+        50
+      ],
+      "unexpected_in_snapshot_company_ids": [
+        51
+      ],
+      "unresolved_snapshot_symbols": [],
+      "exact_match": false
+    },
+    {
+      "index_symbol": "NIFTY 50",
+      "report_month": "2026-08-01",
+      "comparison_date": "2026-08-31",
+      "snapshot_symbol_count": 50,
+      "expected_interval_company_count": 50,
+      "matched_company_count": 49,
+      "missing_from_snapshot_company_ids": [
+        50
+      ],
+      "unexpected_in_snapshot_company_ids": [
+        51
+      ],
+      "unresolved_snapshot_symbols": [],
+      "exact_match": false
+    },
+    {
+      "index_symbol": "NIFTY 50",
+      "report_month": "2026-09-01",
+      "comparison_date": "2026-09-30",
+      "snapshot_symbol_count": 50,
+      "expected_interval_company_count": 50,
+      "matched_company_count": 49,
+      "missing_from_snapshot_company_ids": [
+        50
+      ],
+      "unexpected_in_snapshot_company_ids": [
+        51
+      ],
+      "unresolved_snapshot_symbols": [],
+      "exact_match": false
+    },
+    {
+      "index_symbol": "NIFTY 50",
+      "report_month": "2026-10-01",
+      "comparison_date": "2026-10-31",
+      "snapshot_symbol_count": 50,
+      "expected_interval_company_count": 50,
+      "matched_company_count": 49,
+      "missing_from_snapshot_company_ids": [
+        50
+      ],
+      "unexpected_in_snapshot_company_ids": [
+        51
+      ],
+      "unresolved_snapshot_symbols": [],
+      "exact_match": false
+    }
+  ],
+  "membership_actions": [
+    {
+      "id": 1,
+      "index_symbol": "NIFTY 50",
+      "event_date": "2017-03-31",
+      "company_id": 110,
+      "symbol": "BHEL",
+      "action": "REMOVE",
+      "source_reference": "NSE_PR_2017-02-16",
+      "verification_status": "OFFICIAL_SOURCE_VERIFIED"
+    },
+    {
+      "id": 2,
+      "index_symbol": "NIFTY 50",
+      "event_date": "2017-03-31",
+      "company_id": 119,
+      "symbol": "IDEA",
+      "action": "REMOVE",
+      "source_reference": "NSE_PR_2017-02-16",
+      "verification_status": "OFFICIAL_SOURCE_VERIFIED"
+    },
+    {
+      "id": 3,
+      "index_symbol": "NIFTY 50",
+      "event_date": "2017-03-31",
+      "company_id": 118,
+      "symbol": "IBULHSGFIN",
+      "action": "ADD",
+      "source_reference": "NSE_PR_2017-02-16",
+      "verification_status": "OFFICIAL_SOURCE_VERIFIED"
+    },
+    {
+      "id": 4,
+      "index_symbol": "NIFTY 50",
+      "event_date": "2017-03-31",
+      "company_id": 121,
+      "symbol": "IOC",
+      "action": "ADD",
+      "source_reference": "NSE_PR_2017-02-16",
+      "verification_status": "OFFICIAL_SOURCE_VERIFIED"
+    },
+    {
+      "id": 5,
+      "index_symbol": "NIFTY 50",
+      "event_date": "2017-05-26",
+      "company_id": 17,
+      "symbol": "GRASIM",
+      "action": "REMOVE",
+      "source_reference": "NSE_PR_2017-04-27",
+      "verification_status": "OFFICIAL_SOURCE_VERIFIED"
+    },
+    {
+      "id": 6,
+      "index_symbol": "NIFTY 50",
+      "event_date": "2017-05-26",
+      "company_id": 128,
+      "symbol": "VEDL",
+      "action": "ADD",
+      "source_reference": "NSE_PR_2017-04-27",
+      "verification_status": "OFFICIAL_SOURCE_VERIFIED"
+    },
+    {
+      "id": 7,
+      "index_symbol": "NIFTY 50",
+      "event_date": "2017-09-29",
+      "company_id": 106,
+      "symbol": "ACC",
+      "action": "REMOVE",
+      "source_reference": "NSE_CIRCULAR_2017-08-28",
+      "verification_status": "OFFICIAL_SOURCE_VERIFIED"
+    },
+    {
+      "id": 8,
+      "index_symbol": "NIFTY 50",
+      "event_date": "2017-09-29",
+      "company_id": 109,
+      "symbol": "BANKBARODA",
+      "action": "REMOVE",
+      "source_reference": "NSE_CIRCULAR_2017-08-28",
+      "verification_status": "OFFICIAL_SOURCE_VERIFIED"
+    },
+    {
+      "id": 9,
+      "index_symbol": "NIFTY 50",
+      "event_date": "2017-09-29",
+      "company_id": 125,
+      "symbol": "TATAMTRDVR",
+      "action": "REMOVE",
+      "source_reference": "NSE_CIRCULAR_2017-08-28",
+      "verification_status": "OFFICIAL_SOURCE_VERIFIED"
+    },
+    {
+      "id": 10,
+      "index_symbol": "NIFTY 50",
+      "event_date": "2017-09-29",
+      "company_id": 126,
+      "symbol": "TATAPOWER",
+      "action": "REMOVE",
+      "source_reference": "NSE_CIRCULAR_2017-08-28",
+      "verification_status": "OFFICIAL_SOURCE_VERIFIED"
+    },
+    {
+      "id": 11,
+      "index_symbol": "NIFTY 50",
+      "event_date": "2017-09-29",
+      "company_id": 8,
+      "symbol": "BAJFINANCE",
+      "action": "ADD",
+      "source_reference": "NSE_CIRCULAR_2017-08-28",
+      "verification_status": "OFFICIAL_SOURCE_VERIFIED"
+    },
+    {
+      "id": 12,
+      "index_symbol": "NIFTY 50",
+      "event_date": "2017-09-29",
+      "company_id": 117,
+      "symbol": "HINDPETRO",
+      "action": "ADD",
+      "source_reference": "NSE_CIRCULAR_2017-08-28",
+      "verification_status": "OFFICIAL_SOURCE_VERIFIED"
+    },
+    {
+      "id": 13,
+      "index_symbol": "NIFTY 50",
+      "event_date": "2017-09-29",
+      "company_id": 127,
+      "symbol": "UPL",
+      "action": "ADD",
+      "source_reference": "NSE_CIRCULAR_2017-08-28",
+      "verification_status": "OFFICIAL_SOURCE_VERIFIED"
+    },
+    {
+      "id": 14,
+      "index_symbol": "NIFTY 50",
+      "event_date": "2018-04-02",
+      "company_id": 107,
+      "symbol": "AMBUJACEM",
+      "action": "REMOVE",
+      "source_reference": "NSE_PR_2018-02-21",
+      "verification_status": "OFFICIAL_SOURCE_VERIFIED"
+    },
+    {
+      "id": 15,
+      "index_symbol": "NIFTY 50",
+      "event_date": "2018-04-02",
+      "company_id": 108,
+      "symbol": "AUROPHARMA",
+      "action": "REMOVE",
+      "source_reference": "NSE_PR_2018-02-21",
+      "verification_status": "OFFICIAL_SOURCE_VERIFIED"
+    },
+    {
+      "id": 16,
+      "index_symbol": "NIFTY 50",
+      "event_date": "2018-04-02",
+      "company_id": 111,
+      "symbol": "BOSCHLTD",
+      "action": "REMOVE",
+      "source_reference": "NSE_PR_2018-02-21",
+      "verification_status": "OFFICIAL_SOURCE_VERIFIED"
+    },
+    {
+      "id": 17,
+      "index_symbol": "NIFTY 50",
+      "event_date": "2018-04-02",
+      "company_id": 7,
+      "symbol": "BAJAJFINSV",
+      "action": "ADD",
+      "source_reference": "NSE_PR_2018-02-21",
+      "verification_status": "OFFICIAL_SOURCE_VERIFIED"
+    },
+    {
+      "id": 18,
+      "index_symbol": "NIFTY 50",
+      "event_date": "2018-04-02",
+      "company_id": 17,
+      "symbol": "GRASIM",
+      "action": "ADD",
+      "source_reference": "NSE_PR_2018-02-21",
+      "verification_status": "OFFICIAL_SOURCE_VERIFIED"
+    },
+    {
+      "id": 19,
+      "index_symbol": "NIFTY 50",
+      "event_date": "2018-04-02",
+      "company_id": 49,
+      "symbol": "TITAN",
+      "action": "ADD",
+      "source_reference": "NSE_PR_2018-02-21",
+      "verification_status": "OFFICIAL_SOURCE_VERIFIED"
+    },
+    {
+      "id": 20,
+      "index_symbol": "NIFTY 50",
+      "event_date": "2018-09-28",
+      "company_id": 123,
+      "symbol": "LUPIN",
+      "action": "REMOVE",
+      "source_reference": "NSE_PR_2018-08-28",
+      "verification_status": "OFFICIAL_SOURCE_VERIFIED"
+    },
+    {
+      "id": 21,
+      "index_symbol": "NIFTY 50",
+      "event_date": "2018-09-28",
+      "company_id": 30,
+      "symbol": "JSWSTEEL",
+      "action": "ADD",
+      "source_reference": "NSE_PR_2018-08-28",
+      "verification_status": "OFFICIAL_SOURCE_VERIFIED"
+    },
+    {
+      "id": 22,
+      "index_symbol": "NIFTY 50",
+      "event_date": "2019-03-29",
+      "company_id": 117,
+      "symbol": "HINDPETRO",
+      "action": "REMOVE",
+      "source_reference": "NSE_PR_2019-02-25",
+      "verification_status": "OFFICIAL_SOURCE_VERIFIED"
+    },
+    {
+      "id": 23,
+      "index_symbol": "NIFTY 50",
+      "event_date": "2019-03-29",
+      "company_id": 113,
+      "symbol": "BRITANNIA",
+      "action": "ADD",
+      "source_reference": "NSE_PR_2019-02-25",
+      "verification_status": "OFFICIAL_SOURCE_VERIFIED"
+    },
+    {
+      "id": 24,
+      "index_symbol": "NIFTY 50",
+      "event_date": "2019-09-27",
+      "company_id": 118,
+      "symbol": "IBULHSGFIN",
+      "action": "REMOVE",
+      "source_reference": "NSE_PR_2019-08-28",
+      "verification_status": "OFFICIAL_SOURCE_VERIFIED"
+    },
+    {
+      "id": 25,
+      "index_symbol": "NIFTY 50",
+      "event_date": "2019-09-27",
+      "company_id": 36,
+      "symbol": "NESTLEIND",
+      "action": "ADD",
+      "source_reference": "NSE_PR_2019-08-28",
+      "verification_status": "OFFICIAL_SOURCE_VERIFIED"
+    },
+    {
+      "id": 26,
+      "index_symbol": "NIFTY 50",
+      "event_date": "2020-03-19",
+      "company_id": 129,
+      "symbol": "YESBANK",
+      "action": "REMOVE",
+      "source_reference": "NSE_PR_2020-03-16",
+      "verification_status": "OFFICIAL_SOURCE_VERIFIED"
+    },
+    {
+      "id": 27,
+      "index_symbol": "NIFTY 50",
+      "event_date": "2020-03-19",
+      "company_id": 124,
+      "symbol": "SHREECEM",
+      "action": "ADD",
+      "source_reference": "NSE_PR_2020-03-16",
+      "verification_status": "OFFICIAL_SOURCE_VERIFIED"
+    },
+    {
+      "id": 28,
+      "index_symbol": "NIFTY 50",
+      "event_date": "2020-07-31",
+      "company_id": 128,
+      "symbol": "VEDL",
+      "action": "REMOVE",
+      "source_reference": "NSE_PR_2020-07-02",
+      "verification_status": "OFFICIAL_SOURCE_VERIFIED"
+    },
+    {
+      "id": 29,
+      "index_symbol": "NIFTY 50",
+      "event_date": "2020-07-31",
+      "company_id": 20,
+      "symbol": "HDFCLIFE",
+      "action": "ADD",
+      "source_reference": "NSE_PR_2020-07-02",
+      "verification_status": "OFFICIAL_SOURCE_VERIFIED"
+    },
+    {
+      "id": 30,
+      "index_symbol": "NIFTY 50",
+      "event_date": "2020-09-25",
+      "company_id": 120,
+      "symbol": "INFRATEL",
+      "action": "REMOVE",
+      "source_reference": "NSE_PR_2020-08-20",
+      "verification_status": "OFFICIAL_SOURCE_VERIFIED"
+    },
+    {
+      "id": 31,
+      "index_symbol": "NIFTY 50",
+      "event_date": "2020-09-25",
+      "company_id": 130,
+      "symbol": "ZEEL",
+      "action": "REMOVE",
+      "source_reference": "NSE_PR_2020-08-20",
+      "verification_status": "OFFICIAL_SOURCE_VERIFIED"
+    },
+    {
+      "id": 32,
+      "index_symbol": "NIFTY 50",
+      "event_date": "2020-09-25",
+      "company_id": 114,
+      "symbol": "DIVISLAB",
+      "action": "ADD",
+      "source_reference": "NSE_PR_2020-08-20",
+      "verification_status": "OFFICIAL_SOURCE_VERIFIED"
+    },
+    {
+      "id": 33,
+      "index_symbol": "NIFTY 50",
+      "event_date": "2020-09-25",
+      "company_id": 41,
+      "symbol": "SBILIFE",
+      "action": "ADD",
+      "source_reference": "NSE_PR_2020-08-20",
+      "verification_status": "OFFICIAL_SOURCE_VERIFIED"
+    },
+    {
+      "id": 34,
+      "index_symbol": "NIFTY 50",
+      "event_date": "2021-03-31",
+      "company_id": 115,
+      "symbol": "GAIL",
+      "action": "REMOVE",
+      "source_reference": "NSE_PR_2021-02-23",
+      "verification_status": "OFFICIAL_SOURCE_VERIFIED"
+    },
+    {
+      "id": 35,
+      "index_symbol": "NIFTY 50",
+      "event_date": "2021-03-31",
+      "company_id": 45,
+      "symbol": "TATACONSUM",
+      "action": "ADD",
+      "source_reference": "NSE_PR_2021-02-23",
+      "verification_status": "OFFICIAL_SOURCE_VERIFIED"
+    },
+    {
+      "id": 36,
+      "index_symbol": "NIFTY 50",
+      "event_date": "2022-03-31",
+      "company_id": 121,
+      "symbol": "IOC",
+      "action": "REMOVE",
+      "source_reference": "NSE_PR_2022-02-24",
+      "verification_status": "OFFICIAL_SOURCE_VERIFIED"
+    },
+    {
+      "id": 37,
+      "index_symbol": "NIFTY 50",
+      "event_date": "2022-03-31",
+      "company_id": 3,
+      "symbol": "APOLLOHOSP",
+      "action": "ADD",
+      "source_reference": "NSE_CIRCULAR_2022-02-25",
+      "verification_status": "OFFICIAL_SOURCE_VERIFIED"
+    },
+    {
+      "id": 38,
+      "index_symbol": "NIFTY 50",
+      "event_date": "2022-09-30",
+      "company_id": 124,
+      "symbol": "SHREECEM",
+      "action": "REMOVE",
+      "source_reference": "NSE_PR_2022-09-01",
+      "verification_status": "OFFICIAL_SOURCE_VERIFIED"
+    },
+    {
+      "id": 39,
+      "index_symbol": "NIFTY 50",
+      "event_date": "2022-09-30",
+      "company_id": 1,
+      "symbol": "ADANIENT",
+      "action": "ADD",
+      "source_reference": "NSE_PR_2022-09-01",
+      "verification_status": "OFFICIAL_SOURCE_VERIFIED"
+    },
+    {
+      "id": 40,
+      "index_symbol": "NIFTY 50",
+      "event_date": "2023-07-13",
+      "company_id": 116,
+      "symbol": "HDFC",
+      "action": "REMOVE",
+      "source_reference": "NSE_PRESS_RELEASE_2023-07-04",
+      "verification_status": "OFFICIAL_SOURCE_VERIFIED"
+    },
+    {
+      "id": 41,
+      "index_symbol": "NIFTY 50",
+      "event_date": "2023-07-13",
+      "company_id": 122,
+      "symbol": "LTIM",
+      "action": "ADD",
+      "source_reference": "NSE_PRESS_RELEASE_2023-07-04",
+      "verification_status": "OFFICIAL_SOURCE_VERIFIED"
+    },
+    {
+      "id": 42,
+      "index_symbol": "NIFTY 50",
+      "event_date": "2024-03-28",
+      "company_id": 127,
+      "symbol": "UPL",
+      "action": "REMOVE",
+      "source_reference": "NSE_PR_2024-03-20",
+      "verification_status": "OFFICIAL_SOURCE_VERIFIED"
+    },
+    {
+      "id": 43,
+      "index_symbol": "NIFTY 50",
+      "event_date": "2024-03-28",
+      "company_id": 43,
+      "symbol": "SHRIRAMFIN",
+      "action": "ADD",
+      "source_reference": "NSE_PR_2024-03-20",
+      "verification_status": "OFFICIAL_SOURCE_VERIFIED"
+    },
+    {
+      "id": 44,
+      "index_symbol": "NIFTY 50",
+      "event_date": "2024-09-30",
+      "company_id": 114,
+      "symbol": "DIVISLAB",
+      "action": "REMOVE",
+      "source_reference": "NSE_PR_2024-08-23",
+      "verification_status": "OFFICIAL_SOURCE_VERIFIED"
+    },
+    {
+      "id": 45,
+      "index_symbol": "NIFTY 50",
+      "event_date": "2024-09-30",
+      "company_id": 122,
+      "symbol": "LTIM",
+      "action": "REMOVE",
+      "source_reference": "NSE_PR_2024-08-23",
+      "verification_status": "OFFICIAL_SOURCE_VERIFIED"
+    },
+    {
+      "id": 46,
+      "index_symbol": "NIFTY 50",
+      "event_date": "2024-09-30",
+      "company_id": 9,
+      "symbol": "BEL",
+      "action": "ADD",
+      "source_reference": "NSE_PR_2024-08-23",
+      "verification_status": "OFFICIAL_SOURCE_VERIFIED"
+    },
+    {
+      "id": 47,
+      "index_symbol": "NIFTY 50",
+      "event_date": "2024-09-30",
+      "company_id": 52,
+      "symbol": "TRENT",
+      "action": "ADD",
+      "source_reference": "NSE_PR_2024-08-23",
+      "verification_status": "OFFICIAL_SOURCE_VERIFIED"
+    },
+    {
+      "id": 48,
+      "index_symbol": "NIFTY 50",
+      "event_date": "2025-03-28",
+      "company_id": 112,
+      "symbol": "BPCL",
+      "action": "REMOVE",
+      "source_reference": "NSE_PR_2025-02-21",
+      "verification_status": "OFFICIAL_SOURCE_VERIFIED"
+    },
+    {
+      "id": 49,
+      "index_symbol": "NIFTY 50",
+      "event_date": "2025-03-28",
+      "company_id": 113,
+      "symbol": "BRITANNIA",
+      "action": "REMOVE",
+      "source_reference": "NSE_PR_2025-02-21",
+      "verification_status": "OFFICIAL_SOURCE_VERIFIED"
+    },
+    {
+      "id": 50,
+      "index_symbol": "NIFTY 50",
+      "event_date": "2025-03-28",
+      "company_id": 29,
+      "symbol": "JIOFIN",
+      "action": "ADD",
+      "source_reference": "NSE_PR_2025-02-21",
+      "verification_status": "OFFICIAL_SOURCE_VERIFIED"
+    },
+    {
+      "id": 51,
+      "index_symbol": "NIFTY 50",
+      "event_date": "2025-03-28",
+      "company_id": 16,
+      "symbol": "ZOMATO",
+      "action": "ADD",
+      "source_reference": "NSE_PR_2025-02-21",
+      "verification_status": "OFFICIAL_SOURCE_VERIFIED"
+    },
+    {
+      "id": 52,
+      "index_symbol": "NIFTY 50",
+      "event_date": "2025-09-30",
+      "company_id": 21,
+      "symbol": "HEROMOTOCO",
+      "action": "REMOVE",
+      "source_reference": "NSE_PR_2025-08-22",
+      "verification_status": "OFFICIAL_SOURCE_VERIFIED"
+    },
+    {
+      "id": 53,
+      "index_symbol": "NIFTY 50",
+      "event_date": "2025-09-30",
+      "company_id": 26,
+      "symbol": "INDUSINDBK",
+      "action": "REMOVE",
+      "source_reference": "NSE_PR_2025-08-22",
+      "verification_status": "OFFICIAL_SOURCE_VERIFIED"
+    },
+    {
+      "id": 54,
+      "index_symbol": "NIFTY 50",
+      "event_date": "2025-09-30",
+      "company_id": 25,
+      "symbol": "INDIGO",
+      "action": "ADD",
+      "source_reference": "NSE_PR_2025-08-22",
+      "verification_status": "OFFICIAL_SOURCE_VERIFIED"
+    },
+    {
+      "id": 55,
+      "index_symbol": "NIFTY 50",
+      "event_date": "2025-09-30",
+      "company_id": 35,
+      "symbol": "MAXHEALTH",
+      "action": "ADD",
+      "source_reference": "NSE_PR_2025-08-22",
+      "verification_status": "OFFICIAL_SOURCE_VERIFIED"
+    },
+    {
+      "id": 56,
+      "index_symbol": "NIFTY 50",
+      "event_date": "2026-09-30",
+      "company_id": 54,
+      "symbol": "WIPRO",
+      "action": "REMOVE",
+      "source_reference": "NSE_PR_2026-08-10",
+      "verification_status": "OFFICIAL_SOURCE_VERIFIED"
+    },
+    {
+      "id": 57,
+      "index_symbol": "NIFTY 50",
+      "event_date": "2026-09-30",
+      "company_id": 11,
+      "symbol": "BSE",
+      "action": "ADD",
+      "source_reference": "NSE_PR_2026-08-10",
+      "verification_status": "OFFICIAL_SOURCE_VERIFIED"
+    }
+  ],
+  "membership_events": [
+    {
+      "id": 2,
+      "index_symbol": "NIFTY 50",
+      "event_date": "2025-09-30",
+      "event_type": "INDEX_REPLACEMENT",
+      "old_company_id": 21,
+      "new_company_id": 25,
+      "old_symbol": "HEROMOTOCO",
+      "new_symbol": "INDIGO",
+      "company_identity": "Separate company replacement",
+      "source_reference": "NSE Indices press release, 22 Aug 2025",
+      "verification_status": "RECONCILED_SOURCE_REGISTER"
+    },
+    {
+      "id": 3,
+      "index_symbol": "NIFTY 50",
+      "event_date": "2025-09-30",
+      "event_type": "INDEX_REPLACEMENT",
+      "old_company_id": 26,
+      "new_company_id": 35,
+      "old_symbol": "INDUSINDBK",
+      "new_symbol": "MAXHEALTH",
+      "company_identity": "Separate company replacement",
+      "source_reference": "NSE Indices press release, 22 Aug 2025",
+      "verification_status": "RECONCILED_SOURCE_REGISTER"
+    },
+    {
+      "id": 1,
+      "index_symbol": "NIFTY 50",
+      "event_date": "2025-10-24",
+      "event_type": "SYMBOL_CHANGE",
+      "old_company_id": 50,
+      "new_company_id": 51,
+      "old_symbol": "TATAMOTORS",
+      "new_symbol": "TMPV",
+      "company_identity": "Tata Motors Passenger Vehicles Limited",
+      "source_reference": "NSE circular NSE/FAOP/70882",
+      "verification_status": "RECONCILED_SOURCE_REGISTER"
+    },
+    {
+      "id": 4,
+      "index_symbol": "NIFTY 50",
+      "event_date": "2026-09-30",
+      "event_type": "INDEX_REPLACEMENT",
+      "old_company_id": 54,
+      "new_company_id": 11,
+      "old_symbol": "WIPRO",
+      "new_symbol": "BSE",
+      "company_identity": "Separate company replacement",
+      "source_reference": "NSE Indices press release, 10 Aug 2026",
+      "verification_status": "RECONCILED_SOURCE_REGISTER"
+    }
+  ],
+  "intervals": [
+    {
+      "id": 1,
+      "index_symbol": "NIFTY 50",
+      "company_id": 106,
+      "effective_from": "2016-11-08",
+      "effective_to": "2017-09-28",
+      "source_name": "CERTIFIED_MEMBERSHIP_CSV | CLOSED"
+    },
+    {
+      "id": 47,
+      "index_symbol": "NIFTY 50",
+      "company_id": 31,
+      "effective_from": "2016-11-08",
+      "effective_to": null,
+      "source_name": "CERTIFIED_MEMBERSHIP_CSV | ACTIVE"
+    },
+    {
+      "id": 3,
+      "index_symbol": "NIFTY 50",
+      "company_id": 2,
+      "effective_from": "2016-11-08",
+      "effective_to": null,
+      "source_name": "CERTIFIED_MEMBERSHIP_CSV | ACTIVE"
+    },
+    {
+      "id": 4,
+      "index_symbol": "NIFTY 50",
+      "company_id": 107,
+      "effective_from": "2016-11-08",
+      "effective_to": "2018-04-01",
+      "source_name": "CERTIFIED_MEMBERSHIP_CSV | CLOSED"
+    },
+    {
+      "id": 68,
+      "index_symbol": "NIFTY 50",
+      "company_id": 46,
+      "effective_from": "2016-11-08",
+      "effective_to": null,
+      "source_name": "CERTIFIED_MEMBERSHIP_CSV | ACTIVE"
+    },
+    {
+      "id": 6,
+      "index_symbol": "NIFTY 50",
+      "company_id": 4,
+      "effective_from": "2016-11-08",
+      "effective_to": null,
+      "source_name": "CERTIFIED_MEMBERSHIP_CSV | ACTIVE"
+    },
+    {
+      "id": 7,
+      "index_symbol": "NIFTY 50",
+      "company_id": 108,
+      "effective_from": "2016-11-08",
+      "effective_to": "2018-04-01",
+      "source_name": "CERTIFIED_MEMBERSHIP_CSV | CLOSED"
+    },
+    {
+      "id": 8,
+      "index_symbol": "NIFTY 50",
+      "company_id": 5,
+      "effective_from": "2016-11-08",
+      "effective_to": null,
+      "source_name": "CERTIFIED_MEMBERSHIP_CSV | ACTIVE"
+    },
+    {
+      "id": 9,
+      "index_symbol": "NIFTY 50",
+      "company_id": 6,
+      "effective_from": "2016-11-08",
+      "effective_to": null,
+      "source_name": "CERTIFIED_MEMBERSHIP_CSV | ACTIVE"
+    },
+    {
+      "id": 69,
+      "index_symbol": "NIFTY 50",
+      "company_id": 47,
+      "effective_from": "2016-11-08",
+      "effective_to": null,
+      "source_name": "CERTIFIED_MEMBERSHIP_CSV | ACTIVE"
+    },
+    {
+      "id": 73,
+      "index_symbol": "NIFTY 50",
+      "company_id": 53,
+      "effective_from": "2016-11-08",
+      "effective_to": null,
+      "source_name": "CERTIFIED_MEMBERSHIP_CSV | ACTIVE"
+    },
+    {
+      "id": 12,
+      "index_symbol": "NIFTY 50",
+      "company_id": 109,
+      "effective_from": "2016-11-08",
+      "effective_to": "2017-09-28",
+      "source_name": "CERTIFIED_MEMBERSHIP_CSV | CLOSED"
+    },
+    {
+      "id": 44,
+      "index_symbol": "NIFTY 50",
+      "company_id": 28,
+      "effective_from": "2016-11-08",
+      "effective_to": null,
+      "source_name": "CERTIFIED_MEMBERSHIP_CSV | ACTIVE"
+    },
+    {
+      "id": 14,
+      "index_symbol": "NIFTY 50",
+      "company_id": 10,
+      "effective_from": "2016-11-08",
+      "effective_to": null,
+      "source_name": "CERTIFIED_MEMBERSHIP_CSV | ACTIVE"
+    },
+    {
+      "id": 15,
+      "index_symbol": "NIFTY 50",
+      "company_id": 110,
+      "effective_from": "2016-11-08",
+      "effective_to": "2017-03-30",
+      "source_name": "CERTIFIED_MEMBERSHIP_CSV | CLOSED"
+    },
+    {
+      "id": 16,
+      "index_symbol": "NIFTY 50",
+      "company_id": 111,
+      "effective_from": "2016-11-08",
+      "effective_to": "2018-04-01",
+      "source_name": "CERTIFIED_MEMBERSHIP_CSV | CLOSED"
+    },
+    {
+      "id": 17,
+      "index_symbol": "NIFTY 50",
+      "company_id": 112,
+      "effective_from": "2016-11-08",
+      "effective_to": "2025-03-27",
+      "source_name": "CERTIFIED_MEMBERSHIP_CSV | CLOSED"
+    },
+    {
+      "id": 76,
+      "index_symbol": "NIFTY 50",
+      "company_id": 54,
+      "effective_from": "2016-11-08",
+      "effective_to": "2026-09-29",
+      "source_name": "CERTIFIED_MEMBERSHIP_CSV | CLOSED"
+    },
+    {
+      "id": 77,
+      "index_symbol": "NIFTY 50",
+      "company_id": 129,
+      "effective_from": "2016-11-08",
+      "effective_to": "2020-03-18",
+      "source_name": "CERTIFIED_MEMBERSHIP_CSV | CLOSED"
+    },
+    {
+      "id": 20,
+      "index_symbol": "NIFTY 50",
+      "company_id": 12,
+      "effective_from": "2016-11-08",
+      "effective_to": null,
+      "source_name": "CERTIFIED_MEMBERSHIP_CSV | ACTIVE"
+    },
+    {
+      "id": 21,
+      "index_symbol": "NIFTY 50",
+      "company_id": 13,
+      "effective_from": "2016-11-08",
+      "effective_to": null,
+      "source_name": "CERTIFIED_MEMBERSHIP_CSV | ACTIVE"
+    },
+    {
+      "id": 42,
+      "index_symbol": "NIFTY 50",
+      "company_id": 27,
+      "effective_from": "2016-11-08",
+      "effective_to": null,
+      "source_name": "CERTIFIED_MEMBERSHIP_CSV | ACTIVE"
+    },
+    {
+      "id": 23,
+      "index_symbol": "NIFTY 50",
+      "company_id": 14,
+      "effective_from": "2016-11-08",
+      "effective_to": null,
+      "source_name": "CERTIFIED_MEMBERSHIP_CSV | ACTIVE"
+    },
+    {
+      "id": 24,
+      "index_symbol": "NIFTY 50",
+      "company_id": 15,
+      "effective_from": "2016-11-08",
+      "effective_to": null,
+      "source_name": "CERTIFIED_MEMBERSHIP_CSV | ACTIVE"
+    },
+    {
+      "id": 25,
+      "index_symbol": "NIFTY 50",
+      "company_id": 115,
+      "effective_from": "2016-11-08",
+      "effective_to": "2021-03-30",
+      "source_name": "CERTIFIED_MEMBERSHIP_CSV | CLOSED"
+    },
+    {
+      "id": 26,
+      "index_symbol": "NIFTY 50",
+      "company_id": 17,
+      "effective_from": "2016-11-08",
+      "effective_to": "2017-05-25",
+      "source_name": "CERTIFIED_MEMBERSHIP_CSV | CLOSED"
+    },
+    {
+      "id": 78,
+      "index_symbol": "NIFTY 50",
+      "company_id": 130,
+      "effective_from": "2016-11-08",
+      "effective_to": "2020-09-24",
+      "source_name": "CERTIFIED_MEMBERSHIP_CSV | CLOSED"
+    },
+    {
+      "id": 28,
+      "index_symbol": "NIFTY 50",
+      "company_id": 18,
+      "effective_from": "2016-11-08",
+      "effective_to": null,
+      "source_name": "CERTIFIED_MEMBERSHIP_CSV | ACTIVE"
+    },
+    {
+      "id": 29,
+      "index_symbol": "NIFTY 50",
+      "company_id": 116,
+      "effective_from": "2016-11-08",
+      "effective_to": "2023-07-12",
+      "source_name": "CERTIFIED_MEMBERSHIP_CSV | CLOSED"
+    },
+    {
+      "id": 30,
+      "index_symbol": "NIFTY 50",
+      "company_id": 19,
+      "effective_from": "2016-11-08",
+      "effective_to": null,
+      "source_name": "CERTIFIED_MEMBERSHIP_CSV | ACTIVE"
+    },
+    {
+      "id": 40,
+      "index_symbol": "NIFTY 50",
+      "company_id": 26,
+      "effective_from": "2016-11-08",
+      "effective_to": "2025-09-29",
+      "source_name": "CERTIFIED_MEMBERSHIP_CSV | CLOSED"
+    },
+    {
+      "id": 32,
+      "index_symbol": "NIFTY 50",
+      "company_id": 21,
+      "effective_from": "2016-11-08",
+      "effective_to": "2025-09-29",
+      "source_name": "CERTIFIED_MEMBERSHIP_CSV | CLOSED"
+    },
+    {
+      "id": 33,
+      "index_symbol": "NIFTY 50",
+      "company_id": 22,
+      "effective_from": "2016-11-08",
+      "effective_to": null,
+      "source_name": "CERTIFIED_MEMBERSHIP_CSV | ACTIVE"
+    },
+    {
+      "id": 35,
+      "index_symbol": "NIFTY 50",
+      "company_id": 23,
+      "effective_from": "2016-11-08",
+      "effective_to": null,
+      "source_name": "CERTIFIED_MEMBERSHIP_CSV | ACTIVE"
+    },
+    {
+      "id": 37,
+      "index_symbol": "NIFTY 50",
+      "company_id": 24,
+      "effective_from": "2016-11-08",
+      "effective_to": null,
+      "source_name": "CERTIFIED_MEMBERSHIP_CSV | ACTIVE"
+    },
+    {
+      "id": 38,
+      "index_symbol": "NIFTY 50",
+      "company_id": 119,
+      "effective_from": "2016-11-08",
+      "effective_to": "2017-03-30",
+      "source_name": "CERTIFIED_MEMBERSHIP_CSV | CLOSED"
+    },
+    {
+      "id": 41,
+      "index_symbol": "NIFTY 50",
+      "company_id": 120,
+      "effective_from": "2016-11-08",
+      "effective_to": "2020-09-24",
+      "source_name": "CERTIFIED_MEMBERSHIP_CSV | CLOSED"
+    },
+    {
+      "id": 48,
+      "index_symbol": "NIFTY 50",
+      "company_id": 32,
+      "effective_from": "2016-11-08",
+      "effective_to": null,
+      "source_name": "CERTIFIED_MEMBERSHIP_CSV | ACTIVE"
+    },
+    {
+      "id": 50,
+      "index_symbol": "NIFTY 50",
+      "company_id": 123,
+      "effective_from": "2016-11-08",
+      "effective_to": "2018-09-27",
+      "source_name": "CERTIFIED_MEMBERSHIP_CSV | CLOSED"
+    },
+    {
+      "id": 51,
+      "index_symbol": "NIFTY 50",
+      "company_id": 33,
+      "effective_from": "2016-11-08",
+      "effective_to": null,
+      "source_name": "CERTIFIED_MEMBERSHIP_CSV | ACTIVE"
+    },
+    {
+      "id": 52,
+      "index_symbol": "NIFTY 50",
+      "company_id": 34,
+      "effective_from": "2016-11-08",
+      "effective_to": null,
+      "source_name": "CERTIFIED_MEMBERSHIP_CSV | ACTIVE"
+    },
+    {
+      "id": 55,
+      "index_symbol": "NIFTY 50",
+      "company_id": 37,
+      "effective_from": "2016-11-08",
+      "effective_to": null,
+      "source_name": "CERTIFIED_MEMBERSHIP_CSV | ACTIVE"
+    },
+    {
+      "id": 56,
+      "index_symbol": "NIFTY 50",
+      "company_id": 38,
+      "effective_from": "2016-11-08",
+      "effective_to": null,
+      "source_name": "CERTIFIED_MEMBERSHIP_CSV | ACTIVE"
+    },
+    {
+      "id": 57,
+      "index_symbol": "NIFTY 50",
+      "company_id": 39,
+      "effective_from": "2016-11-08",
+      "effective_to": null,
+      "source_name": "CERTIFIED_MEMBERSHIP_CSV | ACTIVE"
+    },
+    {
+      "id": 58,
+      "index_symbol": "NIFTY 50",
+      "company_id": 40,
+      "effective_from": "2016-11-08",
+      "effective_to": null,
+      "source_name": "CERTIFIED_MEMBERSHIP_CSV | ACTIVE"
+    },
+    {
+      "id": 60,
+      "index_symbol": "NIFTY 50",
+      "company_id": 42,
+      "effective_from": "2016-11-08",
+      "effective_to": null,
+      "source_name": "CERTIFIED_MEMBERSHIP_CSV | ACTIVE"
+    },
+    {
+      "id": 70,
+      "index_symbol": "NIFTY 50",
+      "company_id": 48,
+      "effective_from": "2016-11-08",
+      "effective_to": null,
+      "source_name": "CERTIFIED_MEMBERSHIP_CSV | ACTIVE"
+    },
+    {
+      "id": 63,
+      "index_symbol": "NIFTY 50",
+      "company_id": 44,
+      "effective_from": "2016-11-08",
+      "effective_to": null,
+      "source_name": "CERTIFIED_MEMBERSHIP_CSV | ACTIVE"
+    },
+    {
+      "id": 65,
+      "index_symbol": "NIFTY 50",
+      "company_id": 50,
+      "effective_from": "2016-11-08",
+      "effective_to": null,
+      "source_name": "CERTIFIED_MEMBERSHIP_CSV | ACTIVE"
+    },
+    {
+      "id": 66,
+      "index_symbol": "NIFTY 50",
+      "company_id": 125,
+      "effective_from": "2016-11-08",
+      "effective_to": "2017-09-28",
+      "source_name": "CERTIFIED_MEMBERSHIP_CSV | CLOSED"
+    },
+    {
+      "id": 67,
+      "index_symbol": "NIFTY 50",
+      "company_id": 126,
+      "effective_from": "2016-11-08",
+      "effective_to": "2017-09-28",
+      "source_name": "CERTIFIED_MEMBERSHIP_CSV | CLOSED"
+    },
+    {
+      "id": 43,
+      "index_symbol": "NIFTY 50",
+      "company_id": 121,
+      "effective_from": "2017-03-31",
+      "effective_to": "2022-03-30",
+      "source_name": "CERTIFIED_MEMBERSHIP_CSV | CLOSED"
+    },
+    {
+      "id": 36,
+      "index_symbol": "NIFTY 50",
+      "company_id": 118,
+      "effective_from": "2017-03-31",
+      "effective_to": "2019-09-26",
+      "source_name": "CERTIFIED_MEMBERSHIP_CSV | CLOSED"
+    },
+    {
+      "id": 75,
+      "index_symbol": "NIFTY 50",
+      "company_id": 128,
+      "effective_from": "2017-05-26",
+      "effective_to": "2020-07-30",
+      "source_name": "CERTIFIED_MEMBERSHIP_CSV | CLOSED"
+    },
+    {
+      "id": 11,
+      "index_symbol": "NIFTY 50",
+      "company_id": 8,
+      "effective_from": "2017-09-29",
+      "effective_to": null,
+      "source_name": "CERTIFIED_MEMBERSHIP_CSV | ACTIVE"
+    },
+    {
+      "id": 74,
+      "index_symbol": "NIFTY 50",
+      "company_id": 127,
+      "effective_from": "2017-09-29",
+      "effective_to": "2024-03-27",
+      "source_name": "CERTIFIED_MEMBERSHIP_CSV | CLOSED"
+    },
+    {
+      "id": 34,
+      "index_symbol": "NIFTY 50",
+      "company_id": 117,
+      "effective_from": "2017-09-29",
+      "effective_to": "2019-03-28",
+      "source_name": "CERTIFIED_MEMBERSHIP_CSV | CLOSED"
+    },
+    {
+      "id": 10,
+      "index_symbol": "NIFTY 50",
+      "company_id": 7,
+      "effective_from": "2018-04-02",
+      "effective_to": null,
+      "source_name": "CERTIFIED_MEMBERSHIP_CSV | ACTIVE"
+    },
+    {
+      "id": 27,
+      "index_symbol": "NIFTY 50",
+      "company_id": 17,
+      "effective_from": "2018-04-02",
+      "effective_to": null,
+      "source_name": "CERTIFIED_MEMBERSHIP_CSV | ACTIVE"
+    },
+    {
+      "id": 71,
+      "index_symbol": "NIFTY 50",
+      "company_id": 49,
+      "effective_from": "2018-04-02",
+      "effective_to": null,
+      "source_name": "CERTIFIED_MEMBERSHIP_CSV | ACTIVE"
+    },
+    {
+      "id": 46,
+      "index_symbol": "NIFTY 50",
+      "company_id": 30,
+      "effective_from": "2018-09-28",
+      "effective_to": null,
+      "source_name": "CERTIFIED_MEMBERSHIP_CSV | ACTIVE"
+    },
+    {
+      "id": 18,
+      "index_symbol": "NIFTY 50",
+      "company_id": 113,
+      "effective_from": "2019-03-29",
+      "effective_to": "2025-03-27",
+      "source_name": "CERTIFIED_MEMBERSHIP_CSV | CLOSED"
+    },
+    {
+      "id": 54,
+      "index_symbol": "NIFTY 50",
+      "company_id": 36,
+      "effective_from": "2019-09-27",
+      "effective_to": null,
+      "source_name": "CERTIFIED_MEMBERSHIP_CSV | ACTIVE"
+    },
+    {
+      "id": 61,
+      "index_symbol": "NIFTY 50",
+      "company_id": 124,
+      "effective_from": "2020-03-19",
+      "effective_to": "2022-09-29",
+      "source_name": "CERTIFIED_MEMBERSHIP_CSV | CLOSED"
+    },
+    {
+      "id": 31,
+      "index_symbol": "NIFTY 50",
+      "company_id": 20,
+      "effective_from": "2020-07-31",
+      "effective_to": null,
+      "source_name": "CERTIFIED_MEMBERSHIP_CSV | ACTIVE"
+    },
+    {
+      "id": 59,
+      "index_symbol": "NIFTY 50",
+      "company_id": 41,
+      "effective_from": "2020-09-25",
+      "effective_to": null,
+      "source_name": "CERTIFIED_MEMBERSHIP_CSV | ACTIVE"
+    },
+    {
+      "id": 22,
+      "index_symbol": "NIFTY 50",
+      "company_id": 114,
+      "effective_from": "2020-09-25",
+      "effective_to": "2024-09-29",
+      "source_name": "CERTIFIED_MEMBERSHIP_CSV | CLOSED"
+    },
+    {
+      "id": 64,
+      "index_symbol": "NIFTY 50",
+      "company_id": 45,
+      "effective_from": "2021-03-31",
+      "effective_to": null,
+      "source_name": "CERTIFIED_MEMBERSHIP_CSV | ACTIVE"
+    },
+    {
+      "id": 5,
+      "index_symbol": "NIFTY 50",
+      "company_id": 3,
+      "effective_from": "2022-03-31",
+      "effective_to": null,
+      "source_name": "CERTIFIED_MEMBERSHIP_CSV | ACTIVE"
+    },
+    {
+      "id": 2,
+      "index_symbol": "NIFTY 50",
+      "company_id": 1,
+      "effective_from": "2022-09-30",
+      "effective_to": null,
+      "source_name": "CERTIFIED_MEMBERSHIP_CSV | ACTIVE"
+    },
+    {
+      "id": 49,
+      "index_symbol": "NIFTY 50",
+      "company_id": 122,
+      "effective_from": "2023-07-13",
+      "effective_to": "2024-09-29",
+      "source_name": "CERTIFIED_MEMBERSHIP_CSV | CLOSED"
+    },
+    {
+      "id": 62,
+      "index_symbol": "NIFTY 50",
+      "company_id": 43,
+      "effective_from": "2024-03-28",
+      "effective_to": null,
+      "source_name": "CERTIFIED_MEMBERSHIP_CSV | ACTIVE"
+    },
+    {
+      "id": 72,
+      "index_symbol": "NIFTY 50",
+      "company_id": 52,
+      "effective_from": "2024-09-30",
+      "effective_to": null,
+      "source_name": "CERTIFIED_MEMBERSHIP_CSV | ACTIVE"
+    },
+    {
+      "id": 13,
+      "index_symbol": "NIFTY 50",
+      "company_id": 9,
+      "effective_from": "2024-09-30",
+      "effective_to": null,
+      "source_name": "CERTIFIED_MEMBERSHIP_CSV | ACTIVE"
+    },
+    {
+      "id": 45,
+      "index_symbol": "NIFTY 50",
+      "company_id": 29,
+      "effective_from": "2025-03-28",
+      "effective_to": null,
+      "source_name": "CERTIFIED_MEMBERSHIP_CSV | ACTIVE"
+    },
+    {
+      "id": 79,
+      "index_symbol": "NIFTY 50",
+      "company_id": 16,
+      "effective_from": "2025-03-28",
+      "effective_to": null,
+      "source_name": "CERTIFIED_MEMBERSHIP_CSV | ACTIVE"
+    },
+    {
+      "id": 53,
+      "index_symbol": "NIFTY 50",
+      "company_id": 35,
+      "effective_from": "2025-09-30",
+      "effective_to": null,
+      "source_name": "CERTIFIED_MEMBERSHIP_CSV | ACTIVE"
+    },
+    {
+      "id": 39,
+      "index_symbol": "NIFTY 50",
+      "company_id": 25,
+      "effective_from": "2025-09-30",
+      "effective_to": null,
+      "source_name": "CERTIFIED_MEMBERSHIP_CSV | ACTIVE"
+    },
+    {
+      "id": 19,
+      "index_symbol": "NIFTY 50",
+      "company_id": 11,
+      "effective_from": "2026-09-30",
+      "effective_to": null,
+      "source_name": "CERTIFIED_MEMBERSHIP_CSV | ACTIVE"
+    }
+  ]
+}

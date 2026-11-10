@@ -1,0 +1,389 @@
+========== MARKET IDEAS TESTS ==========
+"""Tests for the GREEDY STOCKS Market Ideas engine."""
+
+import json
+import tempfile
+import unittest
+from pathlib import Path
+from unittest.mock import patch
+
+import pandas as pd
+
+from analytics import market_ideas as mi
+
+
+def sample_ranking():
+    """Build a small deterministic ranking dataset for testing."""
+    rows = [
+        # Positive sector
+        ("POS_A", "Positive A Ltd", "Positive Sector", 8.0, 20.0, -5.0),
+        ("POS_B", "Positive B Ltd", "Positive Sector", 4.0, 22.0, -6.0),
+
+        # Negative sector
+        ("NEG_A", "Negative A Ltd", "Negative Sector", -8.0, 25.0, -12.0),
+        ("NEG_B", "Negative B Ltd", "Negative Sector", -4.0, 24.0, -10.0),
+
+        # Flat sector
+        ("FLAT_A", "Flat A Ltd", "Flat Sector", 0.0, 18.0, -3.0),
+        ("FLAT_B", "Flat B Ltd", "Flat Sector", 0.0, 19.0, -4.0),
+
+        # Single-company sector should be excluded
+        ("SINGLE", "Single Ltd", "Single Sector", 5.0, 21.0, -7.0),
+    ]
+
+    result = pd.DataFrame(
+        [
+            {
+                "symbol": symbol,
+                "company_name": company_name,
+                "sector": sector,
+                "period_return": period_return,
+                "annualized_volatility": volatility,
+                "maximum_drawdown": drawdown,
+                "sharpe_ratio": 0.5,
+                "return_rank": index + 1,
+                "observations": 100,
+                "data_status": "CALCULATED",
+                "last_price_date": pd.Timestamp("2026-11-05"),
+            }
+            for index, (
+                symbol,
+                company_name,
+                sector,
+                period_return,
+                volatility,
+                drawdown,
+            ) in enumerate(rows)
+        ]
+    )
+
+    result.attrs.update(
+        {
+            "index": "NIFTY 50",
+            "snapshot_month": "2026-10-01",
+            "price_basis": "SPLIT_BONUS_ADJUSTED",
+            "dividend_adjusted": False,
+            "membership_basis": "LATEST_MONTHLY_SNAPSHOT",
+            "corporate_action_coverage": "PARTIAL",
+        }
+    )
+
+    return result
+
+
+class TestMarketIdeas(unittest.TestCase):
+
+    def setUp(self):
+        self.ranking = sample_ranking()
+
+    def test_performance_standouts(self):
+        ideas = mi.performance_standouts(
+            self.ranking,
+            "3M",
+            top_n=3,
+        )
+
+        self.assertEqual(len(ideas), 3)
+        self.assertTrue(
+            all(
+                idea["category"] == "PERFORMANCE_STANDOUTS"
+                for idea in ideas
+            )
+        )
+
+        self.assertEqual(
+            ideas[0]["evidence"]["symbol"],
+            "POS_A",
+        )
+
+    def test_risk_stability_insights(self):
+        ideas = mi.risk_stability_insights(
+            self.ranking,
+            "3M",
+            top_n=3,
+        )
+
+        self.assertEqual(len(ideas), 3)
+
+        volatilities = [
+            idea["evidence"]["annualized_volatility_pct"]
+            for idea in ideas
+        ]
+
+        self.assertEqual(volatilities, sorted(volatilities))
+
+    def test_sector_positive_negative_and_flat_classification(self):
+        ideas = mi.sector_opportunities(
+            self.ranking,
+            "3M",
+            top_n=10,
+        )
+
+        classifications = {
+            idea["evidence"]["sector"]:
+                idea["evidence"]["classification"]
+            for idea in ideas
+        }
+
+        self.assertEqual(
+            classifications["Positive Sector"],
+            "POSITIVE_HISTORICAL_PERFORMANCE",
+        )
+
+        self.assertEqual(
+            classifications["Negative Sector"],
+            "NEGATIVE_HISTORICAL_PERFORMANCE",
+        )
+
+        self.assertEqual(
+            classifications["Flat Sector"],
+            "FLAT_HISTORICAL_PERFORMANCE",
+        )
+
+        self.assertNotIn("Single Sector", classifications)
+
+    def test_sector_requires_at_least_two_companies(self):
+        ideas = mi.sector_opportunities(
+            self.ranking,
+            "3M",
+            top_n=10,
+        )
+
+        sectors = {
+            idea["evidence"]["sector"]
+            for idea in ideas
+        }
+
+        self.assertNotIn("Single Sector", sectors)
+
+    def test_missing_sector_is_handled(self):
+        row = self.ranking.iloc[0].copy()
+        row["sector"] = None
+
+        company = mi.company_reference(row)
+
+        self.assertEqual(company["sector"], "Unclassified")
+
+    def test_missing_greedy_log_returns_unavailable_idea(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            missing_file = Path(temp_dir) / "missing.csv"
+
+            with patch.object(mi, "GREEDY_LOG", missing_file):
+                ideas = mi.greedy_experimental_insights()
+
+        self.assertEqual(len(ideas), 1)
+        self.assertEqual(ideas[0]["category"], "GREEDY_PICKS")
+        self.assertEqual(ideas[0]["status"], "UNAVAILABLE")
+
+    def test_greedy_log_missing_required_columns_raises_error(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            log_file = Path(temp_dir) / "greedy.csv"
+            pd.DataFrame(
+                {"step": [1], "selected_symbol": ["TEST"]}
+            ).to_csv(log_file, index=False)
+
+            with patch.object(mi, "GREEDY_LOG", log_file):
+                with self.assertRaises(ValueError):
+                    mi.greedy_experimental_insights()
+
+    def test_greedy_log_generates_historical_experiment_ideas(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            log_file = Path(temp_dir) / "greedy.csv"
+
+            pd.DataFrame(
+                {
+                    "step": [2, 1],
+                    "selected_symbol": ["TEST_B", "TEST_A"],
+                    "sector": ["Sector B", "Sector A"],
+                    "portfolio_sharpe": [0.8, 0.5],
+                    "previous_portfolio_sharpe": [0.4, 0.2],
+                    "candidates_evaluated": [10, 10],
+                    "sector_limit": [3, 3],
+                }
+            ).to_csv(log_file, index=False)
+
+            with patch.object(mi, "GREEDY_LOG", log_file):
+                ideas = mi.greedy_experimental_insights(top_n=2)
+
+        self.assertEqual(len(ideas), 2)
+        self.assertEqual(
+            ideas[0]["evidence"]["symbol"],
+            "TEST_A",
+        )
+        self.assertEqual(
+            ideas[0]["evidence"]["classification"],
+            "HISTORICAL_TRAINING_EXPERIMENT",
+        )
+        self.assertIn("not live", ideas[0]["risk"])
+
+    def test_fundamental_research_is_not_fabricated(self):
+        idea = mi.fundamental_research_status()
+
+        self.assertEqual(
+            idea["category"],
+            "FUNDAMENTAL_RESEARCH",
+        )
+        self.assertEqual(
+            idea["status"],
+            "NOT_YET_AVAILABLE",
+        )
+        self.assertFalse(
+            idea["evidence"]["fundamental_data_available"]
+        )
+        self.assertFalse(
+            idea["evidence"]["valuation_claims_enabled"]
+        )
+
+    def test_invalid_period_is_rejected(self):
+        with self.assertRaises(ValueError):
+            mi.generate_market_ideas(period="5Y")
+
+    def test_non_string_period_is_rejected(self):
+        with self.assertRaises(ValueError):
+            mi.generate_market_ideas(period=3)
+
+    def test_invalid_top_n_is_rejected(self):
+        for value in [0, 11, -1, 2.5, True, "5"]:
+            with self.subTest(top_n=value):
+                with self.assertRaises(ValueError):
+                    mi.generate_market_ideas(top_n=value)
+
+    def test_generate_market_ideas_builds_expected_categories(self):
+        with (
+            patch.object(
+                mi,
+                "run_historical_rankings",
+                return_value=self.ranking,
+            ),
+            patch.object(
+                mi,
+                "greedy_experimental_insights",
+                return_value=[],
+            ),
+        ):
+            report = mi.generate_market_ideas(
+                period="3M",
+                top_n=3,
+            )
+
+        categories = {
+            idea["category"]
+            for idea in report["ideas"]
+        }
+
+        expected = {
+            "PERFORMANCE_STANDOUTS",
+            "RISK_AND_STABILITY",
+            "SECTOR_PERFORMANCE",
+            "FUNDAMENTAL_RESEARCH",
+        }
+
+        self.assertTrue(expected.issubset(categories))
+        self.assertEqual(report["metadata"]["index"], "NIFTY 50")
+        self.assertFalse(report["metadata"]["database_writes"])
+        self.assertEqual(report["metadata"]["universe_size"], 7)
+
+    def test_json_output_is_valid(self):
+        report = {
+            "metadata": {"period": "3M"},
+            "ideas": [
+                {
+                    "category": "TEST",
+                    "evidence": {
+                        "valid_number": mi.safe_number(12.34567),
+                        "missing_number": mi.safe_number(float("nan")),
+                    },
+                }
+            ],
+        }
+
+        encoded = json.dumps(
+            report,
+            allow_nan=False,
+        )
+
+        decoded = json.loads(encoded)
+
+        self.assertEqual(
+            decoded["ideas"][0]["evidence"]["valid_number"],
+            12.3457,
+        )
+        self.assertIsNone(
+            decoded["ideas"][0]["evidence"]["missing_number"]
+        )
+
+    def test_save_market_ideas_creates_json_file(self):
+        report = {
+            "metadata": {"period": "3M"},
+            "ideas": [],
+            "disclosures": [],
+        }
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            with patch.object(
+                mi,
+                "OUTPUT_DIR",
+                Path(temp_dir),
+            ):
+                output_file = mi.save_market_ideas(report)
+
+                self.assertTrue(output_file.exists())
+
+                with output_file.open(
+                    "r",
+                    encoding="utf-8",
+                ) as file:
+                    saved = json.load(file)
+
+        self.assertEqual(saved["metadata"]["period"], "3M")
+        self.assertEqual(output_file.name, "market_ideas_3m.json")
+
+
+if __name__ == "__main__":
+    unittest.main()
+
+========== HISTORICAL RANKING FUNCTIONS ==========
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\historical_rankings.py:30:    period_return,
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\historical_rankings.py:38:PERIODS = {
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\historical_rankings.py:48:def get_latest_snapshot(conn):
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\historical_rankings.py:56:def get_snapshot_companies(conn, snapshot_month):
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\historical_rankings.py:78:def get_company_prices(conn, company_id, start_date, end_date):
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\historical_rankings.py:79:    """Load all history through end_date so earlier actions can adjust the window.
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\historical_rankings.py:81:    start_date is retained in the signature for compatibility. It is not
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\historical_rankings.py:91:          AND trade_date <= :end_date
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\historical_rankings.py:95:        "end_date": end_date,
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\historical_rankings.py:99:def get_company_actions(conn, company_id, end_date):
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\historical_rankings.py:111:          AND ex_date <= :end_date
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\historical_rankings.py:115:        "end_date": pd.Timestamp(end_date).date(),
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\historical_rankings.py:121:def get_trading_sessions(conn, start_date, end_date):
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\historical_rankings.py:132:        WHERE trade_date >= :start_date
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\historical_rankings.py:133:          AND trade_date <= :end_date
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\historical_rankings.py:136:        "start_date": pd.Timestamp(start_date).date(),
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\historical_rankings.py:137:        "end_date": pd.Timestamp(end_date).date(),
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\historical_rankings.py:143:def calculate_company_metrics(
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\historical_rankings.py:146:    start_date,
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\historical_rankings.py:147:    end_date,
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\historical_rankings.py:155:    start = pd.Timestamp(start_date).normalize()
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\historical_rankings.py:156:    end = pd.Timestamp(end_date).normalize()
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\historical_rankings.py:183:            "period_return": period_return(
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\historical_rankings.py:218:def run_historical_rankings(period="3M"):
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\historical_rankings.py:219:    period = period.upper()
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\historical_rankings.py:221:    if period not in PERIODS:
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\historical_rankings.py:223:            f"Unsupported period {period}. Choose from {list(PERIODS)}."
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\historical_rankings.py:255:        end_date = pd.Timestamp(latest_date).normalize()
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\historical_rankings.py:256:        requested_start = (end_date - PERIODS[period]).normalize()
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\historical_rankings.py:260:            end_date,
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\historical_rankings.py:270:        print(f"Ranking period: {period}")
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\historical_rankings.py:272:        print(f"Common end date: {end_date.date()}")
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\historical_rankings.py:282:                end_date,
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\historical_rankings.py:288:                end_date,
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\historical_rankings.py:295:                end_date,
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\historical_rankings.py:302:                    "period_return": None,
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\historical_rankings.py:329:        result["period_return"]
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\historical_rankings.py:331:        .where(result["period_return"].notna())
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\historical_rankings.py:347:    result.attrs["period"] = period
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\historical_rankings.py:348:    result.attrs["requested_start_date"] = requested_start.date().isoformat()
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\historical_rankings.py:349:    result.attrs["common_end_date"] = end_date.date().isoformat()
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\historical_rankings.py:364:    parser.add_argument("--period", choices=list(PERIODS), default="3M")
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\historical_rankings.py:367:    ranking = run_historical_rankings(args.period)
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\historical_rankings.py:374:        "period_return",

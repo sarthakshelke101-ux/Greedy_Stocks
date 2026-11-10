@@ -1,0 +1,1049 @@
+GREEDY STOCKS - PHASE 3 IMPLEMENTATION MAP
+
+
+=====================================================================================
+FILE: backend/company_routes.py
+=====================================================================================
+Lines: 193
+
+FUNCTIONS / CLASSES:
+  Line 13: FunctionDef serialize_value(value)
+  Line 24: FunctionDef get_company_profile(symbol: str)
+
+RELEVANT SOURCE LINES:
+  L2: from datetime import date
+  L3: from decimal import Decimal
+  L5: from fastapi import APIRouter, HTTPException
+  L6: from sqlalchemy import text
+  L8: from database import engine
+  L10: router = APIRouter(tags=["Companies"])
+  L14:     if isinstance(value, date):
+  L15:         return value.isoformat()
+  L18:         return float(value)
+  L20:     return value
+  L23: @router.get("/companies/{symbol}")
+  L24: def get_company_profile(symbol: str):
+  L25:     symbol = symbol.strip().upper()
+  L27:     if not symbol or len(symbol) > 30:
+  L30:             detail="Invalid company symbol.",
+  L34:         with engine.connect() as connection:
+  L35:             company = connection.execute(
+  L39:                         c.symbol,
+  L46:                     FROM companies c
+  L47:                     LEFT JOIN sectors s ON s.id = c.sector_id
+  L48:                     WHERE c.symbol = :symbol
+  L51:                 {"symbol": symbol},
+  L57:                     detail=f"Company {symbol} was not found.",
+  L62:             coverage = connection.execute(
+  L65:                         MIN(trade_date) AS first_trade_date,
+  L66:                         MAX(trade_date) AS latest_trade_date,
+  L68:                     FROM stock_prices
+  L74:             latest_price = connection.execute(
+  L77:                         trade_date,
+  L78:                         open_price,
+  L79:                         high_price,
+  L80:                         low_price,
+  L81:                         close_price,
+  L82:                         previous_close,
+  L83:                         total_traded_volume,
+  L86:                         price_source
+  L87:                     FROM stock_prices
+  L89:                     ORDER BY trade_date DESC
+  L95:             actions = connection.execute(
+  L99:                         announcement_date,
+  L100:                         ex_date,
+  L101:                         record_date,
+  L102:                         effective_date,
+  L105:                         dividend_amount,
+  L108:                     FROM corporate_actions
+  L111:                         ex_date,
+  L112:                         effective_date,
+  L113:                         announcement_date
+  L120:             identifiers = connection.execute(
+  L129:                     FROM company_identifiers
+  L136:         return {
+  L138:                 "symbol": company["symbol"],
+  L146:             "price_coverage": {
+  L147:                 "first_price_date": serialize_value(
+  L148:                     coverage["first_trade_date"]
+  L150:                 "last_price_date": serialize_value(
+  L151:                     coverage["latest_trade_date"]
+  L154:                 "price_basis": "RAW_CLOSE_UNADJUSTED",
+  L156:             "latest_price": (
+  L159:                     for key, value in latest_price.items()
+  L161:                 if latest_price else None
+  L163:             "corporate_actions": [
+  L178:                 "Latest price is an unadjusted raw closing price.",
+  L179:                 "Corporate action coverage is limited to imported records.",
+  L180:                 "Dividend-adjusted total-return history is not provided.",
+  L182:                 "Historical price coverage does not establish historical NIFTY 50 membership.",
+  L193:         ) from error
+
+=====================================================================================
+FILE: backend/portfolio_routes.py
+=====================================================================================
+Lines: 495
+
+FUNCTIONS / CLASSES:
+  Line 29: ClassDef PortfolioRequest()
+  Line 38: FunctionDef _clean(value)
+  Line 50: FunctionDef _metrics(result)
+  Line 60: FunctionDef generate_portfolio(request: PortfolioRequest)
+    DOC: Generate a capital-constrained portfolio using original Greedy V2.
+  Line 251: ClassDef PortfolioRequest()
+  Line 260: FunctionDef _clean(value)
+    DOC: Convert NumPy/Pandas values into JSON-safe Python values.
+  Line 286: FunctionDef _metrics(result)
+  Line 290: FunctionDef _period_summary(prices, include_baseline=True)
+  Line 308: FunctionDef _benchmark_summary(comparison)
+  Line 317: FunctionDef generate_portfolio(request: PortfolioRequest)
+    DOC: Generate a capital-constrained portfolio using original Greedy V2.
+
+RELEVANT SOURCE LINES:
+  L6: from datetime import date, timedelta
+  L7: from pathlib import Path
+  L9: from fastapi import APIRouter, HTTPException
+  L10: from pydantic import BaseModel, Field, FiniteFloat
+  L16: from analytics.greedy_v2_data import prepare_greedy_v2_dataset
+  L17: from analytics.greedy_v2_splits import chronological_split
+  L18: from analytics.greedy_v2_engine import greedy_select_stocks
+  L19: from analytics.portfolio_analytics import (
+  L23: from analytics.portfolio_allocation import allocate_capital
+  L25: router = APIRouter(tags=["Portfolio"])
+  L34:     selected_symbols: list[str] = Field(default_factory=list, max_length=10)
+  L41:     if isinstance(value, (date,)):
+  L42:         return value.isoformat()
+  L44:         return value.isoformat()
+  L46:         return None
+  L47:     return value
+  L51:     return {
+  L59: @router.post("/portfolio/generate")
+  L63:         today = date.today()
+  L64:         end_date = today.isoformat()
+  L65:         start_date = (today - timedelta(days=365 * request.training_years)).isoformat()
+  L68:             start_date=start_date,
+  L69:             end_date=end_date,
+  L72:         split = chronological_split(
+  L73:             dataset.adjusted_prices,
+  L79:             train_prices=split.train,
+  L84:             fixed_symbols=request.selected_symbols,
+  L87:         symbols = selection["selected_symbols"]
+  L89:         # Latest raw close is used for executable share quantities.
+  L90:         latest_prices = {}
+  L92:         for symbol in symbols:
+  L94:                 symbol if symbol in dataset.raw_prices.columns
+  L95:                 else f"{symbol}_RAW"
+  L98:             if raw_column not in dataset.raw_prices.columns:
+  L100:                     f"Raw price history unavailable for {symbol} "
+  L104:             available = dataset.raw_prices[raw_column].dropna()
+  L107:                 raise ValueError(f"No usable raw price is available for {symbol}.")
+  L109:             latest_prices[symbol] = float(available.iloc[-1])
+  L112:             symbols=symbols,
+  L113:             prices=latest_prices,
+  L117:         # Validation-period metrics are kept separate from training selection.
+  L118:         validation_prices = split.validation
+  L119:         validation_benchmark = dataset.benchmark_prices.reindex(split.validation.index)
+  L122:             prices=validation_prices,
+  L124:             symbols=symbols,
+  L128:             price_basis="SPLIT_BONUS_ADJUSTED",
+  L129:             return_type="PRICE_RETURN",
+  L132:         test_prices = split.test
+  L133:         test_benchmark = dataset.benchmark_prices.reindex(test_prices.index)
+  L136:             prices=test_prices,
+  L138:             symbols=symbols,
+  L142:             price_basis="SPLIT_BONUS_ADJUSTED",
+  L143:             return_type="PRICE_RETURN",
+  L158:             holding["sector"] = dataset.sectors[holding["symbol"]]
+  L160:         return {
+  L169:                 "start": str(split.train.index.min().date()),
+  L170:                 "end": str(split.train.index.max().date()),
+  L171:                 "observations": len(split.train),
+  L177:                 "start": str(validation_prices.index.min().date()),
+  L178:                 "end": str(validation_prices.index.max().date()),
+  L179:                 "observations": len(validation_prices),
+  L188:                 "start": str(test_prices.index[1].date()),
+  L189:                 "end": str(test_prices.index[-1].date()),
+  L190:                 "observations": len(test_prices) - 1,
+  L200:                 "corporate_action_coverage": dataset.metadata[
+  L201:                     "corporate_action_coverage"
+  L203:                 "dividend_adjusted": dataset.metadata["dividend_adjusted"],
+  L204:                 "price_basis": dataset.metadata["price_basis"],
+  L205:                 "benchmark_basis": "NIFTY_50_PRICE_RETURN",
+  L208:                 "live_holdings_use_latest_raw_close": True,
+  L214:         raise HTTPException(status_code=400, detail=str(exc)) from exc
+  L220:         ) from exc
+  L226: from datetime import date, timedelta
+  L227: from pathlib import Path
+  L231: from fastapi import APIRouter, HTTPException
+  L232: from pydantic import BaseModel, Field, FiniteFloat
+  L238: from analytics.greedy_v2_data import prepare_greedy_v2_dataset
+  L239: from analytics.greedy_v2_splits import chronological_split
+  L240: from analytics.greedy_v2_engine import greedy_select_stocks
+  L241: from analytics.portfolio_analytics import (
+  L245: from analytics.portfolio_allocation import allocate_capital
+  L247: router = APIRouter(tags=["Portfolio"])
+  L256:     selected_symbols: list[str] = Field(default_factory=list, max_length=10)
+  L263:         return None
+  L266:         return None
+  L268:     if isinstance(value, (pd.Timestamp, date)):
+  L269:         return value.isoformat()
+  L275:         return None
+  L278:         return {str(k): _clean(v) for k, v in value.items()}
+  L281:         return [_clean(v) for v in value]
+  L283:     return value
+  L287:     return _clean(result.get("metrics", {}))
+  L290: def _period_summary(prices, include_baseline=True):
+  L291:     if prices is None or prices.empty:
+  L292:         raise ValueError("Insufficient historical observations for this period.")
+  L296:     if len(prices) <= start_index:
+  L297:         raise ValueError("Insufficient historical observations for this period.")
+  L299:     measured = prices.iloc[start_index:]
+  L301:     return {
+  L302:         "start": str(measured.index.min().date()),
+  ... 69 additional matching lines omitted
+
+=====================================================================================
+FILE: backend/database.py
+=====================================================================================
+Lines: 47
+
+FUNCTIONS / CLASSES:
+
+RELEVANT SOURCE LINES:
+  L3: from pathlib import Path
+  L5: from dotenv import load_dotenv
+  L6: from sqlalchemy import create_engine
+  L7: from sqlalchemy.engine import URL
+  L8: from sqlalchemy.orm import sessionmaker
+  L10: # Load environment variables from the project root.
+  L22:     raise RuntimeError("Database credentials are missing from .env")
+  L24: # Build the connection URL safely, including special characters in passwords.
+  L35: # Create the SQLAlchemy engine.
+  L36: engine = create_engine(
+  L42: # Database session factory.
+  L43: SessionLocal = sessionmaker(
+  L44:     bind=engine,
+
+=====================================================================================
+FILE: backend/chat_routes.py
+=====================================================================================
+Lines: 1121
+
+FUNCTIONS / CLASSES:
+  Line 108: ClassDef ChatRequest()
+  Line 113: ClassDef ChatResponse()
+  Line 124: FunctionDef get_or_create_dev_user(connection)
+  Line 162: FunctionDef get_recent_history(conversation_id)
+  Line 221: FunctionDef detect_period(question: str)
+  Line 237: FunctionDef detect_intents(question: str)
+  Line 334: FunctionDef detect_intent(question: str)
+    DOC: Backward-compatible single-intent interface.
+  Line 343: FunctionDef format_insights(ideas, metadata, category, comparison=None)
+  Line 468: FunctionDef build_financial_context(question)
+  Line 545: FunctionDef generate_gemini_answer(question, financial_context, history)
+  Line 754: FunctionDef generate_greedy_answer(question, history)
+  Line 785: FunctionDef send_message(request: ChatRequest)
+  Line 903: FunctionDef list_conversations(limit: int=100)
+    DOC: Return the development user's recent conversations,
+newest activity first, with a short latest-message preview.
+  Line 977: FunctionDef get_conversation(conversation_id: int)
+  Line 1046: FunctionDef delete_conversation(conversation_id: int)
+    DOC: Delete one conversation belonging to the development user
+and all of its messages.
+  Line 598: FunctionDef operation_result(operation_name, default)
+  Line 415: FunctionDef cell(value, suffix='')
+
+RELEVANT SOURCE LINES:
+  L6: from datetime import datetime, timezone
+  L7: from pathlib import Path
+  L9: from dotenv import load_dotenv
+  L10: from fastapi import APIRouter, HTTPException
+  L11: from pydantic import BaseModel, Field
+  L12: from sqlalchemy import text
+  L25: from backend.database import engine
+  L26: from analytics.market_ideas import generate_market_ideas
+  L27: from analytics.ask_greedy.orchestrator import build_calculation_context
+  L28: from analytics.ask_greedy.greedy_knowledge import build_greedy_knowledge_context
+  L29: from analytics.ask_greedy.historical_intelligence import build_historical_intelligence_context
+  L30: from analytics.ask_greedy.greedy_v2_evidence import build_greedy_v2_evidence_context
+  L31: from analytics.ask_greedy.financial_education import build_education_context
+  L32: from analytics.ask_greedy.research_planner import (
+  L39: router = APIRouter(tags=["Ask GREEDY"])
+  L72: - Never invent prices, returns, dates, ratios, company data,
+  L91: - Corporate-action coverage may be partial.
+  L92: - Dividends may be excluded.
+  L117:     created_at: datetime
+  L124: def get_or_create_dev_user(connection):
+  L125:     user_id = connection.execute(
+  L127:             SELECT id
+  L128:             FROM app_users
+  L135:         return user_id
+  L137:     result = connection.execute(
+  L139:             INSERT INTO app_users (
+  L155:     return result.lastrowid
+  L164:         return []
+  L166:     with engine.connect() as connection:
+  L167:         user_id = connection.execute(
+  L169:                 SELECT id
+  L170:                 FROM app_users
+  L182:         exists = connection.execute(
+  L184:                 SELECT id
+  L185:                 FROM conversations
+  L201:         rows = connection.execute(
+  L203:                 SELECT role, content
+  L204:                 FROM messages
+  L214:     return list(reversed(rows))
+  L221: def detect_period(question: str) -> str:
+  L225:         return "1Y"
+  L228:         return "6M"
+  L231:         return "1M"
+  L233:     return "3M"
+  L329:             return ["EDUCATION"]
+  L331:     return unique_intents or ["GENERAL"]
+  L336:     return detect_intents(question)[0]
+  L382:                 ("period_return_pct", "Historical return", "%"),
+  L386:                 ("observations", "Return observations", ""),
+  L410:             "| Symbol | Return (%) | Volatility (%) | Drawdown (%) | Sharpe | Category |",
+  L417:                     return "Not available"
+  L419:                     return f"{value:.4f}{suffix}"
+  L420:                 return str(value)
+  L425:                 f"| {stock['symbol']} "
+  L426:                 f"| {cell(stock.get('period_return_pct'), '%')} "
+  L433:         overlap = comparison.get("overlap_symbols", [])
+  L446:         f"Period: {metadata.get('period')}",
+  L447:         f"Historical start date: {metadata.get('requested_start_date')}",
+  L448:         f"Historical end date: {metadata.get('common_end_date')}",
+  L451:         f"Price basis: {metadata.get('price_basis')}",
+  L453:             "Corporate-action coverage: "
+  L454:             f"{metadata.get('corporate_action_coverage')}"
+  L456:         f"Dividend adjusted: {metadata.get('dividend_adjusted')}",
+  L462:         "Corporate-action coverage is partial.",
+  L465:     return "\\n".join(lines)
+  L472:         return (
+  L477:             "Historical share-price performance cannot establish "
+  L486:         return build_education_context(question)
+  L490:         return (
+  L498:     period = detect_period(question)
+  L502:             period=period,
+  L523:         return (
+  L525:             f"REQUESTED PERIOD: {period}\\n\\n"
+  L539:         return (
+  L550:         return None
+  L553:         from google import genai
+  L602:                         return str(entry["result"])
+  L603:                     return (
+  L607:             return default
+  L671: DETERMINISTIC CALCULATION ENGINE OUTPUT:
+  L681: - Distinguish mathematical examples from actual market observations.
+  L715:   consolidated comparison table covering every available returned stock.
+  L716: - The table should include stock symbol, historical return, annualised
+  L720: - Identify overlap by matching exact stock symbols, not company-name guesses.
+  L724: - Distinguish lowest volatility from lowest overall risk.
+  L725: - Explain that Sharpe ratio measures excess return per unit of volatility.
+  L741:             return None
+  L743:         return answer.strip()
+  L747:         return None
+  L751: # MAIN RESPONSE ENGINE
+  L767:         return ai_answer
+  L773:     return (
+  L784: @router.post("/chat", response_model=ChatResponse)
+  L795:         # Validate existing conversation and load its history.
+  L804:         with engine.begin() as connection:
+  L805:             user_id = get_or_create_dev_user(connection)
+  L808:                 result = connection.execute(
+  L810:                         INSERT INTO conversations (
+  L830:             connection.execute(
+  L832:                     INSERT INTO messages (
+  ... 48 additional matching lines omitted
+
+=====================================================================================
+FILE: analytics/portfolio_allocation.py
+=====================================================================================
+Lines: 64
+
+FUNCTIONS / CLASSES:
+  Line 6: FunctionDef allocate_capital(symbols: list[str], prices: dict[str, float], capital: float)
+    DOC: Allocate capital equally across selected stocks using whole shares.
+
+RELEVANT SOURCE LINES:
+  L3: from math import floor, isfinite
+  L7:     symbols: list[str],
+  L8:     prices: dict[str, float],
+  L16:     if not symbols or len(symbols) > 10 or len(set(symbols)) != len(symbols):
+  L17:         raise ValueError("Select between 1 and 10 unique stocks.")
+  L19:     clean_prices = {}
+  L20:     for symbol in symbols:
+  L21:         price = prices.get(symbol)
+  L22:         if not isinstance(price, (int, float)) or isinstance(price, bool):
+  L23:             raise ValueError(f"Missing valid price for {symbol}.")
+  L24:         if not isfinite(price) or price <= 0:
+  L25:             raise ValueError(f"Invalid price for {symbol}.")
+  L26:         clean_prices[symbol] = float(price)
+  L28:     minimum = sum(clean_prices.values())
+  L35:     budget_per_stock = capital / len(symbols)
+  L39:     for symbol in symbols:
+  L40:         price = clean_prices[symbol]
+  L41:         quantity = floor(budget_per_stock / price)
+  L42:         amount = round(quantity * price, 2)
+  L45:             "symbol": symbol,
+  L46:             "price": price,
+  L47:             "quantity": quantity,
+  L58:     return {
+  L62:         "stock_count": len(symbols),
+
+=====================================================================================
+FILE: analytics/historical_rankings.py
+=====================================================================================
+Lines: 389
+
+FUNCTIONS / CLASSES:
+  Line 48: FunctionDef get_latest_snapshot(conn)
+  Line 56: FunctionDef get_snapshot_companies(conn, snapshot_month)
+  Line 78: FunctionDef get_company_prices(conn, company_id, start_date, end_date)
+    DOC: Load all history through end_date so earlier actions can adjust the window.
+
+start_date is retained in the signature for compatibility. It is not
+applied to the SQL query because actions before the ranking window must
+be considered when constructing the adjusted price series.
+  Line 99: FunctionDef get_company_actions(conn, company_id, end_date)
+    DOC: Load only actions effective by the common ranking end date.
+  Line 121: FunctionDef get_trading_sessions(conn, start_date, end_date)
+    DOC: Return observed market dates from imported stock_prices.
+
+This detects missing observations relative to the imported dataset's
+shared date set. It cannot detect a market session missing from every
+imported stock record, so it is not a substitute for an official NSE
+trading calendar.
+  Line 143: FunctionDef calculate_company_metrics(prices, actions, start_date, end_date, expected_sessions=None)
+  Line 218: FunctionDef run_historical_rankings(period='3M')
+
+RELEVANT SOURCE LINES:
+  L6: Price basis:
+  L7:     Split/bonus-adjusted close using currently imported corporate actions.
+  L8:     This is NOT a dividend-adjusted total-return series.
+  L12:     Corporate-action coverage is currently partial.
+  L13:     The session reference is derived from dates present in stock_prices;
+  L18: from pathlib import Path
+  L21: from sqlalchemy import text
+  L27: from database import engine
+  L28: from analytics.adjusted_prices import build_adjusted_prices
+  L29: from analytics.financial_metrics import (
+  L30:     period_return,
+  L38: PERIODS = {
+  L39:     "1M": pd.DateOffset(months=1),
+  L40:     "3M": pd.DateOffset(months=3),
+  L41:     "6M": pd.DateOffset(months=6),
+  L42:     "1Y": pd.DateOffset(years=1),
+  L49:     return conn.execute(text("""
+  L50:         SELECT MAX(report_month)
+  L51:         FROM index_constituent_snapshots
+  L52:         WHERE index_symbol = 'NIFTY 50'
+  L60:             c.symbol,
+  L65:         FROM index_constituent_snapshots snap
+  L66:         JOIN companies c
+  L67:             ON c.symbol = snap.symbol
+  L68:         LEFT JOIN sectors s
+  L70:         WHERE snap.index_symbol = 'NIFTY 50'
+  L72:         ORDER BY c.symbol
+  L75:     return [dict(row) for row in rows]
+  L78: def get_company_prices(conn, company_id, start_date, end_date):
+  L79:     """Load all history through end_date so earlier actions can adjust the window.
+  L81:     start_date is retained in the signature for compatibility. It is not
+  L83:     be considered when constructing the adjusted price series.
+  L85:     return pd.read_sql(text("""
+  L87:             trade_date,
+  L88:             close_price AS close
+  L89:         FROM stock_prices
+  L91:           AND trade_date <= :end_date
+  L92:         ORDER BY trade_date
+  L95:         "end_date": end_date,
+  L99: def get_company_actions(conn, company_id, end_date):
+  L100:     """Load only actions effective by the common ranking end date."""
+  L104:             ex_date,
+  L108:         FROM corporate_actions
+  L110:           AND ex_date IS NOT NULL
+  L111:           AND ex_date <= :end_date
+  L112:         ORDER BY ex_date
+  L115:         "end_date": pd.Timestamp(end_date).date(),
+  L118:     return [dict(row) for row in rows]
+  L121: def get_trading_sessions(conn, start_date, end_date):
+  L122:     """Return observed market dates from imported stock_prices.
+  L125:     shared date set. It cannot detect a market session missing from every
+  L130:         SELECT DISTINCT trade_date
+  L131:         FROM stock_prices
+  L132:         WHERE trade_date >= :start_date
+  L133:           AND trade_date <= :end_date
+  L134:         ORDER BY trade_date
+  L136:         "start_date": pd.Timestamp(start_date).date(),
+  L137:         "end_date": pd.Timestamp(end_date).date(),
+  L140:     return pd.DatetimeIndex(pd.to_datetime(list(rows))).normalize()
+  L144:     prices,
+  L146:     start_date,
+  L147:     end_date,
+  L148:     expected_sessions=None,
+  L150:     if prices.empty or expected_sessions is None or len(expected_sessions) < 2:
+  L151:         return None
+  L153:     adjusted = build_adjusted_prices(prices, actions)
+  L155:     start = pd.Timestamp(start_date).normalize()
+  L156:     end = pd.Timestamp(end_date).normalize()
+  L157:     window = adjusted[
+  L158:         (adjusted["trade_date"] >= start)
+  L159:         & (adjusted["trade_date"] <= end)
+  L162:     expected = pd.DatetimeIndex(pd.to_datetime(expected_sessions)).normalize()
+  L166:         return None
+  L169:     # expected session must have exactly one valid adjusted close.
+  L170:     observed = window.dropna(subset=["adjusted_close"]).set_index("trade_date")
+  L171:     observed.index = pd.DatetimeIndex(observed.index).normalize()
+  L174:         return None
+  L177:         return None
+  L179:     price_series = observed["adjusted_close"].astype(float)
+  L183:             "period_return": period_return(
+  L184:                 price_series,
+  L185:                 expected_sessions=expected,
+  L188:                 price_series,
+  L189:                 expected_sessions=expected,
+  L192:                 price_series,
+  L193:                 expected_sessions=expected,
+  L196:                 price_series,
+  L197:                 expected_sessions=expected,
+  L200:                 price_series,
+  L202:                 expected_sessions=expected,
+  L206:         return None
+  L208:     metrics.update({
+  L209:         "observations": len(price_series),
+  L210:         "first_price_date": price_series.index.min().date(),
+  L211:         "last_price_date": price_series.index.max().date(),
+  L212:         "corporate_actions_applied": len(actions),
+  L213:         "expected_sessions": len(expected),
+  L215:     return metrics
+  L218: def run_historical_rankings(period="3M"):
+  L219:     period = period.upper()
+  ... 55 additional matching lines omitted
+
+=====================================================================================
+FILE: analytics/adjusted_prices.py
+=====================================================================================
+Lines: 184
+
+FUNCTIONS / CLASSES:
+  Line 18: FunctionDef _parse_ratio(ratio: str)
+    DOC: Parse a positive finite ratio such as '2:1' or '1:2'.
+  Line 38: FunctionDef action_adjustment_factor(action: Mapping[str, Any])
+    DOC: Return the historical price conversion factor for one action.
+  Line 67: FunctionDef _normalise_date(value: Any, field_name: str)
+    DOC: Parse a date and normalize it to a timezone-naive calendar date.
+  Line 83: FunctionDef build_adjusted_prices(prices: pd.DataFrame, actions: list[dict[str, Any]], date_col: str='trade_date', price_col: str='close')
+    DOC: Build a separate split/bonus-adjusted price series.
+
+For every action, historical prices strictly before its ex-date
+are divided by that action's adjustment factor.
+
+Missing prices remain missing. Invalid non-missing prices are rejected.
+
+Returns original columns plus:
+  - adjustment_factor
+  - adjusted_close
+
+RELEVANT SOURCE LINES:
+  L1: """Corporate-action adjusted historical price calculations.
+  L3: Raw NSE prices are never modified.
+  L4: Verified split and bonus adjustments are applied to pre-ex-date prices only.
+  L5: This is a split/bonus-adjusted price series, NOT a total-return series.
+  L8: from decimal import Decimal, InvalidOperation
+  L9: from typing import Any, Mapping
+  L15: SUPPORTED_ACTIONS = {"STOCK_SPLIT", "BONUS"}
+  L21:         left, right = str(ratio).split(":")
+  L25:         raise ValueError(f"Invalid corporate-action ratio: {ratio!r}") from None
+  L35:     return numerator, denominator
+  L38: def action_adjustment_factor(action: Mapping[str, Any]) -> Decimal:
+  L39:     """Return the historical price conversion factor for one action."""
+  L41:         raise ValueError("Corporate action must be a mapping.")
+  L45:         raise ValueError("Corporate action is missing action_type.")
+  L51:             "Only verified splits and bonuses are supported."
+  L55:         raise ValueError("Corporate action is missing ratio.")
+  L59:     if action_type == "STOCK_SPLIT":
+  L60:         return numerator / denominator
+  L62:     # Bonus ratio 4:1 means 4 additional shares for each 1 held.
+  L63:     # Total shares become 5, so the historical price factor is 5.
+  L64:     return Decimal("1") + (numerator / denominator)
+  L67: def _normalise_date(value: Any, field_name: str) -> pd.Timestamp:
+  L68:     """Parse a date and normalize it to a timezone-naive calendar date."""
+  L72:         raise ValueError(f"Invalid {field_name}: {value!r}") from None
+  L80:     return parsed.normalize()
+  L83: def build_adjusted_prices(
+  L84:     prices: pd.DataFrame,
+  L86:     date_col: str = "trade_date",
+  L87:     price_col: str = "close",
+  L88: ) -> pd.DataFrame:
+  L89:     """Build a separate split/bonus-adjusted price series.
+  L91:     For every action, historical prices strictly before its ex-date
+  L92:     are divided by that action's adjustment factor.
+  L94:     Missing prices remain missing. Invalid non-missing prices are rejected.
+  L97:       - adjustment_factor
+  L98:       - adjusted_close
+  L100:     if not isinstance(prices, pd.DataFrame):
+  L101:         raise ValueError("prices must be a pandas DataFrame.")
+  L103:     if date_col not in prices.columns:
+  L104:         raise ValueError(f"Missing date column: {date_col}")
+  L106:     if price_col not in prices.columns:
+  L107:         raise ValueError(f"Missing price column: {price_col}")
+  L110:         raise ValueError("actions must be a list of corporate-action mappings.")
+  L112:     result = prices.copy(deep=True)
+  L115:         parsed_dates = pd.to_datetime(result[date_col], errors="raise")
+  L117:         raise ValueError("Invalid trading date found in price input.") from None
+  L119:     if parsed_dates.isna().any():
+  L120:         raise ValueError("Missing or invalid trading date found in price input.")
+  L122:     # NSE trading dates are calendar dates; discard any time component.
+  L123:     if getattr(parsed_dates.dt, "tz", None) is not None:
+  L124:         raise ValueError("Trading dates must not contain a timezone.")
+  L126:     result[date_col] = parsed_dates.dt.normalize()
+  L128:     if result[date_col].duplicated().any():
+  L129:         raise ValueError("Duplicate trading dates found in price input.")
+  L131:     original_prices = result[price_col]
+  L132:     numeric_prices = pd.to_numeric(original_prices, errors="coerce")
+  L134:     invalid_conversion = original_prices.notna() & numeric_prices.isna()
+  L136:         raise ValueError("Non-numeric prices found in price input.")
+  L138:     numeric_array = numeric_prices.to_numpy(dtype="float64", na_value=np.nan)
+  L141:         raise ValueError("Infinite prices found in price input.")
+  L143:     if (numeric_prices.dropna() <= 0).any():
+  L144:         raise ValueError("Non-positive prices found in price input.")
+  L146:     result[price_col] = numeric_prices
+  L151:             raise ValueError("Each corporate action must be a mapping.")
+  L153:         if "ex_date" not in action or action["ex_date"] is None:
+  L154:             raise ValueError("Corporate action is missing ex_date.")
+  L156:         ex_date = _normalise_date(action["ex_date"], "corporate-action ex_date")
+  L157:         decimal_factor = action_adjustment_factor(action)
+  L160:             raise ValueError("Corporate-action factor must be positive and finite.")
+  L164:             raise ValueError("Corporate-action factor is outside supported numeric range.")
+  L166:         prepared_actions.append((ex_date, factor))
+  L168:     # Use positional arrays so duplicate DataFrame index labels cannot
+  L169:     # accidentally multiply or misalign adjustment factors.
+  L170:     trading_dates = result[date_col]
+  L173:     for ex_date, factor in prepared_actions:
+  L174:         historical_mask = (trading_dates < ex_date).to_numpy()
+  L177:     result["adjustment_factor"] = factors
+  L178:     result["adjusted_close"] = numeric_prices.to_numpy(dtype="float64", na_value=np.nan) / factors
+  L180:     result.attrs["price_basis"] = "SPLIT_BONUS_ADJUSTED"
+  L181:     result.attrs["raw_price_basis"] = "RAW_CLOSE_UNADJUSTED"
+  L184:     return result.sort_values(date_col, kind="stable").reset_index(drop=True)
+
+=====================================================================================
+FILE: analytics/adjusted_price_adapter.py
+=====================================================================================
+Lines: 172
+
+FUNCTIONS / CLASSES:
+  Line 17: FunctionDef get_company_actions(company_id: int, end_date: str | None=None)
+    DOC: Load supported corporate actions up to the requested date.
+  Line 49: FunctionDef get_adjusted_company_prices(company_id: int, start_date: str | None=None, end_date: str | None=None)
+    DOC: Return raw and split/bonus-adjusted historical prices.
+
+All available price history up to end_date is loaded before applying
+start_date. This preserves the effect of earlier corporate actions.
+
+RELEVANT SOURCE LINES:
+  L2: """Read-only database adapter for split/bonus-adjusted prices.
+  L4: Raw database prices remain untouched.
+  L5: Dividends, rights, mergers and demergers are not adjusted.
+  L8: from __future__ import annotations
+  L11: from sqlalchemy import text
+  L13: from backend.database import engine
+  L14: from analytics.adjusted_prices import build_adjusted_prices
+  L19:     end_date: str | None = None,
+  L21:     """Load supported corporate actions up to the requested date."""
+  L26:             ex_date,
+  L30:         FROM corporate_actions
+  L32:           AND action_type IN ('STOCK_SPLIT', 'BONUS')
+  L33:           AND (:end_date IS NULL OR ex_date <= :end_date)
+  L34:         ORDER BY ex_date, id
+  L37:     with engine.connect() as conn:
+  L42:                 "end_date": end_date,
+  L46:     return [dict(row) for row in rows]
+  L49: def get_adjusted_company_prices(
+  L51:     start_date: str | None = None,
+  L52:     end_date: str | None = None,
+  L53: ) -> pd.DataFrame:
+  L54:     """Return raw and split/bonus-adjusted historical prices.
+  L56:     All available price history up to end_date is loaded before applying
+  L57:     start_date. This preserves the effect of earlier corporate actions.
+  L61:         SELECT trade_date, close_price
+  L62:         FROM stock_prices
+  L64:           AND (:end_date IS NULL OR trade_date <= :end_date)
+  L65:         ORDER BY trade_date
+  L68:     with engine.connect() as conn:
+  L73:                 "end_date": end_date,
+  L78:         result = pd.DataFrame(
+  L80:                 "trade_date",
+  L81:                 "close",
+  L82:                 "adjustment_factor",
+  L83:                 "adjusted_close",
+  L87:         result.attrs["price_basis"] = "SPLIT_BONUS_ADJUSTED"
+  L88:         result.attrs["dividend_adjusted"] = False
+  L89:         result.attrs["corporate_action_coverage"] = "PARTIAL"
+  L90:         return result
+  L92:     raw_prices = pd.DataFrame([dict(row) for row in rows])
+  L94:     raw_prices["close"] = pd.to_numeric(
+  L95:         raw_prices.pop("close_price"),
+  L101:         end_date=end_date,
+  L104:     adjusted = build_adjusted_prices(
+  L105:         prices=raw_prices,
+  L107:         date_col="trade_date",
+  L108:         price_col="close",
+  L111:     if start_date is not None:
+  L112:         start = pd.Timestamp(start_date)
+  L115:             raise ValueError("start_date must not contain a timezone")
+  L117:         adjusted = adjusted[
+  L118:             adjusted["trade_date"] >= start.normalize()
+  L121:     adjusted = adjusted.reset_index(drop=True)
+  L123:     adjusted.attrs["company_id"] = company_id
+  L124:     adjusted.attrs["price_basis"] = "SPLIT_BONUS_ADJUSTED"
+  L125:     adjusted.attrs["dividend_adjusted"] = False
+  L126:     adjusted.attrs["corporate_action_coverage"] = "PARTIAL"
+  L128:     return adjusted
+  L132:     print("ADJUSTED PRICE ADAPTER — READ-ONLY TEST")
+  L135:         SELECT id, symbol
+  L136:         FROM companies
+  L137:         WHERE symbol IN (
+  L145:         ORDER BY symbol
+  L148:     with engine.connect() as conn:
+  L152:         result = get_adjusted_company_prices(
+  L154:             start_date="2025-04-01",
+  L155:             end_date="2026-11-05",
+  L158:         print(f"\n{company['symbol']}")
+  L159:         print("Price observations:", len(result))
+  L160:         print("First date:", result["trade_date"].min() if not result.empty else None)
+  L161:         print("Last date:", result["trade_date"].max() if not result.empty else None)
+  L162:         print("Price basis:", result.attrs["price_basis"])
+  L163:         print("Dividend adjusted:", result.attrs["dividend_adjusted"])
+  L168:                     ["trade_date", "close", "adjustment_factor", "adjusted_close"]
+
+=====================================================================================
+FILE: analytics/ask_greedy/calculations.py
+=====================================================================================
+Lines: 182
+
+FUNCTIONS / CLASSES:
+  Line 8: FunctionDef _finite_array(values, name)
+  Line 15: FunctionDef portfolio_return(weights, returns)
+  Line 25: FunctionDef sharpe_ratio(expected_return, risk_free_rate, volatility)
+  Line 31: FunctionDef portfolio_volatility(weights, volatilities, correlations)
+  Line 63: FunctionDef validate_correlation_matrix(correlations, tolerance=1e-09)
+  Line 85: FunctionDef maximum_sharpe(returns, volatilities, correlations, risk_free_rate=0.0)
+    DOC: Long-only maximum-Sharpe portfolio; deterministic multistart SLSQP.
+  Line 143: FunctionDef drawdown(returns)
+  Line 153: FunctionDef whole_share_allocation(capital, prices)
+  Line 104: FunctionDef objective(w)
+
+RELEVANT SOURCE LINES:
+  L1: """Deterministic financial calculation engine for Ask GREEDY."""
+  L2: from __future__ import annotations
+  L12:     return a
+  L20:     if np.any(w < 0) or not np.isclose(w.sum(), 1):
+  L22:     return float(w @ r)
+  L28:     return float((expected_return - risk_free_rate) / volatility)
+  L38:     if np.any(w < 0) or not np.isclose(w.sum(), 1):
+  L42:     if not np.allclose(c, c.T, atol=1e-10):
+  L44:     if not np.allclose(np.diag(c), 1, atol=1e-10):
+  L60:     return math.sqrt(max(0.0, variance))
+  L63: def validate_correlation_matrix(correlations, tolerance=1e-9):
+  L66:         return {"valid": False, "reason": "Matrix must be square."}
+  L67:     symmetric = bool(np.allclose(c, c.T, atol=tolerance))
+  L68:     diagonal = bool(np.allclose(np.diag(c), 1, atol=tolerance))
+  L73:     return {
+  L87:     from scipy.optimize import minimize
+  L98:     matrix_check = validate_correlation_matrix(c)
+  L107:             return 1e9
+  L108:         return -float((w @ r - risk_free_rate) / math.sqrt(variance))
+  L115:     candidates = []
+  L125:             candidates.append(w)
+  L127:     if not candidates:
+  L130:     weights = min(candidates, key=objective)
+  L133:     return {
+  L146:         raise ValueError("A return cannot be below -100%.")
+  L150:     return float(dd.min())
+  L153: def whole_share_allocation(capital, prices):
+  L156:     p = _finite_array(prices, "prices")
+  L158:         raise ValueError("Prices must be positive.")
+  L177:     return {
+
+=====================================================================================
+FILE: analytics/database_adapter.py
+=====================================================================================
+Lines: 218
+
+FUNCTIONS / CLASSES:
+  Line 13: FunctionDef get_latest_constituents()
+    DOC: Return companies from the latest available NIFTY 50 snapshot.
+
+These are monthly snapshot observations, not verified daily
+effective-membership intervals.
+  Line 61: FunctionDef get_company_prices(company_id: int, start_date: str | None=None, end_date: str | None=None)
+    DOC: Retrieve raw closing prices for one company.
+
+Missing or invalid prices remain missing; they are not forward-filled.
+  Line 106: FunctionDef calculate_latest_snapshot_metrics(start_date: str | None=None, end_date: str | None=None, risk_free_rate: float=0.0)
+    DOC: Calculate raw-price metrics for the latest snapshot's companies.
+
+IMPORTANT:
+This is not a point-in-time historical NIFTY 50 ranking.
+  Line 183: FunctionDef get_all_companies_with_prices(min_observations: int=252)
+    DOC: Return active and inactive companies with sufficient actual price history.
+
+RELEVANT SOURCE LINES:
+  L1: from analytics._bootstrap import PROJECT_ROOT
+  L4: from sqlalchemy import text
+  L6: from database import engine
+  L7: from analytics.financial_metrics import calculate_metrics
+  L10: INDEX_SYMBOL = "NIFTY 50"
+  L13: def get_latest_constituents() -> pd.DataFrame:
+  L14:     """Return companies from the latest available NIFTY 50 snapshot.
+  L22:             s.symbol,
+  L29:         FROM index_constituent_snapshots s
+  L30:         JOIN companies c
+  L31:             ON c.symbol = s.symbol
+  L32:         LEFT JOIN sectors sec
+  L34:         WHERE s.index_symbol = :index_symbol
+  L36:               SELECT MAX(report_month)
+  L37:               FROM index_constituent_snapshots
+  L38:               WHERE index_symbol = :index_symbol
+  L40:         ORDER BY s.weightage DESC, s.symbol
+  L43:     with engine.connect() as conn:
+  L46:             {"index_symbol": INDEX_SYMBOL}
+  L49:     result = pd.DataFrame([dict(row) for row in rows])
+  L53:             f"No constituent snapshot found for {INDEX_SYMBOL}."
+  L56:     result["report_month"] = pd.to_datetime(result["report_month"])
+  L58:     return result
+  L61: def get_company_prices(
+  L63:     start_date: str | None = None,
+  L64:     end_date: str | None = None,
+  L66:     """Retrieve raw closing prices for one company.
+  L68:     Missing or invalid prices remain missing; they are not forward-filled.
+  L71:         SELECT trade_date, close_price
+  L72:         FROM stock_prices
+  L74:           AND (:start_date IS NULL OR trade_date >= :start_date)
+  L75:           AND (:end_date IS NULL OR trade_date <= :end_date)
+  L76:         ORDER BY trade_date
+  L79:     with engine.connect() as conn:
+  L84:                 "start_date": start_date,
+  L85:                 "end_date": end_date,
+  L90:         return pd.Series(dtype=float, name="close_price")
+  L92:     frame = pd.DataFrame([dict(row) for row in rows])
+  L93:     frame["trade_date"] = pd.to_datetime(frame["trade_date"])
+  L94:     frame["close_price"] = pd.to_numeric(
+  L95:         frame["close_price"], errors="coerce"
+  L98:     return pd.Series(
+  L99:         frame["close_price"].values,
+  L100:         index=pd.DatetimeIndex(frame["trade_date"]),
+  L101:         name="close_price",
+  L107:     start_date: str | None = None,
+  L108:     end_date: str | None = None,
+  L110: ) -> pd.DataFrame:
+  L111:     """Calculate raw-price metrics for the latest snapshot's companies.
+  L120:         prices = get_company_prices(
+  L122:             start_date=start_date,
+  L123:             end_date=end_date,
+  L127:             prices,
+  L132:             "symbol": company["symbol"],
+  L135:             "snapshot_month": company["report_month"].date().isoformat(),
+  L139:     result = pd.DataFrame(results)
+  L143:             "period_return_pct",
+  L148:     return result
+  L157:     print(constituents["report_month"].iloc[0].date())
+  L163:             ["symbol", "company_name", "sector", "weightage"]
+  L172:             ["symbol", "period_return_pct", "cagr_pct",
+  L178:     print("\nPrice basis: RAW_CLOSE_UNADJUSTED")
+  L183: def get_all_companies_with_prices(min_observations: int = 252) -> pd.DataFrame:
+  L184:     """Return active and inactive companies with sufficient actual price history."""
+  L191:             c.symbol,
+  L195:             MIN(sp.trade_date) AS first_price_date,
+  L196:             MAX(sp.trade_date) AS last_price_date,
+  L197:             COUNT(DISTINCT sp.trade_date) AS observations
+  L198:         FROM companies c
+  L199:         JOIN stock_prices sp ON sp.company_id = c.id
+  L200:         LEFT JOIN sectors sec ON sec.id = c.sector_id
+  L201:         GROUP BY c.id, c.symbol, c.company_name, sec.name, c.is_active
+  L202:         HAVING COUNT(DISTINCT sp.trade_date) >= :minimum
+  L203:         ORDER BY c.symbol
+  L206:     with engine.connect() as conn:
+  L211:     result = pd.DataFrame([dict(r) for r in rows])
+  L215:     if result["symbol"].duplicated().any():
+  L216:         raise ValueError("Duplicate canonical company symbols detected.")
+  L218:     return result
+
+=====================================================================================
+FILE: analytics/index_adapter.py
+=====================================================================================
+Lines: 128
+
+FUNCTIONS / CLASSES:
+  Line 19: FunctionDef get_index_prices(start_date: str | None=None, end_date: str | None=None)
+    DOC: Retrieve NIFTY 50 daily OHLC values from MySQL.
+
+Returns a read-only DataFrame indexed by trading date.
+Does not forward-fill missing sessions.
+  Line 104: FunctionDef get_index_closes(start_date: str | None=None, end_date: str | None=None)
+    DOC: Return NIFTY 50 closing index values.
+
+RELEVANT SOURCE LINES:
+  L5: from pathlib import Path
+  L8: from sqlalchemy import text
+  L13: from database import engine
+  L15: INDEX_SYMBOL = "NIFTY 50"
+  L19: def get_index_prices(
+  L20:     start_date: str | None = None,
+  L21:     end_date: str | None = None,
+  L22: ) -> pd.DataFrame:
+  L23:     """Retrieve NIFTY 50 daily OHLC values from MySQL.
+  L25:     Returns a read-only DataFrame indexed by trading date.
+  L26:     Does not forward-fill missing sessions.
+  L31:             trade_date,
+  L35:             close_value,
+  L37:         FROM index_prices
+  L38:         WHERE index_symbol = :index_symbol
+  L39:           AND (:start_date IS NULL OR trade_date >= :start_date)
+  L40:           AND (:end_date IS NULL OR trade_date <= :end_date)
+  L41:         ORDER BY trade_date
+  L44:     with engine.connect() as conn:
+  L48:                 "index_symbol": INDEX_SYMBOL,
+  L49:                 "start_date": start_date,
+  L50:                 "end_date": end_date,
+  L55:         return pd.DataFrame(
+  L60:                 "close_value",
+  L63:             index=pd.DatetimeIndex([], name="trade_date"),
+  L66:     frame = pd.DataFrame([dict(row) for row in rows])
+  L68:     frame["trade_date"] = pd.to_datetime(frame["trade_date"])
+  L70:     if frame["trade_date"].duplicated().any():
+  L71:         raise ValueError("Duplicate NIFTY 50 trading dates found.")
+  L73:     frame = frame.sort_values("trade_date")
+  L74:     frame = frame.set_index("trade_date")
+  L76:     price_columns = [
+  L80:         "close_value",
+  L83:     frame[price_columns] = frame[price_columns].apply(
+  L88:     if frame[price_columns].isna().any().any():
+  L91:     if (frame[price_columns] <= 0).any().any():
+  L95:         (frame["high_value"] < frame[["open_value", "close_value"]].max(axis=1))
+  L96:         | (frame["low_value"] > frame[["open_value", "close_value"]].min(axis=1))
+  L101:     return frame
+  L104: def get_index_closes(
+  L105:     start_date: str | None = None,
+  L106:     end_date: str | None = None,
+  L108:     """Return NIFTY 50 closing index values."""
+  L110:     frame = get_index_prices(start_date, end_date)
+  L112:     return frame["close_value"].rename("nifty50_close")
+  L116:     prices = get_index_prices()
+  L120:     print("Index:", INDEX_SYMBOL)
+  L122:     print("Records:", len(prices))
+  L124:     if not prices.empty:
+  L125:         print("First date:", prices.index.min().date())
+  L126:         print("Last date:", prices.index.max().date())
+  L127:         print("\nLatest five sessions:")
+  L128:         print(prices.tail(5).to_string())
+
+=====================================================================================
+FILE: backend/import_verified_corporate_actions.py
+=====================================================================================
+Lines: 257
+
+FUNCTIONS / CLASSES:
+  Line 153: FunctionDef main()
+
+RELEVANT SOURCE LINES:
+  L1: """Import verified corporate actions into GREEDY STOCKS.
+  L4: Original stock_prices records are never modified.
+  L8: from pathlib import Path
+  L13: from sqlalchemy import text
+  L14: from database import engine
+  L19:         "symbol": "BAJFINANCE",
+  L20:         "action_type": "STOCK_SPLIT",
+  L21:         "announcement_date": "2025-05-02",
+  L22:         "ex_date": "2025-06-16",
+  L23:         "record_date": "2025-06-16",
+  L24:         "effective_date": "2025-06-16",
+  L27:             "Face value subdivision from INR 2 to INR 1; "
+  L29:             "Price adjustment factor: 2."
+  L31:         "source_name": "NSE corporate actions / issuer announcement",
+  L38:         "symbol": "BAJFINANCE",
+  L39:         "action_type": "BONUS",
+  L40:         "announcement_date": "2025-05-02",
+  L41:         "ex_date": "2025-06-16",
+  L42:         "record_date": "2025-06-16",
+  L43:         "effective_date": "2025-06-16",
+  L46:             "Four bonus shares for every one existing share. "
+  L47:             "Price adjustment factor: 5. "
+  L48:             "Combined with same-day 2:1 split, "
+  L49:             "total pre-event price factor: 10."
+  L51:         "source_name": "NSE corporate actions / issuer announcement",
+  L58:         "symbol": "KOTAKBANK",
+  L59:         "action_type": "STOCK_SPLIT",
+  L60:         "announcement_date": "2026-01-13",
+  L61:         "ex_date": "2026-01-14",
+  L62:         "record_date": "2026-01-14",
+  L63:         "effective_date": "2026-01-14",
+  L66:             "Face value subdivision from INR 5 to INR 1; "
+  L68:             "Price adjustment factor: 5."
+  L77:         "symbol": "BSE",
+  L78:         "action_type": "BONUS",
+  L79:         "announcement_date": None,
+  L80:         "ex_date": "2025-05-23",
+  L81:         "record_date": "2025-05-23",
+  L82:         "effective_date": "2025-05-23",
+  L85:             "Two bonus shares for every one existing share. "
+  L86:             "Price adjustment factor: 3."
+  L88:         "source_name": "NSE corporate actions",
+  L95:         "symbol": "NESTLEIND",
+  L96:         "action_type": "BONUS",
+  L97:         "announcement_date": "2025-07-29",
+  L98:         "ex_date": "2025-08-08",
+  L99:         "record_date": "2025-08-08",
+  L100:         "effective_date": "2025-08-11",
+  L103:             "One bonus share for every one existing share. "
+  L104:             "Price adjustment factor: 2. "
+  L105:             "Bonus allotment deemed date: 11 August 2025."
+  L111:             "Record%20Date%20for%20bonus%20shares.pdf"
+  L115:         "symbol": "HDFCBANK",
+  L116:         "action_type": "BONUS",
+  L117:         "announcement_date": None,
+  L118:         "ex_date": "2025-08-26",
+  L119:         "record_date": "2025-08-27",
+  L120:         "effective_date": "2025-08-27",
+  L123:             "One bonus share for every one existing share. "
+  L124:             "Price adjustment factor: 2."
+  L126:         "source_name": "NSE corporate actions",
+  L133:         "symbol": "TRENT",
+  L134:         "action_type": "BONUS",
+  L135:         "announcement_date": "2026-04-22",
+  L136:         "ex_date": "2026-06-04",
+  L137:         "record_date": "2026-06-04",
+  L138:         "effective_date": "2026-06-04",
+  L141:             "One bonus share for every two existing shares. "
+  L142:             "Price adjustment factor: 1.5."
+  L144:         "source_name": "NSE corporate actions / Trent issuer filing",
+  L146:             "https://nsearchives.nseindia.com/corporate/"
+  L157:     with engine.begin() as conn:
+  L161:                     SELECT id
+  L162:                     FROM companies
+  L163:                     WHERE symbol = :symbol
+  L165:                 {"symbol": action["symbol"]},
+  L170:                     f"Company not found: {action['symbol']}"
+  L175:                     SELECT id
+  L176:                     FROM corporate_actions
+  L179:                       AND ex_date = :ex_date
+  L186:                     "ex_date": action["ex_date"],
+  L193:                     f"SKIP   {action['symbol']:12} "
+  L195:                     f"{action['ex_date']} "
+  L203:                     INSERT INTO corporate_actions (
+  L206:                         announcement_date,
+  L207:                         ex_date,
+  L208:                         record_date,
+  L209:                         effective_date,
+  L212:                         dividend_amount,
+  L218:                         :announcement_date,
+  L219:                         :ex_date,
+  L220:                         :record_date,
+  L221:                         :effective_date,
+  L236:                 f"INSERT {action['symbol']:12} "
+  L238:                 f"{action['ex_date']} "
+  L244:             text("SELECT COUNT(*) FROM corporate_actions")
+  L248:     print("CORPORATE ACTION IMPORT COMPLETE")
+  L252:     print("Total corporate-action records:", total)
+  L253:     print("Original stock_prices modified: NO")

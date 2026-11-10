@@ -1,0 +1,2740 @@
+
+====================================================================================================
+SOURCE FILE: backend/chat_routes.py
+====================================================================================================
+
+import logging
+import os
+import re
+import sys
+from datetime import datetime, timezone
+from pathlib import Path
+
+from dotenv import load_dotenv
+from fastapi import APIRouter, HTTPException
+from pydantic import BaseModel, Field
+from sqlalchemy import text
+
+# --------------------------------------------------
+# PROJECT CONFIGURATION
+# --------------------------------------------------
+
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
+load_dotenv(dotenv_path=PROJECT_ROOT / ".env", override=False)
+
+from backend.database import engine
+from analytics.market_ideas import generate_market_ideas
+from analytics.ask_greedy.orchestrator import build_calculation_context
+from analytics.ask_greedy.greedy_knowledge import build_greedy_knowledge_context
+from analytics.ask_greedy.historical_intelligence import build_historical_intelligence_context
+from analytics.ask_greedy.greedy_v2_evidence import build_greedy_v2_evidence_context
+from analytics.ask_greedy.financial_education import build_education_context
+
+router = APIRouter(tags=["Ask GREEDY"])
+logger = logging.getLogger("greedy_stocks_chat")
+
+DEV_USER_EMAIL = "local-dev@greedystocks.local"
+
+GEMINI_MODEL = os.getenv(
+    "GEMINI_MODEL",
+    "gemini-3.5-flash-lite",
+)
+
+SYSTEM_INSTRUCTION = """
+You are GREEDY, the AI-powered learning and research assistant
+for GREEDY STOCKS.
+
+PRODUCT SCOPE:
+- You cover ONLY NIFTY 50 companies and the NIFTY 50 index.
+- Do not provide research on NIFTY Next 50 or other indices.
+- You help beginners understand the Indian stock market.
+- Communicate naturally in English, Hindi, or Marathi according
+  to the user's language.
+
+YOUR RESPONSIBILITIES:
+- Explain financial concepts in simple language.
+- Explain verified historical financial research supplied
+  in the application context.
+- Answer follow-up questions using the conversation history.
+- Explain risk, volatility, returns, drawdown and Sharpe ratio.
+- Be friendly, patient and educational.
+
+STRICT FINANCIAL SAFEGUARDS:
+- The application supplies verified financial context.
+- Treat that context as the only authoritative source for
+  GREEDY STOCKS historical financial figures.
+- Never invent prices, returns, dates, ratios, company data,
+  financial statements or market events.
+- Never alter supplied figures. For arithmetic or portfolio calculations using user-provided inputs, use the deterministic calculation result provided in the calculation context. Never invent missing inputs.
+- If a figure is missing, explicitly say it is unavailable.
+- Do not claim a company is undervalued or overvalued without
+  verified fundamental and valuation data.
+- Historical performance is not a forecast.
+- Never promise profits or guaranteed returns.
+- Do not provide personalised investment recommendations.
+- Clearly distinguish educational explanations from
+  investment advice.
+- If the user asks about a company outside NIFTY 50, explain
+  that the product currently focuses only on NIFTY 50.
+
+BACKTEST DISCLOSURES:
+When relevant, explain that:
+- Historical results do not guarantee future performance.
+- Latest monthly constituent snapshots may be used.
+- Historical membership may not be fully reconstructed.
+- Corporate-action coverage may be partial.
+- Dividends may be excluded.
+- Backtests may exclude transaction costs and slippage.
+- Greedy Algorithm experiments are not guaranteed to
+  outperform the benchmark.
+
+RESPONSE STYLE:
+- Friendly and conversational.
+- Beginner-friendly explanations.
+- Use headings and bullet points where useful.
+- Explain technical terms when first introduced.
+- Do not overwhelm beginners with unnecessary jargon.
+- Never claim to have accessed live market data unless
+  the application explicitly supplies it.
+"""
+
+
+class ChatRequest(BaseModel):
+    message: str = Field(min_length=1, max_length=5000)
+    conversation_id: int | None = None
+
+
+class ChatResponse(BaseModel):
+    conversation_id: int
+    user_message: str
+    assistant_message: str
+    created_at: datetime
+
+
+# --------------------------------------------------
+# USER MANAGEMENT
+# --------------------------------------------------
+
+def get_or_create_dev_user(connection):
+    user_id = connection.execute(
+        text("""
+            SELECT id
+            FROM app_users
+            WHERE email = :email
+        """),
+        {"email": DEV_USER_EMAIL},
+    ).scalar_one_or_none()
+
+    if user_id is not None:
+        return user_id
+
+    result = connection.execute(
+        text("""
+            INSERT INTO app_users (
+                username,
+                email,
+                preferred_language,
+                experience_level
+            )
+            VALUES (
+                'GREEDY Development User',
+                :email,
+                'English',
+                'Complete Beginner'
+            )
+        """),
+        {"email": DEV_USER_EMAIL},
+    )
+
+    return result.lastrowid
+
+
+# --------------------------------------------------
+# CONVERSATION HISTORY
+# --------------------------------------------------
+
+def get_recent_history(conversation_id):
+    if conversation_id is None:
+        return []
+
+    with engine.connect() as connection:
+        user_id = connection.execute(
+            text("""
+                SELECT id
+                FROM app_users
+                WHERE email = :email
+            """),
+            {"email": DEV_USER_EMAIL},
+        ).scalar_one_or_none()
+
+        if user_id is None:
+            raise HTTPException(
+                status_code=404,
+                detail="Conversation not found.",
+            )
+
+        exists = connection.execute(
+            text("""
+                SELECT id
+                FROM conversations
+                WHERE id = :conversation_id
+                  AND user_id = :user_id
+            """),
+            {
+                "conversation_id": conversation_id,
+                "user_id": user_id,
+            },
+        ).scalar_one_or_none()
+
+        if exists is None:
+            raise HTTPException(
+                status_code=404,
+                detail="Conversation not found.",
+            )
+
+        rows = connection.execute(
+            text("""
+                SELECT role, content
+                FROM messages
+                WHERE conversation_id = :conversation_id
+                  AND role IN ('user', 'assistant')
+                ORDER BY id DESC
+                LIMIT 10
+            """),
+            {"conversation_id": conversation_id},
+        ).mappings().all()
+
+    # Restore chronological order.
+    return list(reversed(rows))
+
+
+# --------------------------------------------------
+# QUESTION UNDERSTANDING
+# --------------------------------------------------
+
+def detect_period(question: str) -> str:
+    q = question.lower()
+
+    if re.search(r"\b(1y|1 year|one year|12 months)\b", q):
+        return "1Y"
+
+    if re.search(r"\b(6m|6 months|six months)\b", q):
+        return "6M"
+
+    if re.search(r"\b(1m|1 month|one month|30 days)\b", q):
+        return "1M"
+
+    return "3M"
+
+
+
+def detect_intents(question: str) -> list[str]:
+    q = question.lower()
+    intents = []
+
+    if any(word in q for word in [
+        "undervalued", "overvalued", "valuation",
+        "fundamental", "fundamentals", "balance sheet", "earnings",
+    ]):
+        intents.append("FUNDAMENTAL_RESEARCH")
+
+    if re.search(r"\b(?:p/e|pe)\s+ratio\b", q):
+        intents.append("FUNDAMENTAL_RESEARCH")
+
+    if any(word in q for word in [
+    ]):
+        intents.append("FUNDAMENTAL_RESEARCH")
+
+    if any(word in q for word in [
+        "greedy algorithm", "greedy picks",
+        "greedy selection", "algorithm experiment",
+        "greedy portfolio",
+    ]):
+        intents.append("GREEDY_PICKS")
+
+    if any(word in q for word in [
+        "sector performance", "best performing sectors",
+        "top performing sectors", "sector returns",
+        "which sectors performed", "sectors",
+    ]):
+        intents.append("SECTOR_PERFORMANCE")
+
+    if any(word in q for word in [
+        "best performing", "top performing",
+        "performed best", "top performers",
+        "best performers", "top stocks",
+        "best stocks", "highest returns",
+        "highest return", "performance",
+        "performers", "historical returns",
+        "stock returns", "gainers", "most profitable",
+    ]):
+        intents.append("PERFORMANCE_STANDOUTS")
+
+    if any(word in q for word in [
+        "volatility", "drawdown", "sharpe",
+        "risk", "stable", "stability",
+        "least volatile", "lowest volatility",
+    ]):
+        intents.append("RISK_AND_STABILITY")
+
+    education_concepts = [
+        "volatility", "sharpe", "drawdown", "diversification",
+        "correlation", "beta", "liquidity", "risk return",
+        "risk-reward", "risk reward", "cagr",
+    ]
+    education_phrases = [
+        "what is", "explain", "meaning of", "teach me",
+        "beginner", "difference between", "how does",
+        "why does", "help me understand",
+    ]
+
+    if (
+        any(term in q for term in education_concepts)
+        and any(phrase in q for phrase in education_phrases)
+    ):
+        intents.append("EDUCATION")
+
+    if not intents and any(word in q for word in [
+        "nifty 50", "what is nifty",
+        "explain nifty", "stock market basics",
+    ]):
+        intents.append("EDUCATION")
+
+    unique_intents = list(dict.fromkeys(intents))
+
+    # Pure educational questions must not trigger market research.
+    # Preserve mixed education + explicit stock research questions.
+    if "EDUCATION" in unique_intents:
+        research_actions = [
+            "show", "list", "rank", "compare", "analyse",
+            "analyze", "analysis of", "top performing",
+            "best performing", "worst performing",
+            "which stocks", "stocks with", "stock-wise",
+            "performance of", "historical returns of",
+            "least volatile stocks", "lowest volatility stocks",
+            "portfolio", "sector performance",
+        ]
+
+        has_research_action = any(
+            term in q for term in research_actions
+        )
+
+        if not has_research_action:
+            return ["EDUCATION"]
+
+    return unique_intents or ["GENERAL"]
+
+
+def detect_intent(question: str) -> str:
+    """Backward-compatible single-intent interface."""
+    return detect_intents(question)[0]
+
+
+# --------------------------------------------------
+# VERIFIED FINANCIAL CONTEXT
+# --------------------------------------------------
+
+def format_insights(ideas, metadata, category, comparison=None):
+    categories = (
+        [category] if isinstance(category, str)
+        else list(category)
+    )
+
+    lines = []
+
+    for current_category in categories:
+        selected = [
+            idea for idea in ideas
+            if idea.get("category") == current_category
+            and idea.get("status") == "AVAILABLE"
+        ]
+
+        if not selected:
+            lines.append(
+                f"{current_category}: No sufficient verified "
+                "financial insight is available in this report."
+            )
+            lines.append("")
+            continue
+
+        lines.append(f"===== {current_category} =====")
+
+        for index, idea in enumerate(selected, start=1):
+            evidence = idea.get("evidence") or {}
+
+            lines.append(
+                f"{index}. {idea.get('title', 'Historical insight')}"
+            )
+            lines.append(
+                f"What: {idea.get('what', 'Not available')}"
+            )
+
+            if idea.get("why"):
+                lines.append(f"Why: {idea['why']}")
+
+            fields = [
+                ("period_return_pct", "Historical return", "%"),
+                ("annualized_volatility_pct", "Annualised volatility", "%"),
+                ("maximum_drawdown_pct", "Maximum drawdown", "%"),
+                ("sharpe_ratio", "Sharpe ratio", ""),
+                ("observations", "Return observations", ""),
+            ]
+
+            for key, label, suffix in fields:
+                value = evidence.get(key)
+                if value is not None:
+                    lines.append(f"{label}: {value}{suffix}")
+
+            if idea.get("risk"):
+                lines.append(f"Risk: {idea['risk']}")
+
+            lines.append("")
+
+    required_categories = {
+        "PERFORMANCE_STANDOUTS",
+        "RISK_AND_STABILITY",
+    }
+
+    if comparison and required_categories.issubset(set(categories)):
+        lines.extend([
+            "DETERMINISTIC STOCK COMPARISON",
+            "The following union and overlap were constructed by Python.",
+            "Each stock appears once; category order is preserved.",
+            "",
+            "| Symbol | Return (%) | Volatility (%) | Drawdown (%) | Sharpe | Category |",
+            "|---|---:|---:|---:|---:|---|",
+        ])
+
+        for stock in comparison.get("stocks", []):
+            def cell(value, suffix=""):
+                if value is None:
+                    return "Not available"
+                if isinstance(value, (int, float)):
+                    return f"{value:.4f}{suffix}"
+                return str(value)
+
+            membership = " + ".join(stock.get("categories", []))
+
+            lines.append(
+                f"| {stock['symbol']} "
+                f"| {cell(stock.get('period_return_pct'), '%')} "
+                f"| {cell(stock.get('annualized_volatility_pct'), '%')} "
+                f"| {cell(stock.get('maximum_drawdown_pct'), '%')} "
+                f"| {cell(stock.get('sharpe_ratio'))} "
+                f"| {membership} |"
+            )
+
+        overlap = comparison.get("overlap_symbols", [])
+        overlap_text = ", ".join(overlap) if overlap else "None"
+
+        lines.extend([
+            "",
+            f"Unique stocks in comparison: {comparison.get('stock_count', 0)}",
+            f"Stocks appearing in both lists: {overlap_text}",
+            "",
+        ])
+
+    lines.extend([
+        "DATA METHODOLOGY",
+        f"Index: {metadata.get('index')}",
+        f"Period: {metadata.get('period')}",
+        f"Historical start date: {metadata.get('requested_start_date')}",
+        f"Historical end date: {metadata.get('common_end_date')}",
+        f"Data as of: {metadata.get('data_as_of')}",
+        f"Snapshot month: {metadata.get('snapshot_month')}",
+        f"Price basis: {metadata.get('price_basis')}",
+        (
+            "Corporate-action coverage: "
+            f"{metadata.get('corporate_action_coverage')}"
+        ),
+        f"Dividend adjusted: {metadata.get('dividend_adjusted')}",
+        "",
+        "IMPORTANT DISCLOSURES",
+        "These are historical observations, not forecasts.",
+        "The universe uses the latest monthly NIFTY 50 snapshot.",
+        "Historical daily membership is not reconstructed.",
+        "Corporate-action coverage is partial.",
+    ])
+
+    return "\\n".join(lines)
+
+
+def build_financial_context(question):
+    intents = detect_intents(question)
+
+    if intents == ["FUNDAMENTAL_RESEARCH"]:
+        return (
+            "QUESTION CATEGORY: FUNDAMENTAL RESEARCH\\n\\n"
+            "VERIFIED DATA STATUS:\\n"
+            "Company fundamentals and valuation data are not yet "
+            "integrated into GREEDY STOCKS.\\n"
+            "Historical share-price performance cannot establish "
+            "whether a company is undervalued or overvalued.\\n"
+            "Do not invent financial statements, revenue, profit, "
+            "debt, cash flow or valuation ratios.\\n"
+            "You may explain what data would be needed for "
+            "a proper fundamental analysis."
+        )
+
+    if intents == ["EDUCATION"]:
+        return build_education_context(question)
+
+
+    if intents == ["GENERAL"]:
+        return (
+            "QUESTION CATEGORY: GENERAL GREEDY STOCKS HELP\\n"
+            "GREEDY STOCKS currently supports historical NIFTY 50 "
+            "performance, volatility, drawdown, sector performance, "
+            "historical Greedy Algorithm experiments and financial "
+            "education. Fundamental valuation data is not yet integrated."
+        )
+
+    period = detect_period(question)
+
+    try:
+        report = generate_market_ideas(
+            period=period,
+            top_n=5,
+        )
+
+        verified_context = format_insights(
+            ideas=report["ideas"],
+            metadata=report["metadata"],
+            category=intents,
+            comparison=report.get("comparison"),
+        )
+
+        education_context = (
+            build_education_context(
+                question,
+                ideas=report["ideas"],
+                metadata=report["metadata"],
+            )
+            if "EDUCATION" in intents
+            else ""
+        )
+
+        return (
+            f"QUESTION CATEGORIES: {', '.join(intents)}\\n"
+            f"REQUESTED PERIOD: {period}\\n\\n"
+            "THE FOLLOWING IS VERIFIED APPLICATION DATA. "
+            "Do not modify or invent its figures.\\n\\n"
+            f"{verified_context}"
+            + (
+                "\\n\\n" + education_context
+                if education_context else ""
+            )
+        )
+
+    except Exception:
+        logger.exception(
+            "Financial intelligence generation failed."
+        )
+        return (
+            "VERIFIED FINANCIAL DATA IS CURRENTLY UNAVAILABLE. "
+            "Do not invent rankings, returns or risk metrics."
+        )
+
+
+def generate_gemini_answer(question, financial_context, history):
+    api_key = os.getenv("GEMINI_API_KEY")
+
+    if not api_key:
+        logger.warning("GEMINI_API_KEY is not configured.")
+        return None
+
+    try:
+        from google import genai
+
+        client = genai.Client(api_key=api_key)
+
+        calculation_context = build_calculation_context(
+            client=client,
+            model=GEMINI_MODEL,
+            question=question,
+        )
+
+        greedy_knowledge_context = build_greedy_knowledge_context(
+            question=question,
+        )
+
+        historical_company_context = (
+            build_historical_intelligence_context(
+                client=client,
+                model=GEMINI_MODEL,
+                question=question,
+            )
+            if re.search(
+                r"\b(analy[sz]e|analysis of|historical performance of|historical returns of|returns? of|sharpe(?: ratio)? of|volatility of|drawdown of)\b",
+                question or "",
+                re.IGNORECASE,
+            )
+            else "No company-specific historical analysis requested."
+        )
+
+        greedy_v2_evidence_context = build_greedy_v2_evidence_context(question)
+
+
+
+        conversation_text = ""
+
+        for item in history:
+            role = item["role"].upper()
+            content = item["content"]
+
+            conversation_text += (
+                f"\n{role}: {content}\n"
+            )
+
+        prompt = f"""
+VERIFIED APPLICATION CONTEXT:
+
+{financial_context}
+
+COMPANY-SPECIFIC HISTORICAL INTELLIGENCE:
+{historical_company_context}
+
+GREEDY V2 EXPERIMENT AND WALK-FORWARD EVIDENCE:
+{greedy_v2_evidence_context}
+
+GREEDY SOURCE-CODE KNOWLEDGE:
+
+{greedy_knowledge_context}
+
+SOURCE KNOWLEDGE RULES:
+- Use source excerpts to explain actual Greedy implementation.
+- Distinguish Greedy V1, V2 and V3 only when the source supports it.
+- Explain selection logic, objective functions, constraints and limitations
+  only when visible in the supplied code.
+- If a requested version or implementation is not found, say so.
+- Never claim to have run an algorithm merely because its source was read.
+- Never change algorithm behaviour or portfolio-generation decisions.
+- Never invent source files, functions, metrics or algorithm features.
+
+
+DETERMINISTIC CALCULATION ENGINE OUTPUT:
+
+{calculation_context}
+
+CALCULATION RULES:
+- If status is CALCULATED, use the exact result and supplied inputs.
+- Explain the formula, units and assumptions.
+- Do not alter or invent calculated values.
+- If no calculation was executed, do not claim one was verified.
+- User-provided mathematical inputs do not require external market data.
+- Distinguish mathematical examples from actual market observations.
+
+
+RECENT CONVERSATION HISTORY:
+{conversation_text if conversation_text else "No previous messages."}
+
+CURRENT USER QUESTION:
+{question}
+
+INSTRUCTIONS:
+Answer the current question directly.
+
+Use the verified application context for all financial figures.
+If the context says data is unavailable, do not invent it.
+Use conversation history to understand follow-up questions.
+Explain concepts in beginner-friendly language.
+Keep the answer clear, useful and conversational.
+
+CONTEXTUAL EDUCATION RULES:
+- When contextual financial education is supplied, teach the concept first.
+- Then connect it to the supplied historical stock metrics where available.
+- Explain what the metric means in plain language before interpreting values.
+- Never imply that low volatility means no risk or capital protection.
+- Never imply that a high Sharpe ratio guarantees future performance.
+- For diversification, correlation, beta, liquidity or CAGR, clearly state
+  when the corresponding verified metric is unavailable.
+- Do not invent benchmark comparisons, portfolio holdings or correlations.
+- Use a small numerical example only if it is clearly labelled illustrative,
+  not an actual GREEDY STOCKS observation.
+- Do not convert an educational explanation into a buy/sell recommendation.
+
+COMPARATIVE FINANCIAL RESEARCH RULES:
+- When multiple research categories are requested, present each category separately.
+- When two or more categories contain stock-level metrics, include a
+  consolidated comparison table covering every available returned stock.
+- The table should include stock symbol, historical return, annualised
+  volatility, maximum drawdown, Sharpe ratio and category membership.
+- Mark category membership as Performance, Low Volatility, Both, or the
+  applicable verified category names.
+- Identify overlap by matching exact stock symbols, not company-name guesses.
+- Do not omit stocks merely to shorten the table.
+- Use only figures present in VERIFIED APPLICATION CONTEXT.
+- If a metric is unavailable, write "Not available"; never estimate it.
+- Distinguish lowest volatility from lowest overall risk.
+- Explain that Sharpe ratio measures excess return per unit of volatility.
+  It does not prove investment skill or predict future performance.
+- Do not describe historical rankings as investment recommendations.
+- If only one category is requested, do not force an unnecessary comparison.
+"""
+
+        interaction = client.interactions.create(
+            model=GEMINI_MODEL,
+            input=prompt,
+            system_instruction=SYSTEM_INSTRUCTION,
+        )
+
+        answer = interaction.output_text
+
+        if not answer or not answer.strip():
+            logger.warning("Gemini returned an empty response.")
+            return None
+
+        return answer.strip()
+
+    except Exception:
+        logger.exception("Gemini API request failed.")
+        return None
+
+
+# --------------------------------------------------
+# MAIN RESPONSE ENGINE
+# --------------------------------------------------
+
+def generate_greedy_answer(question, history):
+    financial_context = build_financial_context(question)
+
+    # Deterministic fallback is always available.
+    fallback_answer = financial_context
+
+    ai_answer = generate_gemini_answer(
+        question=question,
+        financial_context=financial_context,
+        history=history,
+    )
+
+    if ai_answer:
+        return ai_answer
+
+    logger.warning(
+        "Using deterministic fallback response."
+    )
+
+    return (
+        "GREEDY AI is temporarily unavailable, so I'm "
+        "showing the verified application information instead.\n\n"
+        f"{fallback_answer}"
+    )
+
+
+# --------------------------------------------------
+# SEND CHAT MESSAGE
+# --------------------------------------------------
+
+@router.post("/chat", response_model=ChatResponse)
+def send_message(request: ChatRequest):
+    question = request.message.strip()
+
+    if not question:
+        raise HTTPException(
+            status_code=400,
+            detail="Message cannot be empty.",
+        )
+
+    try:
+        # Validate existing conversation and load its history.
+        history = get_recent_history(request.conversation_id)
+
+        # Generate the answer before opening the write transaction.
+        answer = generate_greedy_answer(
+            question=question,
+            history=history,
+        )
+
+        with engine.begin() as connection:
+            user_id = get_or_create_dev_user(connection)
+
+            if request.conversation_id is None:
+                result = connection.execute(
+                    text("""
+                        INSERT INTO conversations (
+                            user_id,
+                            title
+                        )
+                        VALUES (
+                            :user_id,
+                            :title
+                        )
+                    """),
+                    {
+                        "user_id": user_id,
+                        "title": question[:255],
+                    },
+                )
+
+                conversation_id = result.lastrowid
+
+            else:
+                conversation_id = request.conversation_id
+
+            connection.execute(
+                text("""
+                    INSERT INTO messages (
+                        conversation_id,
+                        role,
+                        content
+                    )
+                    VALUES (
+                        :conversation_id,
+                        'user',
+                        :content
+                    )
+                """),
+                {
+                    "conversation_id": conversation_id,
+                    "content": question,
+                },
+            )
+
+            connection.execute(
+                text("""
+                    INSERT INTO messages (
+                        conversation_id,
+                        role,
+                        content
+                    )
+                    VALUES (
+                        :conversation_id,
+                        'assistant',
+                        :content
+                    )
+                """),
+                {
+                    "conversation_id": conversation_id,
+                    "content": answer,
+                },
+            )
+
+            connection.execute(
+                text("""
+                    UPDATE conversations
+                    SET updated_at = CURRENT_TIMESTAMP
+                    WHERE id = :conversation_id
+                """),
+                {"conversation_id": conversation_id},
+            )
+
+        return ChatResponse(
+            conversation_id=conversation_id,
+            user_message=question,
+            assistant_message=answer,
+            created_at=datetime.now(timezone.utc),
+        )
+
+    except HTTPException:
+        raise
+
+    except Exception:
+        logger.exception("Chat message processing failed.")
+
+        raise HTTPException(
+            status_code=500,
+            detail="Chat service failed. Check backend logs.",
+        )
+
+
+
+
+# --------------------------------------------------
+# LIST CONVERSATIONS
+# --------------------------------------------------
+
+@router.get("/chat/conversations")
+def list_conversations(limit: int = 100):
+    """
+    Return the development user's recent conversations,
+    newest activity first, with a short latest-message preview.
+    """
+    if limit < 1 or limit > 200:
+        raise HTTPException(
+            status_code=400,
+            detail="Limit must be between 1 and 200.",
+        )
+
+    try:
+        with engine.connect() as connection:
+            user_id = connection.execute(
+                text("""
+                    SELECT id
+                    FROM app_users
+                    WHERE email = :email
+                """),
+                {"email": DEV_USER_EMAIL},
+            ).scalar_one_or_none()
+
+            if user_id is None:
+                return {"conversations": []}
+
+            rows = connection.execute(
+                text("""
+                    SELECT
+                        c.id,
+                        c.title,
+                        c.created_at,
+                        c.updated_at,
+                        (
+                            SELECT m.content
+                            FROM messages AS m
+                            WHERE m.conversation_id = c.id
+                            ORDER BY m.id DESC
+                            LIMIT 1
+                        ) AS last_message,
+                        (
+                            SELECT COUNT(*)
+                            FROM messages AS mc
+                            WHERE mc.conversation_id = c.id
+                        ) AS message_count
+                    FROM conversations AS c
+                    WHERE c.user_id = :user_id
+                    ORDER BY c.updated_at DESC, c.id DESC
+                    LIMIT :limit
+                """),
+                {
+                    "user_id": user_id,
+                    "limit": limit,
+                },
+            ).mappings().all()
+
+            return {
+                "conversations": [
+                    dict(row) for row in rows
+                ]
+            }
+
+    except Exception:
+        logger.exception("Conversation list retrieval failed.")
+        raise HTTPException(
+            status_code=500,
+            detail="Could not retrieve conversation history.",
+        )
+
+
+# --------------------------------------------------
+# RETRIEVE CONVERSATION
+# --------------------------------------------------
+
+@router.get("/chat/conversations/{conversation_id}")
+def get_conversation(conversation_id: int):
+    try:
+        with engine.connect() as connection:
+            user_id = connection.execute(
+                text("""
+                    SELECT id
+                    FROM app_users
+                    WHERE email = :email
+                """),
+                {"email": DEV_USER_EMAIL},
+            ).scalar_one_or_none()
+
+            if user_id is None:
+                raise HTTPException(
+                    status_code=404,
+                    detail="User not found.",
+                )
+
+            conversation = connection.execute(
+                text("""
+                    SELECT id, title, created_at, updated_at
+                    FROM conversations
+                    WHERE id = :conversation_id
+                      AND user_id = :user_id
+                """),
+                {
+                    "conversation_id": conversation_id,
+                    "user_id": user_id,
+                },
+            ).mappings().first()
+
+            if conversation is None:
+                raise HTTPException(
+                    status_code=404,
+                    detail="Conversation not found.",
+                )
+
+            messages = connection.execute(
+                text("""
+                    SELECT id, role, content, created_at
+                    FROM messages
+                    WHERE conversation_id = :conversation_id
+                    ORDER BY id ASC
+                """),
+                {"conversation_id": conversation_id},
+            ).mappings().all()
+
+            return {
+                "conversation": dict(conversation),
+                "messages": [dict(message) for message in messages],
+            }
+
+    except HTTPException:
+        raise
+
+    except Exception:
+        logger.exception("Conversation retrieval failed.")
+
+        raise HTTPException(
+            status_code=500,
+            detail="Could not retrieve conversation.",
+        )
+
+
+# --------------------------------------------------
+# DELETE CONVERSATION
+# --------------------------------------------------
+
+@router.delete("/chat/conversations/{conversation_id}")
+def delete_conversation(conversation_id: int):
+    """
+    Delete one conversation belonging to the development user
+    and all of its messages.
+    """
+    try:
+        with engine.begin() as connection:
+            user_id = connection.execute(
+                text("""
+                    SELECT id
+                    FROM app_users
+                    WHERE email = :email
+                """),
+                {"email": DEV_USER_EMAIL},
+            ).scalar_one_or_none()
+
+            if user_id is None:
+                raise HTTPException(
+                    status_code=404,
+                    detail="Conversation not found.",
+                )
+
+            exists = connection.execute(
+                text("""
+                    SELECT id
+                    FROM conversations
+                    WHERE id = :conversation_id
+                      AND user_id = :user_id
+                """),
+                {
+                    "conversation_id": conversation_id,
+                    "user_id": user_id,
+                },
+            ).scalar_one_or_none()
+
+            if exists is None:
+                raise HTTPException(
+                    status_code=404,
+                    detail="Conversation not found.",
+                )
+
+            connection.execute(
+                text("""
+                    DELETE FROM messages
+                    WHERE conversation_id = :conversation_id
+                """),
+                {"conversation_id": conversation_id},
+            )
+
+            connection.execute(
+                text("""
+                    DELETE FROM conversations
+                    WHERE id = :conversation_id
+                      AND user_id = :user_id
+                """),
+                {
+                    "conversation_id": conversation_id,
+                    "user_id": user_id,
+                },
+            )
+
+        return {
+            "success": True,
+            "conversation_id": conversation_id,
+            "message": "Conversation deleted successfully.",
+        }
+
+    except HTTPException:
+        raise
+
+    except Exception:
+        logger.exception("Conversation deletion failed.")
+        raise HTTPException(
+            status_code=500,
+            detail="Could not delete conversation.",
+        )
+
+
+====================================================================================================
+SOURCE FILE: analytics/ask_greedy/orchestrator.py
+====================================================================================================
+"""Validated bridge between Gemini and deterministic calculations."""
+import json
+import logging
+import re
+import math
+
+from .calculations import (
+    portfolio_return, sharpe_ratio, portfolio_volatility,
+    validate_correlation_matrix, maximum_sharpe,
+    drawdown, whole_share_allocation,
+)
+
+logger = logging.getLogger("greedy_stocks_chat.calculations")
+
+OPERATIONS = {
+    "portfolio_return": portfolio_return,
+    "sharpe_ratio": sharpe_ratio,
+    "portfolio_volatility": portfolio_volatility,
+    "validate_correlation_matrix": validate_correlation_matrix,
+    "maximum_sharpe": maximum_sharpe,
+    "drawdown": drawdown,
+    "whole_share_allocation": whole_share_allocation,
+}
+
+CALCULATION_HINTS = re.compile(
+    r"\b(calculate|compute|optimis|optimiz|maximi[sz]e|sharpe|"
+    r"volatility|drawdown|portfolio return|weighted return|"
+    r"correlation matrix|allocate|allocation|weights?)\b",
+    re.IGNORECASE,
+)
+
+PLANNER_INSTRUCTION = """
+Extract calculation inputs from the user's question.
+Return exactly one JSON object, no markdown.
+
+Supported schemas:
+portfolio_return: {"weights":[...],"returns":[...]}
+sharpe_ratio: {"expected_return":number,"risk_free_rate":number,"volatility":number}
+portfolio_volatility: {"weights":[...],"volatilities":[...],"correlations":[[...]]}
+validate_correlation_matrix: {"correlations":[[...]]}
+maximum_sharpe: {"returns":[...],"volatilities":[...],"correlations":[[...]],"risk_free_rate":number}
+drawdown: {"returns":[...]}
+whole_share_allocation: {"capital":number,"prices":[...]}
+
+Return format:
+{"operation":"operation_name","arguments":{...}}
+or
+{"operation":"none","reason":"missing or ambiguous inputs"}
+
+Rules:
+- Extract only numbers explicitly supplied by the user.
+- Never invent inputs or market data.
+- Convert percentages to decimal fractions: 15% = 0.15.
+- For unsupported, incomplete or ambiguous requests, return operation none.
+- Preserve asset order.
+- Do not perform the calculation or answer the question.
+"""
+
+ALLOWED = {
+    "portfolio_return": {"weights", "returns"},
+    "sharpe_ratio": {"expected_return", "risk_free_rate", "volatility"},
+    "portfolio_volatility": {"weights", "volatilities", "correlations"},
+    "validate_correlation_matrix": {"correlations"},
+    "maximum_sharpe": {"returns", "volatilities", "correlations", "risk_free_rate"},
+    "drawdown": {"returns"},
+    "whole_share_allocation": {"capital", "prices"},
+}
+
+def _extract_json(text):
+    text = (text or "").strip()
+    text = re.sub(r"^```(?:json)?\s*", "", text, flags=re.I)
+    text = re.sub(r"\s*```$", "", text)
+    start, end = text.find("{"), text.rfind("}")
+    if start < 0 or end <= start:
+        raise ValueError("Planner returned no JSON object.")
+    return json.loads(text[start:end + 1])
+
+def _validate_plan(plan):
+    if not isinstance(plan, dict):
+        raise ValueError("Invalid plan.")
+    operation = plan.get("operation")
+    if operation == "none":
+        return None
+    if operation not in OPERATIONS:
+        raise ValueError("Unsupported operation.")
+    args = plan.get("arguments")
+    if not isinstance(args, dict) or set(args) != ALLOWED[operation]:
+        raise ValueError("Arguments do not match the operation schema.")
+
+    def check(value, depth=0):
+        if depth > 3:
+            raise ValueError("Input nesting is too deep.")
+        if isinstance(value, list):
+            if len(value) > 50:
+                raise ValueError("Input array is too large.")
+            for item in value:
+                check(item, depth + 1)
+        elif isinstance(value, (int, float)) and not isinstance(value, bool):
+            if not math.isfinite(value):
+                raise ValueError("Inputs must be finite.")
+        else:
+            raise ValueError("Inputs must contain numeric values only.")
+
+    for value in args.values():
+        check(value)
+    return operation, args
+
+def build_calculation_context(client, model, question):
+    if not CALCULATION_HINTS.search(question or ""):
+        return "No deterministic calculation was requested."
+
+    try:
+        interaction = client.interactions.create(
+            model=model,
+            input=PLANNER_INSTRUCTION + "\n\nUSER QUESTION:\n" + question,
+            system_instruction=(
+                "Extract explicit numeric inputs only. Never invent values. "
+                "Return one JSON object only."
+            ),
+        )
+        plan = _extract_json(interaction.output_text)
+        validated = _validate_plan(plan)
+
+        if validated is None:
+            return (
+                "NO_CALCULATION: "
+                + str(plan.get("reason", "Required inputs were not explicit."))
+            )
+
+        operation, arguments = validated
+        result = OPERATIONS[operation](**arguments)
+
+        return json.dumps({
+            "status": "CALCULATED",
+            "operation": operation,
+            "inputs": arguments,
+            "result": result,
+            "verification": "Executed by the deterministic Python calculation engine.",
+        }, ensure_ascii=False, default=float)
+
+    except Exception as exc:
+        logger.warning("Calculation bridge did not execute: %s", exc)
+        return (
+            "NO_CALCULATION: The inputs could not be safely extracted or validated. "
+            "Do not invent a result; ask the user to clarify."
+        )
+
+
+====================================================================================================
+SOURCE FILE: analytics/ask_greedy/historical_intelligence.py
+====================================================================================================
+from __future__ import annotations
+
+import json
+import logging
+import re
+from datetime import date, timedelta
+
+import pandas as pd
+from sqlalchemy import text
+
+from database import engine
+from analytics import adjusted_price_adapter
+from analytics import index_adapter
+from analytics import database_adapter
+from analytics.financial_metrics import calculate_metrics
+
+log = logging.getLogger("greedy_historical")
+MAX_YEARS = 10
+
+PLANNER = (
+    "Return JSON only: "
+    '{"symbol":"NSE ticker or null","start_date":"YYYY-MM-DD or null",'
+    '"end_date":"YYYY-MM-DD or null","include_nifty":true/false,'
+    '"analysis_request":"what the user wants"} '
+    "Resolve relative dates using today's date supplied below. "
+    "Only identify a symbol when clear. Never return SQL or prose."
+)
+
+
+def _json(text_value):
+    s = (text_value or "").strip()
+    s = re.sub(r"^```(?:json)?|```$", "", s, flags=re.I).strip()
+    a, b = s.find("{"), s.rfind("}")
+    if a < 0 or b <= a:
+        raise ValueError("Invalid planner JSON")
+    obj = json.loads(s[a:b + 1])
+    if not isinstance(obj, dict):
+        raise ValueError("Planner output is not an object")
+    return obj
+
+
+def _plan(client, model, question):
+    today = date.today()
+    response = client.models.generate_content(
+        model=model,
+        contents=f"{PLANNER}\nToday: {today}\nQuestion: {question}",
+    )
+    p = _json(getattr(response, "text", ""))
+    symbol = p.get("symbol")
+    if symbol:
+        symbol = str(symbol).strip().upper()
+        if not re.fullmatch(r"[A-Z0-9&._-]{1,30}", symbol):
+            raise ValueError("Invalid ticker format")
+
+    end = date.fromisoformat(p["end_date"]) if p.get("end_date") else today
+    start = (
+        date.fromisoformat(p["start_date"])
+        if p.get("start_date")
+        else end - timedelta(days=365 * MAX_YEARS + 5)
+    )
+    earliest = today - timedelta(days=365 * MAX_YEARS + 5)
+    start, end = max(start, earliest), min(end, today)
+    if start > end:
+        raise ValueError("Invalid date range")
+
+    return (
+        symbol,
+        start,
+        end,
+        bool(p.get("include_nifty")),
+        str(p.get("analysis_request") or question)[:1000],
+    )
+
+
+def _stock(symbol, start, end):
+    # Restrict analysis to the latest available NIFTY 50 snapshot.
+    constituents = database_adapter.get_latest_constituents()
+    supported = set(
+        constituents["symbol"].astype(str).str.strip().str.upper()
+    )
+    if symbol not in supported:
+        raise ValueError(
+            f"{symbol} is not in the latest available NIFTY 50 constituent snapshot."
+        )
+
+    query = text("""
+        SELECT id, symbol, company_name
+        FROM companies
+        WHERE UPPER(symbol) = :symbol
+        LIMIT 1
+    """)
+    with engine.connect() as conn:
+        company = conn.execute(
+            query, {"symbol": symbol}
+        ).mappings().first()
+
+    if not company:
+        raise ValueError(f"Company master record not found for {symbol}.")
+
+    frame = adjusted_price_adapter.get_adjusted_company_prices(
+        company_id=int(company["id"]),
+        start_date=start.isoformat(),
+        end_date=end.isoformat(),
+    )
+    if frame.empty or "adjusted_close" not in frame.columns:
+        raise ValueError(f"No adjusted price observations found for {symbol}.")
+
+    frame = frame.copy()
+    frame["trade_date"] = pd.to_datetime(frame["trade_date"])
+    frame["close_price"] = pd.to_numeric(
+        frame["adjusted_close"], errors="coerce"
+    )
+    frame = frame.dropna(subset=["trade_date", "close_price"])
+    frame = frame[frame["close_price"] > 0]
+    frame = frame.sort_values("trade_date").drop_duplicates("trade_date")
+
+    if len(frame) < 2:
+        raise ValueError(f"Insufficient adjusted price history for {symbol}.")
+
+    frame["symbol"] = str(company["symbol"])
+    frame["company_name"] = str(company["company_name"])
+    return frame.reset_index(drop=True)
+
+
+def _nifty(start, end):
+    series = index_adapter.get_index_closes(
+        start_date=start.isoformat(),
+        end_date=end.isoformat(),
+    )
+    if series is None or series.empty:
+        return pd.DataFrame(columns=["trade_date", "close_value"])
+
+    frame = series.rename("close_value").rename_axis("trade_date").reset_index()
+    frame["trade_date"] = pd.to_datetime(frame["trade_date"])
+    frame["close_value"] = pd.to_numeric(
+        frame["close_value"], errors="coerce"
+    )
+    return (
+        frame.dropna()
+        .query("close_value > 0")
+        .sort_values("trade_date")
+        .drop_duplicates("trade_date")
+        .reset_index(drop=True)
+    )
+
+
+def _year_returns(prices):
+    result = []
+    for year, group in prices.groupby(prices.index.year):
+        if len(group) < 2:
+            continue
+        result.append({
+            "year": int(year),
+            "first_observation": group.index[0].date().isoformat(),
+            "last_observation": group.index[-1].date().isoformat(),
+            "start_adjusted_close": round(float(group.iloc[0]), 4),
+            "end_adjusted_close": round(float(group.iloc[-1]), 4),
+            "return_pct": round(
+                float((group.iloc[-1] / group.iloc[0] - 1) * 100), 4
+            ),
+            "observations": int(len(group)),
+        })
+    return result
+
+
+def _analyse(df, nifty, request):
+    prices = (
+        df.set_index("trade_date")["close_price"]
+        .astype(float)
+        .sort_index()
+    )
+    prices = prices[~prices.index.duplicated(keep="last")]
+
+    if len(prices) < 2:
+        raise ValueError("Insufficient observations")
+
+    metrics = calculate_metrics(
+        prices,
+        risk_free_rate=0.0,
+        price_basis="SPLIT_BONUS_ADJUSTED",
+        return_type="PRICE_RETURN",
+    )
+
+    peak = prices.cummax()
+    drawdown = prices / peak - 1
+    trough = drawdown.idxmin()
+    peak_date = prices.loc[:trough].idxmax()
+    calendar = _year_returns(prices)
+
+    result = {
+        "company": str(df.iloc[0]["company_name"]),
+        "symbol": str(df.iloc[0]["symbol"]),
+        "request": request,
+        "price_basis": (
+            "Split/bonus-adjusted close prices; dividends are not included."
+        ),
+        "coverage": {
+            "first_date": metrics["start_date"],
+            "last_date": metrics["end_date"],
+            "price_observations": metrics["price_observations"],
+            "daily_return_observations": metrics["return_observations"],
+        },
+        "period_return_pct": metrics["period_return_pct"],
+        "cagr_pct": metrics["cagr_pct"],
+        "annualized_volatility_pct": metrics["annualized_volatility_pct"],
+        "sharpe_ratio": metrics["sharpe_ratio"],
+        "sharpe_assumptions": {
+            "annual_risk_free_rate": 0.0,
+            "trading_days_per_year": 252,
+            "method": "Annualized daily excess-return Sharpe ratio",
+        },
+        "maximum_drawdown": {
+            "pct": round(float(drawdown.min() * 100), 4),
+            "peak_date": peak_date.date().isoformat(),
+            "trough_date": trough.date().isoformat(),
+        },
+        "calendar_year_returns": calendar,
+        "best_calendar_year": (
+            max(calendar, key=lambda x: x["return_pct"]) if calendar else None
+        ),
+        "worst_calendar_year": (
+            min(calendar, key=lambda x: x["return_pct"]) if calendar else None
+        ),
+        "metric_methodology": {
+            "trading_days_per_year": metrics["trading_days_per_year"],
+            "risk_free_rate_annual": metrics["risk_free_rate_annual"],
+            "calendar_validation": metrics["calendar_validation"],
+            "cagr_status": metrics["cagr_status"],
+        },
+    }
+
+    if nifty is not None and not nifty.empty:
+        benchmark = nifty.set_index("trade_date")["close_value"].astype(float)
+        aligned = pd.concat(
+            [prices.rename("stock"), benchmark.rename("nifty")],
+            axis=1,
+            join="inner",
+        ).dropna()
+
+        if len(aligned) >= 2:
+            result["nifty_comparison"] = {
+                "matched_observations": int(len(aligned)),
+                "first_matched_date": aligned.index[0].date().isoformat(),
+                "last_matched_date": aligned.index[-1].date().isoformat(),
+                "stock_return_pct": round(
+                    float((aligned.stock.iloc[-1] / aligned.stock.iloc[0] - 1) * 100),
+                    4,
+                ),
+                "nifty_return_pct": round(
+                    float((aligned.nifty.iloc[-1] / aligned.nifty.iloc[0] - 1) * 100),
+                    4,
+                ),
+                "benchmark_basis": "NIFTY 50 index close price return",
+            }
+        else:
+            result["nifty_comparison"] = {
+                "status": "UNAVAILABLE",
+                "reason": "Insufficient matched stock and index observations.",
+            }
+
+    return result
+
+
+def build_historical_intelligence_context(client, model, question):
+    """Read-only historical analysis using adjusted prices and shared metrics."""
+    try:
+        symbol, start, end, compare, request = _plan(
+            client, model, question
+        )
+        if not symbol:
+            return (
+                "HISTORICAL_STATUS: NEEDS_CLARIFICATION. "
+                "Ask which supported NIFTY 50 ticker the user means."
+            )
+
+        stock = _stock(symbol, start, end)
+        nifty = _nifty(start, end) if compare else None
+        data = _analyse(stock, nifty, request)
+        data["requested_period"] = {
+            "start": start.isoformat(),
+            "end": end.isoformat(),
+        }
+        data["quality_notes"] = [
+            "Prices are adjusted for supported stock splits and bonus issues.",
+            "Dividend adjustments are not available; these are not total returns.",
+            "Corporate-action coverage is partial and depends on stored records.",
+            "No missing dates were forward-filled.",
+            "Metrics use observed price dates; expected exchange sessions were not supplied.",
+            "Calendar-year returns use first and last available adjusted observations.",
+            "NIFTY 50 membership is checked against the latest available snapshot only.",
+            "This does not establish historical NIFTY 50 membership.",
+        ]
+        return (
+            "HISTORICAL_STATUS: VERIFIED_DATABASE_RESULT\n"
+            + json.dumps(data, indent=2, default=str)
+        )
+    except Exception as exc:
+        log.exception("Historical analysis failed")
+        return (
+            f"HISTORICAL_STATUS: UNAVAILABLE\n"
+            f"Reason: {type(exc).__name__}: {str(exc)[:400]}\n"
+            "Do not invent figures."
+        )
+
+
+====================================================================================================
+SOURCE FILE: analytics/ask_greedy/calculations.py
+====================================================================================================
+"""Deterministic financial calculation engine for Ask GREEDY."""
+from __future__ import annotations
+
+import math
+import numpy as np
+
+
+def _finite_array(values, name):
+    a = np.asarray(values, dtype=float)
+    if not np.all(np.isfinite(a)):
+        raise ValueError(f"{name} must contain only finite numbers.")
+    return a
+
+
+def portfolio_return(weights, returns):
+    w = _finite_array(weights, "weights")
+    r = _finite_array(returns, "returns")
+    if w.ndim != 1 or r.ndim != 1 or len(w) != len(r):
+        raise ValueError("Weights and returns must be equal-length vectors.")
+    if np.any(w < 0) or not np.isclose(w.sum(), 1):
+        raise ValueError("Weights must be non-negative and sum to 1.")
+    return float(w @ r)
+
+
+def sharpe_ratio(expected_return, risk_free_rate, volatility):
+    if volatility <= 0 or not math.isfinite(volatility):
+        raise ValueError("Volatility must be positive and finite.")
+    return float((expected_return - risk_free_rate) / volatility)
+
+
+def portfolio_volatility(weights, volatilities, correlations):
+    w = _finite_array(weights, "weights")
+    s = _finite_array(volatilities, "volatilities")
+    c = _finite_array(correlations, "correlations")
+
+    if c.shape != (len(w), len(w)) or len(s) != len(w):
+        raise ValueError("Incompatible portfolio dimensions.")
+    if np.any(w < 0) or not np.isclose(w.sum(), 1):
+        raise ValueError("Weights must be non-negative and sum to 1.")
+    if np.any(s < 0):
+        raise ValueError("Volatilities cannot be negative.")
+    if not np.allclose(c, c.T, atol=1e-10):
+        raise ValueError("Correlation matrix must be symmetric.")
+    if not np.allclose(np.diag(c), 1, atol=1e-10):
+        raise ValueError("Correlation matrix diagonal must equal 1.")
+    if np.any(np.abs(c) > 1 + 1e-10):
+        raise ValueError("Correlations must lie between -1 and 1.")
+
+    eigenvalues = np.linalg.eigvalsh(c)
+    if eigenvalues.min() < -1e-9:
+        raise ValueError(
+            f"Invalid correlation matrix: minimum eigenvalue "
+            f"{eigenvalues.min():.10f}"
+        )
+
+    cov = np.outer(s, s) * c
+    variance = float(w @ cov @ w)
+    if variance < -1e-10:
+        raise ValueError("Calculated portfolio variance is negative.")
+    return math.sqrt(max(0.0, variance))
+
+
+def validate_correlation_matrix(correlations, tolerance=1e-9):
+    c = _finite_array(correlations, "correlations")
+    if c.ndim != 2 or c.shape[0] != c.shape[1]:
+        return {"valid": False, "reason": "Matrix must be square."}
+    symmetric = bool(np.allclose(c, c.T, atol=tolerance))
+    diagonal = bool(np.allclose(np.diag(c), 1, atol=tolerance))
+    bounded = bool(np.all(np.abs(c) <= 1 + tolerance))
+    eigenvalues = np.linalg.eigvalsh((c + c.T) / 2)
+    minimum = float(eigenvalues.min())
+    valid = symmetric and diagonal and bounded and minimum >= -tolerance
+    return {
+        "valid": valid,
+        "symmetric": symmetric,
+        "unit_diagonal": diagonal,
+        "bounded": bounded,
+        "minimum_eigenvalue": minimum,
+        "determinant": float(np.linalg.det(c)),
+        "reason": "Positive semidefinite correlation matrix."
+                  if valid else "One or more correlation constraints failed."
+    }
+
+
+def maximum_sharpe(returns, volatilities, correlations, risk_free_rate=0.0):
+    """Long-only maximum-Sharpe portfolio; deterministic multistart SLSQP."""
+    from scipy.optimize import minimize
+
+    r = _finite_array(returns, "returns")
+    s = _finite_array(volatilities, "volatilities")
+    c = _finite_array(correlations, "correlations")
+    n = len(r)
+
+    if n < 1 or len(s) != n or c.shape != (n, n):
+        raise ValueError("Incompatible input dimensions.")
+    if np.any(s <= 0):
+        raise ValueError("All volatilities must be positive.")
+    matrix_check = validate_correlation_matrix(c)
+    if not matrix_check["valid"]:
+        raise ValueError(matrix_check["reason"])
+
+    cov = np.outer(s, s) * c
+
+    def objective(w):
+        variance = float(w @ cov @ w)
+        if variance <= 1e-16:
+            return 1e9
+        return -float((w @ r - risk_free_rate) / math.sqrt(variance))
+
+    constraints = [{"type": "eq", "fun": lambda w: np.sum(w) - 1}]
+    bounds = [(0.0, 1.0)] * n
+    starts = [np.full(n, 1 / n)]
+    starts += [np.eye(n)[i] for i in range(n)]
+
+    candidates = []
+    for start in starts:
+        result = minimize(
+            objective, start, method="SLSQP",
+            bounds=bounds, constraints=constraints,
+            options={"maxiter": 2000, "ftol": 1e-12}
+        )
+        if result.success and np.all(np.isfinite(result.x)):
+            w = np.maximum(result.x, 0)
+            w /= w.sum()
+            candidates.append(w)
+
+    if not candidates:
+        raise RuntimeError("Optimisation failed to converge.")
+
+    weights = min(candidates, key=objective)
+    ret = float(weights @ r)
+    vol = math.sqrt(float(weights @ cov @ weights))
+    return {
+        "weights": weights.tolist(),
+        "expected_return": ret,
+        "volatility": vol,
+        "sharpe_ratio": sharpe_ratio(ret, risk_free_rate, vol),
+        "optimizer": "SLSQP deterministic multistart",
+        "matrix_validation": matrix_check
+    }
+
+
+def drawdown(returns):
+    r = _finite_array(returns, "returns")
+    if np.any(r < -1):
+        raise ValueError("A return cannot be below -100%.")
+    wealth = np.cumprod(1 + r)
+    peaks = np.maximum.accumulate(np.r_[1.0, wealth])[1:]
+    dd = wealth / peaks - 1
+    return float(dd.min())
+
+
+def whole_share_allocation(capital, prices):
+    if not math.isfinite(capital) or capital < 0:
+        raise ValueError("Capital must be non-negative.")
+    p = _finite_array(prices, "prices")
+    if np.any(p <= 0):
+        raise ValueError("Prices must be positive.")
+    quantities = np.zeros(len(p), dtype=int)
+    remaining = float(capital)
+
+    # One share each, if affordable, then distribute remaining
+    # capital by iterative affordable-share allocation.
+    for i in np.argsort(p):
+        if p[i] <= remaining:
+            quantities[i] += 1
+            remaining -= p[i]
+
+    while True:
+        affordable = np.where(p <= remaining + 1e-9)[0]
+        if len(affordable) == 0:
+            break
+        i = int(affordable[np.argmin(p[affordable])])
+        quantities[i] += 1
+        remaining -= p[i]
+
+    return {
+        "quantities": quantities.tolist(),
+        "invested": float(quantities @ p),
+        "cash_remaining": float(remaining),
+        "all_stocks_held": bool(np.all(quantities > 0))
+    }
+
+
+====================================================================================================
+SOURCE FILE: analytics/ask_greedy/adapter.py
+====================================================================================================
+"""AI-facing calculation adapter. Does not modify the chat route."""
+from .calculations import (
+    portfolio_return, sharpe_ratio, portfolio_volatility,
+    validate_correlation_matrix, maximum_sharpe,
+    drawdown, whole_share_allocation
+)
+
+AVAILABLE_CALCULATIONS = {
+    "portfolio_return": portfolio_return,
+    "sharpe_ratio": sharpe_ratio,
+    "portfolio_volatility": portfolio_volatility,
+    "validate_correlation_matrix": validate_correlation_matrix,
+    "maximum_sharpe": maximum_sharpe,
+    "drawdown": drawdown,
+    "whole_share_allocation": whole_share_allocation,
+}
+
+SYSTEM_INSTRUCTION = """
+You are Ask GREEDY, a beginner-friendly financial education assistant.
+You may calculate from numbers explicitly supplied by the user even when
+market data is unavailable. Never claim missing application data prevents
+ordinary mathematical calculations.
+
+For numerical finance questions:
+1. Identify the supplied inputs and assumptions.
+2. Use the deterministic calculation engine when a supported operation fits.
+3. Never invent market data or silently change assumptions.
+4. Verify returned values and explain units and annualisation.
+5. Distinguish mathematical examples from actual market observations.
+6. If an operation is unsupported, explain exactly what is missing.
+7. Never claim a calculation was tool-verified unless the tool was run.
+8. Do not append irrelevant product disclaimers to ordinary arithmetic.
+"""
+
+
+====================================================================================================
+SOURCE FILE: analytics/ask_greedy/greedy_knowledge.py
+====================================================================================================
+"""Read-only source-code knowledge layer for Ask GREEDY."""
+from pathlib import Path
+import logging
+
+logger = logging.getLogger("greedy_stocks_chat.knowledge")
+
+ROOT = Path(__file__).resolve().parents[2]
+ANALYTICS = ROOT / "analytics"
+
+# Only trusted project source directories and explicit analytical modules.
+MAX_FILES = 14
+MAX_FILE_CHARS = 6500
+MAX_TOTAL_CHARS = 28000
+
+EXACT_FILES = [
+    "greedy_v2_engine.py",
+    "greedy_v2_data.py",
+    "greedy_v2_splits.py",
+    "financial_metrics.py",
+    "portfolio_analytics.py",
+    "portfolio_allocation.py",
+]
+
+def discover_sources():
+    found = {}
+
+    for name in EXACT_FILES:
+        path = ANALYTICS / name
+        if path.is_file():
+            found[path.resolve()] = path
+
+    # Discover versioned implementations without assuming their names.
+    for path in ANALYTICS.rglob("*.py"):
+        if not path.is_file():
+            continue
+        low = path.name.lower()
+        if "greedy" in low and any(x in low for x in ("v1", "v2", "v3", "engine", "algorithm")):
+            found[path.resolve()] = path
+
+    # Also discover Greedy-named backend algorithm modules.
+    backend = ROOT / "backend"
+    if backend.exists():
+        for path in backend.glob("*greedy*.py"):
+            if path.is_file():
+                found[path.resolve()] = path
+
+    return sorted(found.values(), key=lambda p: str(p).lower())[:MAX_FILES]
+
+def build_greedy_knowledge_context(question=""):
+    """Return bounded source excerpts; never execute source code."""
+    pieces = []
+    total = 0
+
+    for path in discover_sources():
+        try:
+            text = path.read_text(encoding="utf-8-sig")
+        except (OSError, UnicodeError) as exc:
+            logger.warning("Could not read algorithm source %s: %s", path.name, exc)
+            continue
+
+        # Keep context bounded and avoid exposing unrelated oversized modules.
+        excerpt = text[:MAX_FILE_CHARS]
+        relative = path.relative_to(ROOT).as_posix()
+        block = (
+            f"\n--- SOURCE FILE: {relative} ---\n"
+            f"{excerpt}\n"
+            f"--- END SOURCE FILE: {relative} ---\n"
+        )
+
+        if total + len(block) > MAX_TOTAL_CHARS:
+            break
+
+        pieces.append(block)
+        total += len(block)
+
+    if not pieces:
+        return (
+            "GREEDY SOURCE STATUS: No matching algorithm source files were found. "
+            "Do not invent version-specific implementation details."
+        )
+
+    return (
+        "GREEDY STOCKS SOURCE-CODE KNOWLEDGE\n"
+        "The following excerpts are read-only project source files. "
+        "Use them as evidence when explaining algorithm implementation.\n"
+        "Do not claim a version exists unless its source is present. "
+        "Do not infer undocumented behaviour. If a file is truncated, "
+        "say the available excerpt does not establish the missing detail.\n"
+        + "".join(pieces)
+    )
+
+
+====================================================================================================
+SOURCE FILE: analytics/ask_greedy/test_orchestrator.py
+====================================================================================================
+import pytest
+from analytics.ask_greedy.orchestrator import _validate_plan, _extract_json
+from analytics.ask_greedy.calculations import maximum_sharpe
+
+def test_extract_json():
+    assert _extract_json('```json\n{"operation":"none"}\n```')["operation"] == "none"
+
+def test_reject_unknown_operation():
+    with pytest.raises(ValueError):
+        _validate_plan({"operation":"unknown","arguments":{}})
+
+def test_reject_missing_arguments():
+    with pytest.raises(ValueError):
+        _validate_plan({"operation":"sharpe_ratio","arguments":{"volatility":0.2}})
+
+def test_reject_extra_arguments():
+    with pytest.raises(ValueError):
+        _validate_plan({"operation":"drawdown","arguments":{"returns":[0.1],"extra":1}})
+
+def test_q1_optimizer():
+    c = [[1,.9,-.8],[.9,1,-.9],[-.8,-.9,1]]
+    result = maximum_sharpe([.15,.12,.10],[.2,.15,.1],c,.05)
+    assert result["sharpe_ratio"] == pytest.approx(2.162817, rel=1e-5)
+    assert sum(result["weights"]) == pytest.approx(1)
+
+
+====================================================================================================
+SOURCE FILE: analytics/ask_greedy/test_chat_integration.py
+====================================================================================================
+"""Phase 5 Ask GREEDY integration regression tests."""
+
+import pytest
+
+import backend.chat_routes as chat
+
+
+@pytest.mark.parametrize("question", [
+    "Explain volatility",
+    "What is Sharpe ratio?",
+    "Explain maximum drawdown",
+    "What is diversification?",
+    "Explain beta",
+    "What is liquidity?",
+    "Explain CAGR",
+])
+def test_pure_education_uses_education_intent(question):
+    assert chat.detect_intents(question) == ["EDUCATION"]
+
+
+def test_pure_education_does_not_generate_market_ideas(monkeypatch):
+    def unexpected_call(**kwargs):
+        raise AssertionError(
+            "Pure education must not generate Market Ideas."
+        )
+
+    monkeypatch.setattr(
+        chat, "generate_market_ideas", unexpected_call
+    )
+
+    context = chat.build_financial_context("Explain volatility")
+
+    assert "CONCEPT:" in context
+    assert "Historical observations" in context
+
+
+def test_pure_education_sharpe_does_not_generate_market_ideas(
+    monkeypatch,
+):
+    def unexpected_call(**kwargs):
+        raise AssertionError(
+            "Pure education must not generate Market Ideas."
+        )
+
+    monkeypatch.setattr(
+        chat, "generate_market_ideas", unexpected_call
+    )
+
+    context = chat.build_financial_context("What is Sharpe ratio?")
+
+    assert "CONCEPT:" in context
+    assert "excess return" in context.lower()
+
+
+def test_mixed_education_and_stock_research_preserved():
+    intents = chat.detect_intents(
+        "Explain volatility and show the least volatile stocks"
+    )
+
+    assert "EDUCATION" in intents
+    assert "RISK_AND_STABILITY" in intents
+
+
+def test_mixed_context_contains_education_and_verified_data(
+    monkeypatch,
+):
+    ideas = [{
+        "status": "AVAILABLE",
+        "evidence": {
+            "symbol": "TESTCO",
+            "annualized_volatility_pct": 24.5,
+            "sharpe_ratio": 1.2,
+        },
+    }]
+
+    calls = []
+
+    def fake_market_ideas(**kwargs):
+        calls.append(kwargs)
+        return {
+            "ideas": ideas,
+            "metadata": {"period": "3M"},
+            "comparison": None,
+        }
+
+    monkeypatch.setattr(
+        chat, "generate_market_ideas", fake_market_ideas
+    )
+    monkeypatch.setattr(
+        chat, "format_insights",
+        lambda **kwargs: "VERIFIED TEST METRICS",
+    )
+
+    context = chat.build_financial_context(
+        "Explain volatility and show the least volatile stocks"
+    )
+
+    assert calls
+    assert "VERIFIED TEST METRICS" in context
+    assert "CONCEPT:" in context
+    assert "TESTCO: 24.5" in context
+
+
+def test_missing_metrics_are_not_fabricated():
+    context = chat.build_financial_context("Explain beta")
+
+    assert "verified beta value is not currently available" in context
+    assert "buy or sell recommendation" in context.lower()
+
+
+def test_gemini_unavailable_uses_deterministic_fallback(monkeypatch):
+    monkeypatch.setattr(
+        chat, "generate_gemini_answer", lambda **kwargs: None
+    )
+
+    answer = chat.generate_greedy_answer(
+        "Explain beta", []
+    )
+
+    assert "GREEDY AI is temporarily unavailable" in answer
+    assert "CONCEPT:" in answer
+
+
+def test_gemini_success_returns_ai_answer(monkeypatch):
+    monkeypatch.setattr(
+        chat,
+        "generate_gemini_answer",
+        lambda **kwargs: "Mocked educational answer.",
+    )
+
+    answer = chat.generate_greedy_answer(
+        "Explain beta", []
+    )
+
+    assert answer == "Mocked educational answer."
+
+
+def test_gemini_empty_response_uses_fallback(monkeypatch):
+    monkeypatch.setattr(
+        chat, "generate_gemini_answer", lambda **kwargs: ""
+    )
+
+    answer = chat.generate_greedy_answer(
+        "Explain volatility", []
+    )
+
+    assert "temporarily unavailable" in answer
+
+
+def test_general_help_remains_general():
+    assert chat.detect_intents("How do I use this application?") == [
+        "GENERAL"
+    ]
+
+
+def test_stock_performance_intent_is_preserved():
+    assert "PERFORMANCE_STANDOUTS" in chat.detect_intents(
+        "Show the best performing stocks"
+    )
+
+
+def test_education_engine_and_gemini_configuration():
+    from analytics.ask_greedy.financial_education import CONCEPTS
+    import os
+
+    assert len(CONCEPTS) >= 10
+    assert os.getenv("GEMINI_API_KEY")
+
+
+====================================================================================================
+SOURCE FILE: analytics/market_ideas.py
+====================================================================================================
+"""GREEDY STOCKS — Evidence-based Market Ideas Engine.
+
+Scope:
+    NIFTY 50 only.
+
+Sources:
+    Existing historical ranking engine.
+    Existing Greedy selection audit log.
+
+Important:
+    Insights describe historical observations, not predictions
+    or personalised investment recommendations.
+    Split/bonus-adjusted prices are not total-return prices.
+    Corporate-action coverage is partial.
+    Greedy selections are historical in-sample experiments.
+"""
+
+import json
+import sys
+from pathlib import Path
+
+import pandas as pd
+
+ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT))
+
+from analytics.historical_rankings import run_historical_rankings
+
+
+OUTPUT_DIR = ROOT / "database" / "processed" / "analytics"
+
+GREEDY_LOG = OUTPUT_DIR / "greedy_selection_log.csv"
+
+SUPPORTED_PERIODS = {"1M", "3M", "6M", "1Y"}
+
+
+def safe_number(value, decimals=4):
+    """Convert pandas/numpy numeric values to JSON-safe numbers."""
+    if value is None or pd.isna(value):
+        return None
+
+    return round(float(value), decimals)
+
+
+def company_reference(row):
+    """Return a standard company reference."""
+    return {
+        "symbol": str(row["symbol"]),
+        "company_name": str(row["company_name"]),
+        "sector": (
+            str(row["sector"])
+            if pd.notna(row["sector"])
+            else "Unclassified"
+        ),
+    }
+
+
+def build_idea(
+    category,
+    title,
+    what,
+    why,
+    risk,
+    explore,
+    evidence,
+    status="AVAILABLE",
+):
+    """Build a consistent Market Ideas record."""
+    return {
+        "category": category,
+        "title": title,
+        "what": what,
+        "why": why,
+        "risk": risk,
+        "explore": explore,
+        "evidence": evidence,
+        "status": status,
+    }
+
+
+def performance_standouts(ranking, period, top_n=5):
+    """Identify companies with the strongest historical returns."""
+    valid = ranking[
+        ranking["period_return"].notna()
+        & (ranking["data_status"] == "CALCULATED")
+    ].copy()
+
+    valid = valid.sort_values(
+        ["period_return", "symbol"],
+        ascending=[False, True],
+    )
+
+    ideas = []
+
+    for _, row in valid.head(top_n).iterrows():
+        company = company_reference(row)
+        return_pct = safe_number(row["period_return"])
+
+        ideas.append(
+            build_idea(
+                category="PERFORMANCE_STANDOUTS",
+                title=(
+                    f"{company['symbol']} — "
+                    "Historical performance standout"
+                ),
+                what=(
+                    f"{company['company_name']} recorded a "
+                    f"{return_pct}% return over {period}."
+                ),
+                why=(
+                    "It ranked among the strongest NIFTY 50 "
+                    "historical performers for the selected period."
+                ),
+                risk=(
+                    "Past performance does not predict future returns. "
+                    "Review volatility, drawdown and company fundamentals "
+                    "before drawing conclusions."
+                ),
+                explore=(
+                    f"Explain the historical performance and risks "
+                    f"of {company['symbol']}."
+                ),
+                evidence={
+                    **company,
+                    "period": period,
+                    "period_return_pct": return_pct,
+                    "return_rank": safe_number(row["return_rank"]),
+                    "annualized_volatility_pct": safe_number(
+                        row["annualized_volatility"]
+                    ),
+                    "maximum_drawdown_pct": safe_number(
+                        row["maximum_drawdown"]
+                    ),
+                    "sharpe_ratio": safe_number(row["sharpe_ratio"]),
+                    "observations": int(row["observations"]),
+                },
+            )
+        )
+
+    return ideas
+
+
+def risk_stability_insights(ranking, period, top_n=5):
+    """Find historically lower-volatility and lower-drawdown stocks."""
+    valid = ranking[
+        ranking["annualized_volatility"].notna()
+        & ranking["maximum_drawdown"].notna()
+        & (ranking["data_status"] == "CALCULATED")
+    ].copy()
+
+    if valid.empty:
+        return []
+
+    # Prefer lower volatility, then drawdowns closer to zero.
+    valid = valid.sort_values(
+        ["annualized_volatility", "maximum_drawdown"],
+        ascending=[True, False],
+    )
+
+    ideas = []
+
+    for _, row in valid.head(top_n).iterrows():
+        company = company_reference(row)
+
+        volatility = safe_number(row["annualized_volatility"])
+        drawdown = safe_number(row["maximum_drawdown"])
+
+        ideas.append(
+            build_idea(
+                category="RISK_AND_STABILITY",
+                title=(
+                    f"{company['symbol']} — "
+                    "Lower historical volatility"
+                ),
+                what=(
+                    f"{company['company_name']} had annualised "
+                    f"volatility of {volatility}% and maximum "
+                    f"drawdown of {drawdown}% over {period}."
+                ),
+                why=(
+                    "It ranked relatively well on historical "
+                    "volatility and drawdown within the available universe."
+                ),
+                risk=(
+                    "Lower historical volatility does not mean "
+                    "capital protection or low future risk. "
+                    "This is not a measure of fundamental business risk."
+                ),
+                explore=(
+                    f"Compare the historical risk profile of "
+                    f"{company['symbol']} with its sector."
+                ),
+                evidence={
+                    **company,
+                    "period": period,
+                    "annualized_volatility_pct": volatility,
+                    "maximum_drawdown_pct": drawdown,
+                    "period_return_pct": safe_number(
+                        row["period_return"]
+                    ),
+                    "sharpe_ratio": safe_number(row["sharpe_ratio"]),
+                    "observations": int(row["observations"]),
+                },
+            )
+        )
+
+    return ideas
+
+
+def sector_opportunities(ranking, period, top_n=5):
+    """Compare NIFTY 50 sector constituent performance historically."""
+    valid = ranking[
+        ranking["period_return"].notna()
+        & ranking["sector"].notna()
+        & (ranking["data_status"] == "CALCULATED")
+    ].copy()
+
+    if valid.empty:
+        return []
+
+    sector_summary = (
+        valid.groupby("sector")
+        .agg(
+            company_count=("symbol", "count"),
+            median_return=("period_return", "median"),
+            median_volatility=("annualized_volatility", "median"),
+            median_drawdown=("maximum_drawdown", "median"),
+        )
+        .reset_index()
+    )
+
+    # Require at least two available companies per sector.
+    sector_summary = sector_summary[
+        sector_summary["company_count"] >= 2
+    ]
+
+    sector_summary = sector_summary.sort_values(
+        ["median_return", "sector"],
+        ascending=[False, True],
+    )
+
+    ideas = []
+
+    for _, row in sector_summary.head(top_n).iterrows():
+        sector = str(row["sector"])
+        median_return = safe_number(row["median_return"])
+
+        if median_return > 0:
+            classification = "POSITIVE_HISTORICAL_PERFORMANCE"
+            title = f"{sector} — Positive historical performance"
+            interpretation = (
+                "The sector's median constituent return was positive "
+                "over the selected historical period."
+            )
+
+        elif median_return < 0:
+            classification = "NEGATIVE_HISTORICAL_PERFORMANCE"
+            title = f"{sector} — Negative historical performance"
+            interpretation = (
+                "The sector's median constituent return was negative "
+                "over the selected historical period."
+            )
+
+        else:
+            classification = "FLAT_HISTORICAL_PERFORMANCE"
+            title = f"{sector} — Flat historical performance"
+            interpretation = (
+                "The sector's median constituent return was approximately zero."
+            )
+
+        ideas.append(
+            build_idea(
+                category="SECTOR_PERFORMANCE",
+                title=title,
+                what=(
+                    f"The {sector} sector had a median constituent "
+                    f"return of {median_return}% over {period}."
+                ),
+                why=(
+                    f"{interpretation} The calculation covers "
+                    f"{int(row['company_count'])} available "
+                    "NIFTY 50 companies."
+                ),
+                risk=(
+                    "This is a comparison of available NIFTY 50 "
+                    "constituents, not the return of a complete sector index. "
+                    "It does not establish future sector performance."
+                ),
+                explore=(
+                    f"Show the NIFTY 50 companies and historical risks "
+                    f"within the {sector} sector."
+                ),
+                evidence={
+                    "sector": sector,
+                    "period": period,
+                    "company_count": int(row["company_count"]),
+                    "median_return_pct": median_return,
+                    "median_volatility_pct": safe_number(
+                        row["median_volatility"]
+                    ),
+                    "median_drawdown_pct": safe_number(
+                        row["median_drawdown"]
+                    ),
+                    "classification": classification,
+                },
+            )
+        )
+
+    return ideas
+
+
+def greedy_experimental_insights(top_n=10):
+    """Read the existing Greedy selection audit log."""
+    if not GREEDY_LOG.exists():
+        return [
+            build_idea(
+                category="GREEDY_PICKS",
+                title="Greedy selection log unavailable",
+                what="The historical Greedy selection log was not found.",
+                why="The engine cannot verify the selection sequence.",
+                risk="No Greedy selection claims are being generated.",
+                explore="Explore how the Greedy portfolio algorithm works.",
+                evidence={},
+                status="UNAVAILABLE",
+            )
+        ]
+
+    log = pd.read_csv(GREEDY_LOG)
+
+    required = {
+        "step",
+        "selected_symbol",
+        "sector",
+        "portfolio_sharpe",
+        "candidates_evaluated",
+        "sector_limit",
+    }
+
+    missing = required - set(log.columns)
+
+    if missing:
+        raise ValueError(
+            f"Greedy selection log missing columns: {sorted(missing)}"
+        )
+
+    log = log.sort_values("step").head(top_n)
+
+    ideas = []
+
+    for _, row in log.iterrows():
+        symbol = str(row["selected_symbol"])
+        sector = str(row["sector"])
+
+        ideas.append(
+            build_idea(
+                category="GREEDY_PICKS",
+                title=f"{symbol} — Historical Greedy selection",
+                what=(
+                    f"{symbol} was selected at step "
+                    f"{int(row['step'])} of the historical Greedy experiment."
+                ),
+                why=(
+                    "The algorithm selected this candidate based on "
+                    "the portfolio Sharpe objective at that selection step."
+                ),
+                risk=(
+                    "These selections were optimised using historical "
+                    "training data. Training-period optimisation can "
+                    "overfit and may not generalise to unseen periods. "
+                    "These are not live or out-of-sample picks."
+                ),
+                explore=(
+                    f"Explain why {symbol} was selected by the "
+                    "Greedy Algorithm and what risks it carries."
+                ),
+                evidence={
+                    "symbol": symbol,
+                    "sector": sector,
+                    "selection_step": int(row["step"]),
+                    "portfolio_sharpe_at_step": safe_number(
+                        row["portfolio_sharpe"]
+                    ),
+                    "previous_portfolio_sharpe": safe_number(
+                        row["previous_portfolio_sharpe"]
+                    ),
+                    "candidates_evaluated": int(
+                        row["candidates_evaluated"]
+                    ),
+                    "sector_limit": int(row["sector_limit"]),
+                    "source": GREEDY_LOG.name,
+                    "classification": "HISTORICAL_TRAINING_EXPERIMENT",
+                },
+            )
+        )
+
+    return ideas
+
+
+def fundamental_research_status():
+    """Do not invent fundamental or valuation information."""
+    return build_idea(
+        category="FUNDAMENTAL_RESEARCH",
+        title="Fundamental research data not yet integrated",
+        what=(
+            "Verified company fundamentals and valuation data "
+            "are not yet connected to this Market Ideas engine."
+        ),
+        why=(
+            "Fundamental research requires sourced financial statements, "
+            "ratios and consistent reporting periods."
+        ),
+        risk=(
+            "Historical share prices alone cannot establish whether "
+            "a company is undervalued, overvalued or financially healthy."
+        ),
+        explore=(
+            "Explain which fundamental metrics are needed to analyse "
+            "a NIFTY 50 company."
+        ),
+        evidence={
+            "fundamental_data_available": False,
+            "valuation_claims_enabled": False,
+        },
+        status="NOT_YET_AVAILABLE",
+    )
+
+
+def build_stock_comparison(ideas):
+    """Build a deterministic union of performance and risk rankings."""
+    category_order = [
+        ("PERFORMANCE_STANDOUTS", "Performance"),
+        ("RISK_AND_STABILITY", "Low Volatility"),
+    ]
+
+    stocks = {}
+
+    for category, label in category_order:
+        for idea in ideas:
+            if (
+                idea.get("category") != category
+                or idea.get("status") != "AVAILABLE"
+            ):
+                continue
+
+            evidence = idea.get("evidence") or {}
+            symbol = evidence.get("symbol")
+
+            if not symbol:
+                continue
+
+            symbol = str(symbol).strip().upper()
+            if not symbol:
+                continue
+
+            if symbol not in stocks:
+                stocks[symbol] = {
+                    "symbol": symbol,
+                    "company_name": evidence.get("company_name"),
+                    "period_return_pct": evidence.get("period_return_pct"),
+                    "annualized_volatility_pct": evidence.get(
+                        "annualized_volatility_pct"
+                    ),
+                    "maximum_drawdown_pct": evidence.get(
+                        "maximum_drawdown_pct"
+                    ),
+                    "sharpe_ratio": evidence.get("sharpe_ratio"),
+                    "categories": [],
+                }
+
+            record = stocks[symbol]
+
+            if label not in record["categories"]:
+                record["categories"].append(label)
+
+            # Fill missing values from the second category if available.
+            for field in (
+                "company_name",
+                "period_return_pct",
+                "annualized_volatility_pct",
+                "maximum_drawdown_pct",
+                "sharpe_ratio",
+            ):
+                if record[field] is None and evidence.get(field) is not None:
+                    record[field] = evidence[field]
+
+    result = list(stocks.values())
+
+    overlap = [
+        stock["symbol"]
+        for stock in result
+        if "Performance" in stock["categories"]
+        and "Low Volatility" in stock["categories"]
+    ]
+
+    return {
+        "stocks": result,
+        "stock_count": len(result),
+        "overlap_symbols": overlap,
+    }
+
+
+def generate_market_ideas(period="3M", top_n=5):
+    """Generate structured, evidence-backed NIFTY 50 market ideas."""
+    if not isinstance(period, str):
+        raise ValueError("Period must be a string.")
+
+    period = period.upper()
+
+    if period not in SUPPORTED_PERIODS:
+        raise ValueError(
+            f"Unsupported period {period}. "
+            f"Choose from {sorted(SUPPORTED_PERIODS)}."
+        )
+
+    if not isinstance(top_n, int) or isinstance(top_n, bool):
+        raise ValueError("top_n must be an integer.")
+
+    if top_n < 1 or top_n > 10:
+        raise ValueError("top_n must be between 1 and 10.")
+
+    print(f"Generating Market Ideas for {period}...")
+
+    ranking = run_historical_rankings(period)
+
+    metadata = {
+        "index": ranking.attrs.get("index", "NIFTY 50"),
+        "period": period,
+        "requested_start_date": ranking.attrs.get("requested_start_date"),
+        "common_end_date": ranking.attrs.get("common_end_date"),
+        "snapshot_month": str(ranking.attrs.get("snapshot_month")),
+        "price_basis": ranking.attrs.get("price_basis"),
+        "dividend_adjusted": ranking.attrs.get("dividend_adjusted"),
+        "membership_basis": ranking.attrs.get("membership_basis"),
+        "corporate_action_coverage": ranking.attrs.get(
+            "corporate_action_coverage"
+        ),
+        "data_as_of": (
+            str(ranking["last_price_date"].max())
+            if (
+                "last_price_date" in ranking.columns
+                and ranking["last_price_date"].notna().any()
+            )
+            else None
+        ),
+        "universe_size": int(len(ranking)),
+        "calculated_companies": int(
+            (ranking["data_status"] == "CALCULATED").sum()
+        ),
+        "insufficient_data_companies": int(
+            (ranking["data_status"] != "CALCULATED").sum()
+        ),
+        "database_writes": False,
+        "interpretation": "HISTORICAL_RESEARCH_NOT_INVESTMENT_ADVICE",
+    }
+
+    ideas = []
+
+    ideas.extend(
+        performance_standouts(ranking, period, top_n)
+    )
+
+    ideas.extend(
+        risk_stability_insights(ranking, period, top_n)
+    )
+
+    ideas.extend(
+        sector_opportunities(ranking, period, top_n)
+    )
+
+    ideas.extend(
+        greedy_experimental_insights(top_n=10)
+    )
+
+    ideas.append(fundamental_research_status())
+
+    report = {
+        "product": "GREEDY STOCKS",
+        "report_type": "MARKET_IDEAS",
+        "metadata": metadata,
+        "ideas": ideas,
+        "comparison": build_stock_comparison(ideas),
+        "disclosures": [
+            "Insights describe historical observations, not forecasts.",
+            "The universe uses the latest monthly NIFTY 50 snapshot.",
+            "Historical daily membership is not reconstructed.",
+            "Prices are split/bonus adjusted where imported actions apply.",
+            "Corporate-action coverage is partial.",
+            "Dividends are excluded; this is not a total-return series.",
+            (
+                "Greedy selections are in-sample historical experiments, "
+                "not live or out-of-sample recommendations."
+            ),
+            (
+                "Fundamental and valuation claims are not generated "
+                "without verified data."
+            ),
+        ],
+    }
+
+    return report
+
+
+def save_market_ideas(report):
+    """Save a JSON report without writing to the database."""
+    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+
+    period = report["metadata"]["period"]
+    output_file = OUTPUT_DIR / f"market_ideas_{period.lower()}.json"
+
+    with output_file.open("w", encoding="utf-8") as file:
+        json.dump(
+            report,
+            file,
+            indent=2,
+            ensure_ascii=False,
+            default=str,
+        )
+
+    return output_file
+
+
+def print_market_ideas(report):
+    """Print a readable Market Ideas report."""
+    metadata = report["metadata"]
+
+    print("\n" + "=" * 85)
+    print("GREEDY STOCKS — MARKET IDEAS")
+    print("=" * 85)
+
+    print(f"Index: {metadata['index']}")
+    print(f"Period: {metadata['period']}")
+    print(f"Data as of: {metadata['data_as_of']}")
+    print(f"Snapshot month: {metadata['snapshot_month']}")
+    print(f"Companies calculated: {metadata['calculated_companies']}/50")
+    print(f"Price basis: {metadata['price_basis']}")
+    print(f"Corporate actions: {metadata['corporate_action_coverage']}")
+    print(f"Dividend adjusted: {metadata['dividend_adjusted']}")
+
+    for idea in report["ideas"]:
+        print("\n" + "-" * 85)
+        print(f"[{idea['category']}] {idea['title']}")
+        print(f"What: {idea['what']}")
+        print(f"Why: {idea['why']}")
+        print(f"Risk: {idea['risk']}")
+        print(f"Explore: {idea['explore']}")
+        print(f"Status: {idea['status']}")
+
+    print("\n" + "=" * 85)
+    print("DISCLOSURES")
+
+    for disclosure in report["disclosures"]:
+        print(f"- {disclosure}")
+
+
+if __name__ == "__main__":
+    import argparse
+
+    parser = argparse.ArgumentParser(
+        description="Generate GREEDY STOCKS Market Ideas."
+    )
+
+    parser.add_argument(
+        "--period",
+        choices=sorted(SUPPORTED_PERIODS),
+        default="3M",
+    )
+
+    parser.add_argument(
+        "--top",
+        type=int,
+        default=5,
+    )
+
+    args = parser.parse_args()
+
+    market_ideas = generate_market_ideas(
+        period=args.period,
+        top_n=args.top,
+    )
+
+    print_market_ideas(market_ideas)
+
+    saved_file = save_market_ideas(market_ideas)
+
+    print(f"\nSaved report: {saved_file}")
+    print("No database writes performed.")

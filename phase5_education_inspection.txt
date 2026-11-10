@@ -1,0 +1,1676 @@
+
+==========================================================================================
+FILE: backend/chat_routes.py
+==========================================================================================
+
+--- LINES 1-180 ---
+1: 
+2: import logging
+3: import os
+4: import re
+5: import sys
+6: from datetime import datetime, timezone
+7: from pathlib import Path
+8: 
+9: from dotenv import load_dotenv
+10: from fastapi import APIRouter, HTTPException
+11: from pydantic import BaseModel, Field
+12: from sqlalchemy import text
+13: 
+14: # --------------------------------------------------
+15: # PROJECT CONFIGURATION
+16: # --------------------------------------------------
+17: 
+18: PROJECT_ROOT = Path(__file__).resolve().parent.parent
+19: 
+20: if str(PROJECT_ROOT) not in sys.path:
+21:     sys.path.insert(0, str(PROJECT_ROOT))
+22: 
+23: load_dotenv(dotenv_path=PROJECT_ROOT / ".env", override=False)
+24: 
+25: from database import engine
+26: from analytics.market_ideas import generate_market_ideas
+27: from analytics.ask_greedy.orchestrator import build_calculation_context
+28: from analytics.ask_greedy.greedy_knowledge import build_greedy_knowledge_context
+29: from analytics.ask_greedy.historical_intelligence import build_historical_intelligence_context
+30: from analytics.ask_greedy.greedy_v2_evidence import build_greedy_v2_evidence_context
+31: 
+32: router = APIRouter(tags=["Ask GREEDY"])
+33: logger = logging.getLogger("greedy_stocks_chat")
+34: 
+35: DEV_USER_EMAIL = "local-dev@greedystocks.local"
+36: 
+37: GEMINI_MODEL = os.getenv(
+38:     "GEMINI_MODEL",
+39:     "gemini-3.5-flash-lite",
+40: )
+41: 
+42: SYSTEM_INSTRUCTION = """
+43: You are GREEDY, the AI-powered learning and research assistant
+44: for GREEDY STOCKS.
+45: 
+46: PRODUCT SCOPE:
+47: - You cover ONLY NIFTY 50 companies and the NIFTY 50 index.
+48: - Do not provide research on NIFTY Next 50 or other indices.
+49: - You help beginners understand the Indian stock market.
+50: - Communicate naturally in English, Hindi, or Marathi according
+51:   to the user's language.
+52: 
+53: YOUR RESPONSIBILITIES:
+54: - Explain financial concepts in simple language.
+55: - Explain verified historical financial research supplied
+56:   in the application context.
+57: - Answer follow-up questions using the conversation history.
+58: - Explain risk, volatility, returns, drawdown and Sharpe ratio.
+59: - Be friendly, patient and educational.
+60: 
+61: STRICT FINANCIAL SAFEGUARDS:
+62: - The application supplies verified financial context.
+63: - Treat that context as the only authoritative source for
+64:   GREEDY STOCKS historical financial figures.
+65: - Never invent prices, returns, dates, ratios, company data,
+66:   financial statements or market events.
+67: - Never alter supplied figures. For arithmetic or portfolio calculations using user-provided inputs, use the deterministic calculation result provided in the calculation context. Never invent missing inputs.
+68: - If a figure is missing, explicitly say it is unavailable.
+69: - Do not claim a company is undervalued or overvalued without
+70:   verified fundamental and valuation data.
+71: - Historical performance is not a forecast.
+72: - Never promise profits or guaranteed returns.
+73: - Do not provide personalised investment recommendations.
+74: - Clearly distinguish educational explanations from
+75:   investment advice.
+76: - If the user asks about a company outside NIFTY 50, explain
+77:   that the product currently focuses only on NIFTY 50.
+78: 
+79: BACKTEST DISCLOSURES:
+80: When relevant, explain that:
+81: - Historical results do not guarantee future performance.
+82: - Latest monthly constituent snapshots may be used.
+83: - Historical membership may not be fully reconstructed.
+84: - Corporate-action coverage may be partial.
+85: - Dividends may be excluded.
+86: - Backtests may exclude transaction costs and slippage.
+87: - Greedy Algorithm experiments are not guaranteed to
+88:   outperform the benchmark.
+89: 
+90: RESPONSE STYLE:
+91: - Friendly and conversational.
+92: - Beginner-friendly explanations.
+93: - Use headings and bullet points where useful.
+94: - Explain technical terms when first introduced.
+95: - Do not overwhelm beginners with unnecessary jargon.
+96: - Never claim to have accessed live market data unless
+97:   the application explicitly supplies it.
+98: """
+99: 
+100: 
+101: class ChatRequest(BaseModel):
+102:     message: str = Field(min_length=1, max_length=5000)
+103:     conversation_id: int | None = None
+104: 
+105: 
+106: class ChatResponse(BaseModel):
+107:     conversation_id: int
+108:     user_message: str
+109:     assistant_message: str
+110:     created_at: datetime
+111: 
+112: 
+113: # --------------------------------------------------
+114: # USER MANAGEMENT
+115: # --------------------------------------------------
+116: 
+117: def get_or_create_dev_user(connection):
+118:     user_id = connection.execute(
+119:         text("""
+120:             SELECT id
+121:             FROM app_users
+122:             WHERE email = :email
+123:         """),
+124:         {"email": DEV_USER_EMAIL},
+125:     ).scalar_one_or_none()
+126: 
+127:     if user_id is not None:
+128:         return user_id
+129: 
+130:     result = connection.execute(
+131:         text("""
+132:             INSERT INTO app_users (
+133:                 username,
+134:                 email,
+135:                 preferred_language,
+136:                 experience_level
+137:             )
+138:             VALUES (
+139:                 'GREEDY Development User',
+140:                 :email,
+141:                 'English',
+142:                 'Complete Beginner'
+143:             )
+144:         """),
+145:         {"email": DEV_USER_EMAIL},
+146:     )
+147: 
+148:     return result.lastrowid
+149: 
+150: 
+151: # --------------------------------------------------
+152: # CONVERSATION HISTORY
+153: # --------------------------------------------------
+154: 
+155: def get_recent_history(conversation_id):
+156:     if conversation_id is None:
+157:         return []
+158: 
+159:     with engine.connect() as connection:
+160:         user_id = connection.execute(
+161:             text("""
+162:                 SELECT id
+163:                 FROM app_users
+164:                 WHERE email = :email
+165:             """),
+166:             {"email": DEV_USER_EMAIL},
+167:         ).scalar_one_or_none()
+168: 
+169:         if user_id is None:
+170:             raise HTTPException(
+171:                 status_code=404,
+172:                 detail="Conversation not found.",
+173:             )
+174: 
+175:         exists = connection.execute(
+176:             text("""
+177:                 SELECT id
+178:                 FROM conversations
+179:                 WHERE id = :conversation_id
+180:                   AND user_id = :user_id
+
+--- LINES 180-380 ---
+180:                   AND user_id = :user_id
+181:             """),
+182:             {
+183:                 "conversation_id": conversation_id,
+184:                 "user_id": user_id,
+185:             },
+186:         ).scalar_one_or_none()
+187: 
+188:         if exists is None:
+189:             raise HTTPException(
+190:                 status_code=404,
+191:                 detail="Conversation not found.",
+192:             )
+193: 
+194:         rows = connection.execute(
+195:             text("""
+196:                 SELECT role, content
+197:                 FROM messages
+198:                 WHERE conversation_id = :conversation_id
+199:                   AND role IN ('user', 'assistant')
+200:                 ORDER BY id DESC
+201:                 LIMIT 10
+202:             """),
+203:             {"conversation_id": conversation_id},
+204:         ).mappings().all()
+205: 
+206:     # Restore chronological order.
+207:     return list(reversed(rows))
+208: 
+209: 
+210: # --------------------------------------------------
+211: # QUESTION UNDERSTANDING
+212: # --------------------------------------------------
+213: 
+214: def detect_period(question: str) -> str:
+215:     q = question.lower()
+216: 
+217:     if re.search(r"\b(1y|1 year|one year|12 months)\b", q):
+218:         return "1Y"
+219: 
+220:     if re.search(r"\b(6m|6 months|six months)\b", q):
+221:         return "6M"
+222: 
+223:     if re.search(r"\b(1m|1 month|one month|30 days)\b", q):
+224:         return "1M"
+225: 
+226:     return "3M"
+227: 
+228: 
+229: 
+230: def detect_intents(question: str) -> list[str]:
+231:     q = question.lower()
+232:     intents = []
+233: 
+234:     if any(word in q for word in [
+235:         "undervalued", "overvalued", "valuation",
+236:         "fundamental", "fundamentals", "balance sheet", "earnings",
+237:     ]):
+238:         intents.append("FUNDAMENTAL_RESEARCH")
+239: 
+240:     if re.search(r"\b(?:p/e|pe)\s+ratio\b", q):
+241:         intents.append("FUNDAMENTAL_RESEARCH")
+242: 
+243:     if any(word in q for word in [
+244:     ]):
+245:         intents.append("FUNDAMENTAL_RESEARCH")
+246: 
+247:     if any(word in q for word in [
+248:         "greedy algorithm", "greedy picks",
+249:         "greedy selection", "algorithm experiment",
+250:         "greedy portfolio",
+251:     ]):
+252:         intents.append("GREEDY_PICKS")
+253: 
+254:     if any(word in q for word in [
+255:         "sector performance", "best performing sectors",
+256:         "top performing sectors", "sector returns",
+257:         "which sectors performed", "sectors",
+258:     ]):
+259:         intents.append("SECTOR_PERFORMANCE")
+260: 
+261:     if any(word in q for word in [
+262:         "best performing", "top performing",
+263:         "performed best", "top performers",
+264:         "best performers", "top stocks",
+265:         "best stocks", "highest returns",
+266:         "highest return", "performance",
+267:         "performers", "historical returns",
+268:         "stock returns", "gainers", "most profitable",
+269:     ]):
+270:         intents.append("PERFORMANCE_STANDOUTS")
+271: 
+272:     if any(word in q for word in [
+273:         "volatility", "drawdown", "sharpe",
+274:         "risk", "stable", "stability",
+275:         "least volatile", "lowest volatility",
+276:     ]):
+277:         intents.append("RISK_AND_STABILITY")
+278: 
+279:     if not intents and any(word in q for word in [
+280:         "nifty 50", "what is nifty",
+281:         "explain nifty", "stock market basics",
+282:     ]):
+283:         intents.append("EDUCATION")
+284: 
+285:     return list(dict.fromkeys(intents)) or ["GENERAL"]
+286: 
+287: 
+288: def detect_intent(question: str) -> str:
+289:     """Backward-compatible single-intent interface."""
+290:     return detect_intents(question)[0]
+291: 
+292: 
+293: # --------------------------------------------------
+294: # VERIFIED FINANCIAL CONTEXT
+295: # --------------------------------------------------
+296: 
+297: def format_insights(ideas, metadata, category, comparison=None):
+298:     categories = (
+299:         [category] if isinstance(category, str)
+300:         else list(category)
+301:     )
+302: 
+303:     lines = []
+304: 
+305:     for current_category in categories:
+306:         selected = [
+307:             idea for idea in ideas
+308:             if idea.get("category") == current_category
+309:             and idea.get("status") == "AVAILABLE"
+310:         ]
+311: 
+312:         if not selected:
+313:             lines.append(
+314:                 f"{current_category}: No sufficient verified "
+315:                 "financial insight is available in this report."
+316:             )
+317:             lines.append("")
+318:             continue
+319: 
+320:         lines.append(f"===== {current_category} =====")
+321: 
+322:         for index, idea in enumerate(selected, start=1):
+323:             evidence = idea.get("evidence") or {}
+324: 
+325:             lines.append(
+326:                 f"{index}. {idea.get('title', 'Historical insight')}"
+327:             )
+328:             lines.append(
+329:                 f"What: {idea.get('what', 'Not available')}"
+330:             )
+331: 
+332:             if idea.get("why"):
+333:                 lines.append(f"Why: {idea['why']}")
+334: 
+335:             fields = [
+336:                 ("period_return_pct", "Historical return", "%"),
+337:                 ("annualized_volatility_pct", "Annualised volatility", "%"),
+338:                 ("maximum_drawdown_pct", "Maximum drawdown", "%"),
+339:                 ("sharpe_ratio", "Sharpe ratio", ""),
+340:                 ("observations", "Return observations", ""),
+341:             ]
+342: 
+343:             for key, label, suffix in fields:
+344:                 value = evidence.get(key)
+345:                 if value is not None:
+346:                     lines.append(f"{label}: {value}{suffix}")
+347: 
+348:             if idea.get("risk"):
+349:                 lines.append(f"Risk: {idea['risk']}")
+350: 
+351:             lines.append("")
+352: 
+353:     required_categories = {
+354:         "PERFORMANCE_STANDOUTS",
+355:         "RISK_AND_STABILITY",
+356:     }
+357: 
+358:     if comparison and required_categories.issubset(set(categories)):
+359:         lines.extend([
+360:             "DETERMINISTIC STOCK COMPARISON",
+361:             "The following union and overlap were constructed by Python.",
+362:             "Each stock appears once; category order is preserved.",
+363:             "",
+364:             "| Symbol | Return (%) | Volatility (%) | Drawdown (%) | Sharpe | Category |",
+365:             "|---|---:|---:|---:|---:|---|",
+366:         ])
+367: 
+368:         for stock in comparison.get("stocks", []):
+369:             def cell(value, suffix=""):
+370:                 if value is None:
+371:                     return "Not available"
+372:                 if isinstance(value, (int, float)):
+373:                     return f"{value:.4f}{suffix}"
+374:                 return str(value)
+375: 
+376:             membership = " + ".join(stock.get("categories", []))
+377: 
+378:             lines.append(
+379:                 f"| {stock['symbol']} "
+380:                 f"| {cell(stock.get('period_return_pct'), '%')} "
+
+--- LINES 380-620 ---
+380:                 f"| {cell(stock.get('period_return_pct'), '%')} "
+381:                 f"| {cell(stock.get('annualized_volatility_pct'), '%')} "
+382:                 f"| {cell(stock.get('maximum_drawdown_pct'), '%')} "
+383:                 f"| {cell(stock.get('sharpe_ratio'))} "
+384:                 f"| {membership} |"
+385:             )
+386: 
+387:         overlap = comparison.get("overlap_symbols", [])
+388:         overlap_text = ", ".join(overlap) if overlap else "None"
+389: 
+390:         lines.extend([
+391:             "",
+392:             f"Unique stocks in comparison: {comparison.get('stock_count', 0)}",
+393:             f"Stocks appearing in both lists: {overlap_text}",
+394:             "",
+395:         ])
+396: 
+397:     lines.extend([
+398:         "DATA METHODOLOGY",
+399:         f"Index: {metadata.get('index')}",
+400:         f"Period: {metadata.get('period')}",
+401:         f"Historical start date: {metadata.get('requested_start_date')}",
+402:         f"Historical end date: {metadata.get('common_end_date')}",
+403:         f"Data as of: {metadata.get('data_as_of')}",
+404:         f"Snapshot month: {metadata.get('snapshot_month')}",
+405:         f"Price basis: {metadata.get('price_basis')}",
+406:         (
+407:             "Corporate-action coverage: "
+408:             f"{metadata.get('corporate_action_coverage')}"
+409:         ),
+410:         f"Dividend adjusted: {metadata.get('dividend_adjusted')}",
+411:         "",
+412:         "IMPORTANT DISCLOSURES",
+413:         "These are historical observations, not forecasts.",
+414:         "The universe uses the latest monthly NIFTY 50 snapshot.",
+415:         "Historical daily membership is not reconstructed.",
+416:         "Corporate-action coverage is partial.",
+417:     ])
+418: 
+419:     return "\\n".join(lines)
+420: 
+421: 
+422: def build_financial_context(question):
+423:     intents = detect_intents(question)
+424: 
+425:     if intents == ["FUNDAMENTAL_RESEARCH"]:
+426:         return (
+427:             "QUESTION CATEGORY: FUNDAMENTAL RESEARCH\\n\\n"
+428:             "VERIFIED DATA STATUS:\\n"
+429:             "Company fundamentals and valuation data are not yet "
+430:             "integrated into GREEDY STOCKS.\\n"
+431:             "Historical share-price performance cannot establish "
+432:             "whether a company is undervalued or overvalued.\\n"
+433:             "Do not invent financial statements, revenue, profit, "
+434:             "debt, cash flow or valuation ratios.\\n"
+435:             "You may explain what data would be needed for "
+436:             "a proper fundamental analysis."
+437:         )
+438: 
+439:     if intents == ["EDUCATION"]:
+440:         return (
+441:             "QUESTION CATEGORY: FINANCIAL EDUCATION\\n"
+442:             "Explain NIFTY 50 and basic stock market concepts "
+443:             "at a beginner-friendly level.\\n"
+444:             "Do not invent current market figures."
+445:         )
+446: 
+447:     if intents == ["GENERAL"]:
+448:         return (
+449:             "QUESTION CATEGORY: GENERAL GREEDY STOCKS HELP\\n"
+450:             "GREEDY STOCKS currently supports historical NIFTY 50 "
+451:             "performance, volatility, drawdown, sector performance, "
+452:             "historical Greedy Algorithm experiments and financial "
+453:             "education. Fundamental valuation data is not yet integrated."
+454:         )
+455: 
+456:     period = detect_period(question)
+457: 
+458:     try:
+459:         report = generate_market_ideas(
+460:             period=period,
+461:             top_n=5,
+462:         )
+463: 
+464:         verified_context = format_insights(
+465:             ideas=report["ideas"],
+466:             metadata=report["metadata"],
+467:             category=intents,
+468:             comparison=report.get("comparison"),
+469:         )
+470: 
+471:         return (
+472:             f"QUESTION CATEGORIES: {', '.join(intents)}\\n"
+473:             f"REQUESTED PERIOD: {period}\\n\\n"
+474:             "THE FOLLOWING IS VERIFIED APPLICATION DATA. "
+475:             "Do not modify or invent its figures.\\n\\n"
+476:             f"{verified_context}"
+477:         )
+478: 
+479:     except Exception:
+480:         logger.exception(
+481:             "Financial intelligence generation failed."
+482:         )
+483:         return (
+484:             "VERIFIED FINANCIAL DATA IS CURRENTLY UNAVAILABLE. "
+485:             "Do not invent rankings, returns or risk metrics."
+486:         )
+487: 
+488: 
+489: def generate_gemini_answer(question, financial_context, history):
+490:     api_key = os.getenv("GEMINI_API_KEY")
+491: 
+492:     if not api_key:
+493:         logger.warning("GEMINI_API_KEY is not configured.")
+494:         return None
+495: 
+496:     try:
+497:         from google import genai
+498: 
+499:         client = genai.Client(api_key=api_key)
+500: 
+501:         calculation_context = build_calculation_context(
+502:             client=client,
+503:             model=GEMINI_MODEL,
+504:             question=question,
+505:         )
+506: 
+507:         greedy_knowledge_context = build_greedy_knowledge_context(
+508:             question=question,
+509:         )
+510: 
+511:         historical_company_context = (
+512:             build_historical_intelligence_context(
+513:                 client=client,
+514:                 model=GEMINI_MODEL,
+515:                 question=question,
+516:             )
+517:             if re.search(
+518:                 r"\b(analy[sz]e|analysis of|historical performance of|historical returns of|returns? of|sharpe(?: ratio)? of|volatility of|drawdown of)\b",
+519:                 question or "",
+520:                 re.IGNORECASE,
+521:             )
+522:             else "No company-specific historical analysis requested."
+523:         )
+524: 
+525:         greedy_v2_evidence_context = build_greedy_v2_evidence_context(question)
+526: 
+527: 
+528: 
+529:         conversation_text = ""
+530: 
+531:         for item in history:
+532:             role = item["role"].upper()
+533:             content = item["content"]
+534: 
+535:             conversation_text += (
+536:                 f"\n{role}: {content}\n"
+537:             )
+538: 
+539:         prompt = f"""
+540: VERIFIED APPLICATION CONTEXT:
+541: 
+542: {financial_context}
+543: 
+544: COMPANY-SPECIFIC HISTORICAL INTELLIGENCE:
+545: {historical_company_context}
+546: 
+547: GREEDY V2 EXPERIMENT AND WALK-FORWARD EVIDENCE:
+548: {greedy_v2_evidence_context}
+549: 
+550: GREEDY SOURCE-CODE KNOWLEDGE:
+551: 
+552: {greedy_knowledge_context}
+553: 
+554: SOURCE KNOWLEDGE RULES:
+555: - Use source excerpts to explain actual Greedy implementation.
+556: - Distinguish Greedy V1, V2 and V3 only when the source supports it.
+557: - Explain selection logic, objective functions, constraints and limitations
+558:   only when visible in the supplied code.
+559: - If a requested version or implementation is not found, say so.
+560: - Never claim to have run an algorithm merely because its source was read.
+561: - Never change algorithm behaviour or portfolio-generation decisions.
+562: - Never invent source files, functions, metrics or algorithm features.
+563: 
+564: 
+565: DETERMINISTIC CALCULATION ENGINE OUTPUT:
+566: 
+567: {calculation_context}
+568: 
+569: CALCULATION RULES:
+570: - If status is CALCULATED, use the exact result and supplied inputs.
+571: - Explain the formula, units and assumptions.
+572: - Do not alter or invent calculated values.
+573: - If no calculation was executed, do not claim one was verified.
+574: - User-provided mathematical inputs do not require external market data.
+575: - Distinguish mathematical examples from actual market observations.
+576: 
+577: 
+578: RECENT CONVERSATION HISTORY:
+579: {conversation_text if conversation_text else "No previous messages."}
+580: 
+581: CURRENT USER QUESTION:
+582: {question}
+583: 
+584: INSTRUCTIONS:
+585: Answer the current question directly.
+586: 
+587: Use the verified application context for all financial figures.
+588: If the context says data is unavailable, do not invent it.
+589: Use conversation history to understand follow-up questions.
+590: Explain concepts in beginner-friendly language.
+591: Keep the answer clear, useful and conversational.
+592: 
+593: COMPARATIVE FINANCIAL RESEARCH RULES:
+594: - When multiple research categories are requested, present each category separately.
+595: - When two or more categories contain stock-level metrics, include a
+596:   consolidated comparison table covering every available returned stock.
+597: - The table should include stock symbol, historical return, annualised
+598:   volatility, maximum drawdown, Sharpe ratio and category membership.
+599: - Mark category membership as Performance, Low Volatility, Both, or the
+600:   applicable verified category names.
+601: - Identify overlap by matching exact stock symbols, not company-name guesses.
+602: - Do not omit stocks merely to shorten the table.
+603: - Use only figures present in VERIFIED APPLICATION CONTEXT.
+604: - If a metric is unavailable, write "Not available"; never estimate it.
+605: - Distinguish lowest volatility from lowest overall risk.
+606: - Explain that Sharpe ratio measures excess return per unit of volatility.
+607:   It does not prove investment skill or predict future performance.
+608: - Do not describe historical rankings as investment recommendations.
+609: - If only one category is requested, do not force an unnecessary comparison.
+610: """
+611: 
+612:         interaction = client.interactions.create(
+613:             model=GEMINI_MODEL,
+614:             input=prompt,
+615:             system_instruction=SYSTEM_INSTRUCTION,
+616:         )
+617: 
+618:         answer = interaction.output_text
+619: 
+620:         if not answer or not answer.strip():
+
+==========================================================================================
+FILE: analytics/ask_greedy/greedy_knowledge.py
+==========================================================================================
+
+--- LINES 1-260 ---
+1: """Read-only source-code knowledge layer for Ask GREEDY."""
+2: from pathlib import Path
+3: import logging
+4: 
+5: logger = logging.getLogger("greedy_stocks_chat.knowledge")
+6: 
+7: ROOT = Path(__file__).resolve().parents[2]
+8: ANALYTICS = ROOT / "analytics"
+9: 
+10: # Only trusted project source directories and explicit analytical modules.
+11: MAX_FILES = 14
+12: MAX_FILE_CHARS = 6500
+13: MAX_TOTAL_CHARS = 28000
+14: 
+15: EXACT_FILES = [
+16:     "greedy_v2_engine.py",
+17:     "greedy_v2_data.py",
+18:     "greedy_v2_splits.py",
+19:     "financial_metrics.py",
+20:     "portfolio_analytics.py",
+21:     "portfolio_allocation.py",
+22: ]
+23: 
+24: def discover_sources():
+25:     found = {}
+26: 
+27:     for name in EXACT_FILES:
+28:         path = ANALYTICS / name
+29:         if path.is_file():
+30:             found[path.resolve()] = path
+31: 
+32:     # Discover versioned implementations without assuming their names.
+33:     for path in ANALYTICS.rglob("*.py"):
+34:         if not path.is_file():
+35:             continue
+36:         low = path.name.lower()
+37:         if "greedy" in low and any(x in low for x in ("v1", "v2", "v3", "engine", "algorithm")):
+38:             found[path.resolve()] = path
+39: 
+40:     # Also discover Greedy-named backend algorithm modules.
+41:     backend = ROOT / "backend"
+42:     if backend.exists():
+43:         for path in backend.glob("*greedy*.py"):
+44:             if path.is_file():
+45:                 found[path.resolve()] = path
+46: 
+47:     return sorted(found.values(), key=lambda p: str(p).lower())[:MAX_FILES]
+48: 
+49: def build_greedy_knowledge_context(question=""):
+50:     """Return bounded source excerpts; never execute source code."""
+51:     pieces = []
+52:     total = 0
+53: 
+54:     for path in discover_sources():
+55:         try:
+56:             text = path.read_text(encoding="utf-8-sig")
+57:         except (OSError, UnicodeError) as exc:
+58:             logger.warning("Could not read algorithm source %s: %s", path.name, exc)
+59:             continue
+60: 
+61:         # Keep context bounded and avoid exposing unrelated oversized modules.
+62:         excerpt = text[:MAX_FILE_CHARS]
+63:         relative = path.relative_to(ROOT).as_posix()
+64:         block = (
+65:             f"\n--- SOURCE FILE: {relative} ---\n"
+66:             f"{excerpt}\n"
+67:             f"--- END SOURCE FILE: {relative} ---\n"
+68:         )
+69: 
+70:         if total + len(block) > MAX_TOTAL_CHARS:
+71:             break
+72: 
+73:         pieces.append(block)
+74:         total += len(block)
+75: 
+76:     if not pieces:
+77:         return (
+78:             "GREEDY SOURCE STATUS: No matching algorithm source files were found. "
+79:             "Do not invent version-specific implementation details."
+80:         )
+81: 
+82:     return (
+83:         "GREEDY STOCKS SOURCE-CODE KNOWLEDGE\n"
+84:         "The following excerpts are read-only project source files. "
+85:         "Use them as evidence when explaining algorithm implementation.\n"
+86:         "Do not claim a version exists unless its source is present. "
+87:         "Do not infer undocumented behaviour. If a file is truncated, "
+88:         "say the available excerpt does not establish the missing detail.\n"
+89:         + "".join(pieces)
+90:     )
+
+==========================================================================================
+FILE: analytics/ask_greedy/calculations.py
+==========================================================================================
+
+--- LINES 1-300 ---
+1: """Deterministic financial calculation engine for Ask GREEDY."""
+2: from __future__ import annotations
+3: 
+4: import math
+5: import numpy as np
+6: 
+7: 
+8: def _finite_array(values, name):
+9:     a = np.asarray(values, dtype=float)
+10:     if not np.all(np.isfinite(a)):
+11:         raise ValueError(f"{name} must contain only finite numbers.")
+12:     return a
+13: 
+14: 
+15: def portfolio_return(weights, returns):
+16:     w = _finite_array(weights, "weights")
+17:     r = _finite_array(returns, "returns")
+18:     if w.ndim != 1 or r.ndim != 1 or len(w) != len(r):
+19:         raise ValueError("Weights and returns must be equal-length vectors.")
+20:     if np.any(w < 0) or not np.isclose(w.sum(), 1):
+21:         raise ValueError("Weights must be non-negative and sum to 1.")
+22:     return float(w @ r)
+23: 
+24: 
+25: def sharpe_ratio(expected_return, risk_free_rate, volatility):
+26:     if volatility <= 0 or not math.isfinite(volatility):
+27:         raise ValueError("Volatility must be positive and finite.")
+28:     return float((expected_return - risk_free_rate) / volatility)
+29: 
+30: 
+31: def portfolio_volatility(weights, volatilities, correlations):
+32:     w = _finite_array(weights, "weights")
+33:     s = _finite_array(volatilities, "volatilities")
+34:     c = _finite_array(correlations, "correlations")
+35: 
+36:     if c.shape != (len(w), len(w)) or len(s) != len(w):
+37:         raise ValueError("Incompatible portfolio dimensions.")
+38:     if np.any(w < 0) or not np.isclose(w.sum(), 1):
+39:         raise ValueError("Weights must be non-negative and sum to 1.")
+40:     if np.any(s < 0):
+41:         raise ValueError("Volatilities cannot be negative.")
+42:     if not np.allclose(c, c.T, atol=1e-10):
+43:         raise ValueError("Correlation matrix must be symmetric.")
+44:     if not np.allclose(np.diag(c), 1, atol=1e-10):
+45:         raise ValueError("Correlation matrix diagonal must equal 1.")
+46:     if np.any(np.abs(c) > 1 + 1e-10):
+47:         raise ValueError("Correlations must lie between -1 and 1.")
+48: 
+49:     eigenvalues = np.linalg.eigvalsh(c)
+50:     if eigenvalues.min() < -1e-9:
+51:         raise ValueError(
+52:             f"Invalid correlation matrix: minimum eigenvalue "
+53:             f"{eigenvalues.min():.10f}"
+54:         )
+55: 
+56:     cov = np.outer(s, s) * c
+57:     variance = float(w @ cov @ w)
+58:     if variance < -1e-10:
+59:         raise ValueError("Calculated portfolio variance is negative.")
+60:     return math.sqrt(max(0.0, variance))
+61: 
+62: 
+63: def validate_correlation_matrix(correlations, tolerance=1e-9):
+64:     c = _finite_array(correlations, "correlations")
+65:     if c.ndim != 2 or c.shape[0] != c.shape[1]:
+66:         return {"valid": False, "reason": "Matrix must be square."}
+67:     symmetric = bool(np.allclose(c, c.T, atol=tolerance))
+68:     diagonal = bool(np.allclose(np.diag(c), 1, atol=tolerance))
+69:     bounded = bool(np.all(np.abs(c) <= 1 + tolerance))
+70:     eigenvalues = np.linalg.eigvalsh((c + c.T) / 2)
+71:     minimum = float(eigenvalues.min())
+72:     valid = symmetric and diagonal and bounded and minimum >= -tolerance
+73:     return {
+74:         "valid": valid,
+75:         "symmetric": symmetric,
+76:         "unit_diagonal": diagonal,
+77:         "bounded": bounded,
+78:         "minimum_eigenvalue": minimum,
+79:         "determinant": float(np.linalg.det(c)),
+80:         "reason": "Positive semidefinite correlation matrix."
+81:                   if valid else "One or more correlation constraints failed."
+82:     }
+83: 
+84: 
+85: def maximum_sharpe(returns, volatilities, correlations, risk_free_rate=0.0):
+86:     """Long-only maximum-Sharpe portfolio; deterministic multistart SLSQP."""
+87:     from scipy.optimize import minimize
+88: 
+89:     r = _finite_array(returns, "returns")
+90:     s = _finite_array(volatilities, "volatilities")
+91:     c = _finite_array(correlations, "correlations")
+92:     n = len(r)
+93: 
+94:     if n < 1 or len(s) != n or c.shape != (n, n):
+95:         raise ValueError("Incompatible input dimensions.")
+96:     if np.any(s <= 0):
+97:         raise ValueError("All volatilities must be positive.")
+98:     matrix_check = validate_correlation_matrix(c)
+99:     if not matrix_check["valid"]:
+100:         raise ValueError(matrix_check["reason"])
+101: 
+102:     cov = np.outer(s, s) * c
+103: 
+104:     def objective(w):
+105:         variance = float(w @ cov @ w)
+106:         if variance <= 1e-16:
+107:             return 1e9
+108:         return -float((w @ r - risk_free_rate) / math.sqrt(variance))
+109: 
+110:     constraints = [{"type": "eq", "fun": lambda w: np.sum(w) - 1}]
+111:     bounds = [(0.0, 1.0)] * n
+112:     starts = [np.full(n, 1 / n)]
+113:     starts += [np.eye(n)[i] for i in range(n)]
+114: 
+115:     candidates = []
+116:     for start in starts:
+117:         result = minimize(
+118:             objective, start, method="SLSQP",
+119:             bounds=bounds, constraints=constraints,
+120:             options={"maxiter": 2000, "ftol": 1e-12}
+121:         )
+122:         if result.success and np.all(np.isfinite(result.x)):
+123:             w = np.maximum(result.x, 0)
+124:             w /= w.sum()
+125:             candidates.append(w)
+126: 
+127:     if not candidates:
+128:         raise RuntimeError("Optimisation failed to converge.")
+129: 
+130:     weights = min(candidates, key=objective)
+131:     ret = float(weights @ r)
+132:     vol = math.sqrt(float(weights @ cov @ weights))
+133:     return {
+134:         "weights": weights.tolist(),
+135:         "expected_return": ret,
+136:         "volatility": vol,
+137:         "sharpe_ratio": sharpe_ratio(ret, risk_free_rate, vol),
+138:         "optimizer": "SLSQP deterministic multistart",
+139:         "matrix_validation": matrix_check
+140:     }
+141: 
+142: 
+143: def drawdown(returns):
+144:     r = _finite_array(returns, "returns")
+145:     if np.any(r < -1):
+146:         raise ValueError("A return cannot be below -100%.")
+147:     wealth = np.cumprod(1 + r)
+148:     peaks = np.maximum.accumulate(np.r_[1.0, wealth])[1:]
+149:     dd = wealth / peaks - 1
+150:     return float(dd.min())
+151: 
+152: 
+153: def whole_share_allocation(capital, prices):
+154:     if not math.isfinite(capital) or capital < 0:
+155:         raise ValueError("Capital must be non-negative.")
+156:     p = _finite_array(prices, "prices")
+157:     if np.any(p <= 0):
+158:         raise ValueError("Prices must be positive.")
+159:     quantities = np.zeros(len(p), dtype=int)
+160:     remaining = float(capital)
+161: 
+162:     # One share each, if affordable, then distribute remaining
+163:     # capital by iterative affordable-share allocation.
+164:     for i in np.argsort(p):
+165:         if p[i] <= remaining:
+166:             quantities[i] += 1
+167:             remaining -= p[i]
+168: 
+169:     while True:
+170:         affordable = np.where(p <= remaining + 1e-9)[0]
+171:         if len(affordable) == 0:
+172:             break
+173:         i = int(affordable[np.argmin(p[affordable])])
+174:         quantities[i] += 1
+175:         remaining -= p[i]
+176: 
+177:     return {
+178:         "quantities": quantities.tolist(),
+179:         "invested": float(quantities @ p),
+180:         "cash_remaining": float(remaining),
+181:         "all_stocks_held": bool(np.all(quantities > 0))
+182:     }
+
+==========================================================================================
+FILE: analytics/ask_greedy/orchestrator.py
+==========================================================================================
+
+--- LINES 1-300 ---
+1: """Validated bridge between Gemini and deterministic calculations."""
+2: import json
+3: import logging
+4: import re
+5: import math
+6: 
+7: from .calculations import (
+8:     portfolio_return, sharpe_ratio, portfolio_volatility,
+9:     validate_correlation_matrix, maximum_sharpe,
+10:     drawdown, whole_share_allocation,
+11: )
+12: 
+13: logger = logging.getLogger("greedy_stocks_chat.calculations")
+14: 
+15: OPERATIONS = {
+16:     "portfolio_return": portfolio_return,
+17:     "sharpe_ratio": sharpe_ratio,
+18:     "portfolio_volatility": portfolio_volatility,
+19:     "validate_correlation_matrix": validate_correlation_matrix,
+20:     "maximum_sharpe": maximum_sharpe,
+21:     "drawdown": drawdown,
+22:     "whole_share_allocation": whole_share_allocation,
+23: }
+24: 
+25: CALCULATION_HINTS = re.compile(
+26:     r"\b(calculate|compute|optimis|optimiz|maximi[sz]e|sharpe|"
+27:     r"volatility|drawdown|portfolio return|weighted return|"
+28:     r"correlation matrix|allocate|allocation|weights?)\b",
+29:     re.IGNORECASE,
+30: )
+31: 
+32: PLANNER_INSTRUCTION = """
+33: Extract calculation inputs from the user's question.
+34: Return exactly one JSON object, no markdown.
+35: 
+36: Supported schemas:
+37: portfolio_return: {"weights":[...],"returns":[...]}
+38: sharpe_ratio: {"expected_return":number,"risk_free_rate":number,"volatility":number}
+39: portfolio_volatility: {"weights":[...],"volatilities":[...],"correlations":[[...]]}
+40: validate_correlation_matrix: {"correlations":[[...]]}
+41: maximum_sharpe: {"returns":[...],"volatilities":[...],"correlations":[[...]],"risk_free_rate":number}
+42: drawdown: {"returns":[...]}
+43: whole_share_allocation: {"capital":number,"prices":[...]}
+44: 
+45: Return format:
+46: {"operation":"operation_name","arguments":{...}}
+47: or
+48: {"operation":"none","reason":"missing or ambiguous inputs"}
+49: 
+50: Rules:
+51: - Extract only numbers explicitly supplied by the user.
+52: - Never invent inputs or market data.
+53: - Convert percentages to decimal fractions: 15% = 0.15.
+54: - For unsupported, incomplete or ambiguous requests, return operation none.
+55: - Preserve asset order.
+56: - Do not perform the calculation or answer the question.
+57: """
+58: 
+59: ALLOWED = {
+60:     "portfolio_return": {"weights", "returns"},
+61:     "sharpe_ratio": {"expected_return", "risk_free_rate", "volatility"},
+62:     "portfolio_volatility": {"weights", "volatilities", "correlations"},
+63:     "validate_correlation_matrix": {"correlations"},
+64:     "maximum_sharpe": {"returns", "volatilities", "correlations", "risk_free_rate"},
+65:     "drawdown": {"returns"},
+66:     "whole_share_allocation": {"capital", "prices"},
+67: }
+68: 
+69: def _extract_json(text):
+70:     text = (text or "").strip()
+71:     text = re.sub(r"^```(?:json)?\s*", "", text, flags=re.I)
+72:     text = re.sub(r"\s*```$", "", text)
+73:     start, end = text.find("{"), text.rfind("}")
+74:     if start < 0 or end <= start:
+75:         raise ValueError("Planner returned no JSON object.")
+76:     return json.loads(text[start:end + 1])
+77: 
+78: def _validate_plan(plan):
+79:     if not isinstance(plan, dict):
+80:         raise ValueError("Invalid plan.")
+81:     operation = plan.get("operation")
+82:     if operation == "none":
+83:         return None
+84:     if operation not in OPERATIONS:
+85:         raise ValueError("Unsupported operation.")
+86:     args = plan.get("arguments")
+87:     if not isinstance(args, dict) or set(args) != ALLOWED[operation]:
+88:         raise ValueError("Arguments do not match the operation schema.")
+89: 
+90:     def check(value, depth=0):
+91:         if depth > 3:
+92:             raise ValueError("Input nesting is too deep.")
+93:         if isinstance(value, list):
+94:             if len(value) > 50:
+95:                 raise ValueError("Input array is too large.")
+96:             for item in value:
+97:                 check(item, depth + 1)
+98:         elif isinstance(value, (int, float)) and not isinstance(value, bool):
+99:             if not math.isfinite(value):
+100:                 raise ValueError("Inputs must be finite.")
+101:         else:
+102:             raise ValueError("Inputs must contain numeric values only.")
+103: 
+104:     for value in args.values():
+105:         check(value)
+106:     return operation, args
+107: 
+108: def build_calculation_context(client, model, question):
+109:     if not CALCULATION_HINTS.search(question or ""):
+110:         return "No deterministic calculation was requested."
+111: 
+112:     try:
+113:         interaction = client.interactions.create(
+114:             model=model,
+115:             input=PLANNER_INSTRUCTION + "\n\nUSER QUESTION:\n" + question,
+116:             system_instruction=(
+117:                 "Extract explicit numeric inputs only. Never invent values. "
+118:                 "Return one JSON object only."
+119:             ),
+120:         )
+121:         plan = _extract_json(interaction.output_text)
+122:         validated = _validate_plan(plan)
+123: 
+124:         if validated is None:
+125:             return (
+126:                 "NO_CALCULATION: "
+127:                 + str(plan.get("reason", "Required inputs were not explicit."))
+128:             )
+129: 
+130:         operation, arguments = validated
+131:         result = OPERATIONS[operation](**arguments)
+132: 
+133:         return json.dumps({
+134:             "status": "CALCULATED",
+135:             "operation": operation,
+136:             "inputs": arguments,
+137:             "result": result,
+138:             "verification": "Executed by the deterministic Python calculation engine.",
+139:         }, ensure_ascii=False, default=float)
+140: 
+141:     except Exception as exc:
+142:         logger.warning("Calculation bridge did not execute: %s", exc)
+143:         return (
+144:             "NO_CALCULATION: The inputs could not be safely extracted or validated. "
+145:             "Do not invent a result; ask the user to clarify."
+146:         )
+
+==========================================================================================
+FILE: analytics/market_ideas.py
+==========================================================================================
+
+--- LINES 1-180 ---
+1: """GREEDY STOCKS — Evidence-based Market Ideas Engine.
+2: 
+3: Scope:
+4:     NIFTY 50 only.
+5: 
+6: Sources:
+7:     Existing historical ranking engine.
+8:     Existing Greedy selection audit log.
+9: 
+10: Important:
+11:     Insights describe historical observations, not predictions
+12:     or personalised investment recommendations.
+13:     Split/bonus-adjusted prices are not total-return prices.
+14:     Corporate-action coverage is partial.
+15:     Greedy selections are historical in-sample experiments.
+16: """
+17: 
+18: import json
+19: import sys
+20: from pathlib import Path
+21: 
+22: import pandas as pd
+23: 
+24: ROOT = Path(__file__).resolve().parents[1]
+25: sys.path.insert(0, str(ROOT))
+26: 
+27: from analytics.historical_rankings import run_historical_rankings
+28: 
+29: 
+30: OUTPUT_DIR = ROOT / "database" / "processed" / "analytics"
+31: 
+32: GREEDY_LOG = OUTPUT_DIR / "greedy_selection_log.csv"
+33: 
+34: SUPPORTED_PERIODS = {"1M", "3M", "6M", "1Y"}
+35: 
+36: 
+37: def safe_number(value, decimals=4):
+38:     """Convert pandas/numpy numeric values to JSON-safe numbers."""
+39:     if value is None or pd.isna(value):
+40:         return None
+41: 
+42:     return round(float(value), decimals)
+43: 
+44: 
+45: def company_reference(row):
+46:     """Return a standard company reference."""
+47:     return {
+48:         "symbol": str(row["symbol"]),
+49:         "company_name": str(row["company_name"]),
+50:         "sector": (
+51:             str(row["sector"])
+52:             if pd.notna(row["sector"])
+53:             else "Unclassified"
+54:         ),
+55:     }
+56: 
+57: 
+58: def build_idea(
+59:     category,
+60:     title,
+61:     what,
+62:     why,
+63:     risk,
+64:     explore,
+65:     evidence,
+66:     status="AVAILABLE",
+67: ):
+68:     """Build a consistent Market Ideas record."""
+69:     return {
+70:         "category": category,
+71:         "title": title,
+72:         "what": what,
+73:         "why": why,
+74:         "risk": risk,
+75:         "explore": explore,
+76:         "evidence": evidence,
+77:         "status": status,
+78:     }
+79: 
+80: 
+81: def performance_standouts(ranking, period, top_n=5):
+82:     """Identify companies with the strongest historical returns."""
+83:     valid = ranking[
+84:         ranking["period_return"].notna()
+85:         & (ranking["data_status"] == "CALCULATED")
+86:     ].copy()
+87: 
+88:     valid = valid.sort_values(
+89:         ["period_return", "symbol"],
+90:         ascending=[False, True],
+91:     )
+92: 
+93:     ideas = []
+94: 
+95:     for _, row in valid.head(top_n).iterrows():
+96:         company = company_reference(row)
+97:         return_pct = safe_number(row["period_return"])
+98: 
+99:         ideas.append(
+100:             build_idea(
+101:                 category="PERFORMANCE_STANDOUTS",
+102:                 title=(
+103:                     f"{company['symbol']} — "
+104:                     "Historical performance standout"
+105:                 ),
+106:                 what=(
+107:                     f"{company['company_name']} recorded a "
+108:                     f"{return_pct}% return over {period}."
+109:                 ),
+110:                 why=(
+111:                     "It ranked among the strongest NIFTY 50 "
+112:                     "historical performers for the selected period."
+113:                 ),
+114:                 risk=(
+115:                     "Past performance does not predict future returns. "
+116:                     "Review volatility, drawdown and company fundamentals "
+117:                     "before drawing conclusions."
+118:                 ),
+119:                 explore=(
+120:                     f"Explain the historical performance and risks "
+121:                     f"of {company['symbol']}."
+122:                 ),
+123:                 evidence={
+124:                     **company,
+125:                     "period": period,
+126:                     "period_return_pct": return_pct,
+127:                     "return_rank": safe_number(row["return_rank"]),
+128:                     "annualized_volatility_pct": safe_number(
+129:                         row["annualized_volatility"]
+130:                     ),
+131:                     "maximum_drawdown_pct": safe_number(
+132:                         row["maximum_drawdown"]
+133:                     ),
+134:                     "sharpe_ratio": safe_number(row["sharpe_ratio"]),
+135:                     "observations": int(row["observations"]),
+136:                 },
+137:             )
+138:         )
+139: 
+140:     return ideas
+141: 
+142: 
+143: def risk_stability_insights(ranking, period, top_n=5):
+144:     """Find historically lower-volatility and lower-drawdown stocks."""
+145:     valid = ranking[
+146:         ranking["annualized_volatility"].notna()
+147:         & ranking["maximum_drawdown"].notna()
+148:         & (ranking["data_status"] == "CALCULATED")
+149:     ].copy()
+150: 
+151:     if valid.empty:
+152:         return []
+153: 
+154:     # Prefer lower volatility, then drawdowns closer to zero.
+155:     valid = valid.sort_values(
+156:         ["annualized_volatility", "maximum_drawdown"],
+157:         ascending=[True, False],
+158:     )
+159: 
+160:     ideas = []
+161: 
+162:     for _, row in valid.head(top_n).iterrows():
+163:         company = company_reference(row)
+164: 
+165:         volatility = safe_number(row["annualized_volatility"])
+166:         drawdown = safe_number(row["maximum_drawdown"])
+167: 
+168:         ideas.append(
+169:             build_idea(
+170:                 category="RISK_AND_STABILITY",
+171:                 title=(
+172:                     f"{company['symbol']} — "
+173:                     "Lower historical volatility"
+174:                 ),
+175:                 what=(
+176:                     f"{company['company_name']} had annualised "
+177:                     f"volatility of {volatility}% and maximum "
+178:                     f"drawdown of {drawdown}% over {period}."
+179:                 ),
+180:                 why=(
+
+--- LINES 180-360 ---
+180:                 why=(
+181:                     "It ranked relatively well on historical "
+182:                     "volatility and drawdown within the available universe."
+183:                 ),
+184:                 risk=(
+185:                     "Lower historical volatility does not mean "
+186:                     "capital protection or low future risk. "
+187:                     "This is not a measure of fundamental business risk."
+188:                 ),
+189:                 explore=(
+190:                     f"Compare the historical risk profile of "
+191:                     f"{company['symbol']} with its sector."
+192:                 ),
+193:                 evidence={
+194:                     **company,
+195:                     "period": period,
+196:                     "annualized_volatility_pct": volatility,
+197:                     "maximum_drawdown_pct": drawdown,
+198:                     "period_return_pct": safe_number(
+199:                         row["period_return"]
+200:                     ),
+201:                     "sharpe_ratio": safe_number(row["sharpe_ratio"]),
+202:                     "observations": int(row["observations"]),
+203:                 },
+204:             )
+205:         )
+206: 
+207:     return ideas
+208: 
+209: 
+210: def sector_opportunities(ranking, period, top_n=5):
+211:     """Compare NIFTY 50 sector constituent performance historically."""
+212:     valid = ranking[
+213:         ranking["period_return"].notna()
+214:         & ranking["sector"].notna()
+215:         & (ranking["data_status"] == "CALCULATED")
+216:     ].copy()
+217: 
+218:     if valid.empty:
+219:         return []
+220: 
+221:     sector_summary = (
+222:         valid.groupby("sector")
+223:         .agg(
+224:             company_count=("symbol", "count"),
+225:             median_return=("period_return", "median"),
+226:             median_volatility=("annualized_volatility", "median"),
+227:             median_drawdown=("maximum_drawdown", "median"),
+228:         )
+229:         .reset_index()
+230:     )
+231: 
+232:     # Require at least two available companies per sector.
+233:     sector_summary = sector_summary[
+234:         sector_summary["company_count"] >= 2
+235:     ]
+236: 
+237:     sector_summary = sector_summary.sort_values(
+238:         ["median_return", "sector"],
+239:         ascending=[False, True],
+240:     )
+241: 
+242:     ideas = []
+243: 
+244:     for _, row in sector_summary.head(top_n).iterrows():
+245:         sector = str(row["sector"])
+246:         median_return = safe_number(row["median_return"])
+247: 
+248:         if median_return > 0:
+249:             classification = "POSITIVE_HISTORICAL_PERFORMANCE"
+250:             title = f"{sector} — Positive historical performance"
+251:             interpretation = (
+252:                 "The sector's median constituent return was positive "
+253:                 "over the selected historical period."
+254:             )
+255: 
+256:         elif median_return < 0:
+257:             classification = "NEGATIVE_HISTORICAL_PERFORMANCE"
+258:             title = f"{sector} — Negative historical performance"
+259:             interpretation = (
+260:                 "The sector's median constituent return was negative "
+261:                 "over the selected historical period."
+262:             )
+263: 
+264:         else:
+265:             classification = "FLAT_HISTORICAL_PERFORMANCE"
+266:             title = f"{sector} — Flat historical performance"
+267:             interpretation = (
+268:                 "The sector's median constituent return was approximately zero."
+269:             )
+270: 
+271:         ideas.append(
+272:             build_idea(
+273:                 category="SECTOR_PERFORMANCE",
+274:                 title=title,
+275:                 what=(
+276:                     f"The {sector} sector had a median constituent "
+277:                     f"return of {median_return}% over {period}."
+278:                 ),
+279:                 why=(
+280:                     f"{interpretation} The calculation covers "
+281:                     f"{int(row['company_count'])} available "
+282:                     "NIFTY 50 companies."
+283:                 ),
+284:                 risk=(
+285:                     "This is a comparison of available NIFTY 50 "
+286:                     "constituents, not the return of a complete sector index. "
+287:                     "It does not establish future sector performance."
+288:                 ),
+289:                 explore=(
+290:                     f"Show the NIFTY 50 companies and historical risks "
+291:                     f"within the {sector} sector."
+292:                 ),
+293:                 evidence={
+294:                     "sector": sector,
+295:                     "period": period,
+296:                     "company_count": int(row["company_count"]),
+297:                     "median_return_pct": median_return,
+298:                     "median_volatility_pct": safe_number(
+299:                         row["median_volatility"]
+300:                     ),
+301:                     "median_drawdown_pct": safe_number(
+302:                         row["median_drawdown"]
+303:                     ),
+304:                     "classification": classification,
+305:                 },
+306:             )
+307:         )
+308: 
+309:     return ideas
+310: 
+311: 
+312: def greedy_experimental_insights(top_n=10):
+313:     """Read the existing Greedy selection audit log."""
+314:     if not GREEDY_LOG.exists():
+315:         return [
+316:             build_idea(
+317:                 category="GREEDY_PICKS",
+318:                 title="Greedy selection log unavailable",
+319:                 what="The historical Greedy selection log was not found.",
+320:                 why="The engine cannot verify the selection sequence.",
+321:                 risk="No Greedy selection claims are being generated.",
+322:                 explore="Explore how the Greedy portfolio algorithm works.",
+323:                 evidence={},
+324:                 status="UNAVAILABLE",
+325:             )
+326:         ]
+327: 
+328:     log = pd.read_csv(GREEDY_LOG)
+329: 
+330:     required = {
+331:         "step",
+332:         "selected_symbol",
+333:         "sector",
+334:         "portfolio_sharpe",
+335:         "candidates_evaluated",
+336:         "sector_limit",
+337:     }
+338: 
+339:     missing = required - set(log.columns)
+340: 
+341:     if missing:
+342:         raise ValueError(
+343:             f"Greedy selection log missing columns: {sorted(missing)}"
+344:         )
+345: 
+346:     log = log.sort_values("step").head(top_n)
+347: 
+348:     ideas = []
+349: 
+350:     for _, row in log.iterrows():
+351:         symbol = str(row["selected_symbol"])
+352:         sector = str(row["sector"])
+353: 
+354:         ideas.append(
+355:             build_idea(
+356:                 category="GREEDY_PICKS",
+357:                 title=f"{symbol} — Historical Greedy selection",
+358:                 what=(
+359:                     f"{symbol} was selected at step "
+360:                     f"{int(row['step'])} of the historical Greedy experiment."
+
+==========================================================================================
+FILE: analytics/test_market_ideas.py
+==========================================================================================
+
+--- LINES 1-120 ---
+1: """Tests for the GREEDY STOCKS Market Ideas engine."""
+2: 
+3: import json
+4: import tempfile
+5: import unittest
+6: from pathlib import Path
+7: from unittest.mock import patch
+8: 
+9: import pandas as pd
+10: 
+11: from analytics import market_ideas as mi
+12: 
+13: 
+14: def sample_ranking():
+15:     """Build a small deterministic ranking dataset for testing."""
+16:     rows = [
+17:         # Positive sector
+18:         ("POS_A", "Positive A Ltd", "Positive Sector", 8.0, 20.0, -5.0),
+19:         ("POS_B", "Positive B Ltd", "Positive Sector", 4.0, 22.0, -6.0),
+20: 
+21:         # Negative sector
+22:         ("NEG_A", "Negative A Ltd", "Negative Sector", -8.0, 25.0, -12.0),
+23:         ("NEG_B", "Negative B Ltd", "Negative Sector", -4.0, 24.0, -10.0),
+24: 
+25:         # Flat sector
+26:         ("FLAT_A", "Flat A Ltd", "Flat Sector", 0.0, 18.0, -3.0),
+27:         ("FLAT_B", "Flat B Ltd", "Flat Sector", 0.0, 19.0, -4.0),
+28: 
+29:         # Single-company sector should be excluded
+30:         ("SINGLE", "Single Ltd", "Single Sector", 5.0, 21.0, -7.0),
+31:     ]
+32: 
+33:     result = pd.DataFrame(
+34:         [
+35:             {
+36:                 "symbol": symbol,
+37:                 "company_name": company_name,
+38:                 "sector": sector,
+39:                 "period_return": period_return,
+40:                 "annualized_volatility": volatility,
+41:                 "maximum_drawdown": drawdown,
+42:                 "sharpe_ratio": 0.5,
+43:                 "return_rank": index + 1,
+44:                 "observations": 100,
+45:                 "data_status": "CALCULATED",
+46:                 "last_price_date": pd.Timestamp("2026-11-05"),
+47:             }
+48:             for index, (
+49:                 symbol,
+50:                 company_name,
+51:                 sector,
+52:                 period_return,
+53:                 volatility,
+54:                 drawdown,
+55:             ) in enumerate(rows)
+56:         ]
+57:     )
+58: 
+59:     result.attrs.update(
+60:         {
+61:             "index": "NIFTY 50",
+62:             "snapshot_month": "2026-10-01",
+63:             "price_basis": "SPLIT_BONUS_ADJUSTED",
+64:             "dividend_adjusted": False,
+65:             "membership_basis": "LATEST_MONTHLY_SNAPSHOT",
+66:             "corporate_action_coverage": "PARTIAL",
+67:         }
+68:     )
+69: 
+70:     return result
+71: 
+72: 
+73: class TestMarketIdeas(unittest.TestCase):
+74: 
+75:     def setUp(self):
+76:         self.ranking = sample_ranking()
+77: 
+78:     def test_performance_standouts(self):
+79:         ideas = mi.performance_standouts(
+80:             self.ranking,
+81:             "3M",
+82:             top_n=3,
+83:         )
+84: 
+85:         self.assertEqual(len(ideas), 3)
+86:         self.assertTrue(
+87:             all(
+88:                 idea["category"] == "PERFORMANCE_STANDOUTS"
+89:                 for idea in ideas
+90:             )
+91:         )
+92: 
+93:         self.assertEqual(
+94:             ideas[0]["evidence"]["symbol"],
+95:             "POS_A",
+96:         )
+97: 
+98:     def test_risk_stability_insights(self):
+99:         ideas = mi.risk_stability_insights(
+100:             self.ranking,
+101:             "3M",
+102:             top_n=3,
+103:         )
+104: 
+105:         self.assertEqual(len(ideas), 3)
+106: 
+107:         volatilities = [
+108:             idea["evidence"]["annualized_volatility_pct"]
+109:             for idea in ideas
+110:         ]
+111: 
+112:         self.assertEqual(volatilities, sorted(volatilities))
+113: 
+114:     def test_sector_positive_negative_and_flat_classification(self):
+115:         ideas = mi.sector_opportunities(
+116:             self.ranking,
+117:             "3M",
+118:             top_n=10,
+119:         )
+120: 
+
+--- LINES 250-360 ---
+250:             {
+251:                 "category": "PERFORMANCE_STANDOUTS",
+252:                 "status": "AVAILABLE",
+253:                 "evidence": {
+254:                     "symbol": "BBB",
+255:                     "company_name": "BBB Ltd",
+256:                     "period_return_pct": 8.0,
+257:                     "annualized_volatility_pct": 18.0,
+258:                     "maximum_drawdown_pct": -4.0,
+259:                     "sharpe_ratio": 0.9,
+260:                 },
+261:             },
+262:             {
+263:                 "category": "RISK_AND_STABILITY",
+264:                 "status": "AVAILABLE",
+265:                 "evidence": {
+266:                     "symbol": "BBB",
+267:                     "company_name": "BBB Ltd",
+268:                     "period_return_pct": 8.0,
+269:                     "annualized_volatility_pct": 18.0,
+270:                     "maximum_drawdown_pct": -4.0,
+271:                     "sharpe_ratio": 0.9,
+272:                 },
+273:             },
+274:             {
+275:                 "category": "RISK_AND_STABILITY",
+276:                 "status": "AVAILABLE",
+277:                 "evidence": {
+278:                     "symbol": "CCC",
+279:                     "company_name": "CCC Ltd",
+280:                     "period_return_pct": -2.0,
+281:                     "annualized_volatility_pct": 12.0,
+282:                     "maximum_drawdown_pct": -6.0,
+283:                     "sharpe_ratio": -0.2,
+284:                 },
+285:             },
+286:         ]
+287: 
+288:         result = mi.build_stock_comparison(ideas)
+289: 
+290:         self.assertEqual(
+291:             [stock["symbol"] for stock in result["stocks"]],
+292:             ["AAA", "BBB", "CCC"],
+293:         )
+294:         self.assertEqual(result["stock_count"], 3)
+295:         self.assertEqual(result["overlap_symbols"], ["BBB"])
+296:         self.assertEqual(
+297:             result["stocks"][1]["categories"],
+298:             ["Performance", "Low Volatility"],
+299:         )
+300: 
+301:     def test_stock_comparison_preserves_missing_metrics(self):
+302:         ideas = [{
+303:             "category": "PERFORMANCE_STANDOUTS",
+304:             "status": "AVAILABLE",
+305:             "evidence": {
+306:                 "symbol": "MISS",
+307:                 "period_return_pct": 5.0,
+308:                 "annualized_volatility_pct": None,
+309:                 "maximum_drawdown_pct": -3.0,
+310:                 "sharpe_ratio": None,
+311:             },
+312:         }]
+313: 
+314:         result = mi.build_stock_comparison(ideas)
+315:         stock = result["stocks"][0]
+316: 
+317:         self.assertIsNone(stock["annualized_volatility_pct"])
+318:         self.assertIsNone(stock["sharpe_ratio"])
+319: 
+320:     def test_stock_comparison_ignores_unavailable_and_duplicate_records(self):
+321:         ideas = [
+322:             {
+323:                 "category": "PERFORMANCE_STANDOUTS",
+324:                 "status": "AVAILABLE",
+325:                 "evidence": {"symbol": "AAA", "period_return_pct": 5.0},
+326:             },
+327:             {
+328:                 "category": "PERFORMANCE_STANDOUTS",
+329:                 "status": "AVAILABLE",
+330:                 "evidence": {"symbol": "AAA", "period_return_pct": 5.0},
+331:             },
+332:             {
+333:                 "category": "RISK_AND_STABILITY",
+334:                 "status": "UNAVAILABLE",
+335:                 "evidence": {"symbol": "BBB"},
+336:             },
+337:         ]
+338: 
+339:         result = mi.build_stock_comparison(ideas)
+340: 
+341:         self.assertEqual(result["stock_count"], 1)
+342:         self.assertEqual(
+343:             [stock["symbol"] for stock in result["stocks"]],
+344:             ["AAA"],
+345:         )
+346:         self.assertEqual(result["overlap_symbols"], [])
+347: 
+348:     def test_stock_comparison_handles_empty_input(self):
+349:         result = mi.build_stock_comparison([])
+350: 
+351:         self.assertEqual(result["stocks"], [])
+352:         self.assertEqual(result["stock_count"], 0)
+353:         self.assertEqual(result["overlap_symbols"], [])
+354: 
+355:     def test_invalid_period_is_rejected(self):
+356:         with self.assertRaises(ValueError):
+357:             mi.generate_market_ideas(period="5Y")
+358: 
+359:     def test_non_string_period_is_rejected(self):
+360:         with self.assertRaises(ValueError):

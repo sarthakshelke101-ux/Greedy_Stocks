@@ -1,0 +1,843 @@
+﻿
+FullName                                                                                                     
+--------                                                                                                     
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\ask_greedy_audit.txt                                                 
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\ask_greedy_chat_route_points.txt                                     
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\ask_greedy_connection_audit.txt                                      
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\ask_greedy_engine_audit.txt                                          
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\ask_greedy_final_wiring_audit.txt                                    
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\ask_greedy_inspection.txt                                            
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\ask_greedy_integration_points.txt                                    
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\ask_greedy_next_inspection.txt                                       
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\ask_greedy_routes.txt                                                
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\greedy_lab_frontend_bundle.txt                                       
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\greedy_strategy_source_bundle.txt                                    
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\strategy_experiment_preflight.txt                                    
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\audit_greedy_universe.py                                   
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\audit_walk_forward_results.backup_20261109_130619.py       
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\audit_walk_forward_results.py                              
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\greedy_v2_data.py                                          
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\greedy_v2_data.py.new                                      
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\greedy_v2_data.py.pre_empty_window.bak                     
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\greedy_v2_data.py.pre_universe.bak                         
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\greedy_v2_engine.py                                        
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\greedy_v2_splits.py                                        
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_five_greedy_strategies.py                              
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_greedy_selection.py                                    
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_greedy_stability.py                                    
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_greedy_v2_baselines.py                                 
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_greedy_v2_experiment.backup_20261109_124456.py         
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_greedy_v2_experiment.backup_sparse_20261109_124756.py  
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_greedy_v2_experiment.py                                
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_greedy_v2_experiment.py.pre_universe.bak               
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_greedy_validation.py                                   
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_greedy_walk_forward.py                                 
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_registered_greedy_v2_experiment.py                     
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_walk_forward_cost_validation.backup_20261109_130430.py 
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_walk_forward_cost_validation.py                        
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\test_greedy_v2_engine.py                                   
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\test_greedy_v2_splits.py                                   
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\ask_greedy\greedy_knowledge.py                             
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\ask_greedy\greedy_v2_evidence.py                           
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\ask_greedy\greedy_v2_evidence.py.before-strategy-filter.bak
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\ask_greedy\test_greedy_knowledge.py                        
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\greedy_out_of_sample_summary.csv        
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\greedy_selection_log.csv                
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\greedy_strategy_baseline_comparison.csv 
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\greedy_strategy_baseline_summary.csv    
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\greedy_training_selection_log.csv       
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\greedy_training_stability.csv           
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\greedy_training_stability.json          
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\greedy_training_stability_overlap.csv   
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\greedy_v2_baseline_comparison.json      
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\greedy_v2_experiment.json               
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\greedy_v2_random_baselines.csv          
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\greedy_v2_selection_log.csv             
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\greedy_walk_forward_results.csv         
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\walk_forward_aggregate_metrics.csv      
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\walk_forward_clean_oos_paths.csv        
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\walk_forward_clean_report.json          
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\walk_forward_clean_summary.csv          
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\walk_forward_daily_returns.csv          
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\walk_forward_fold_metrics.csv           
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\walk_forward_selections.csv             
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\walk_forward_validation_report.json     
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\raw\bhavcopy\nifty50_rebuilt_identity_crosswalk.csv         
+
+
+
+========== chronological_split ==========
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\ask_greedy_connection_audit.txt | LINE 2180 | from analytics.greedy_v2_splits import chronological_split
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\ask_greedy_connection_audit.txt | LINE 2234 | split = chronological_split(
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\ask_greedy_connection_audit.txt | LINE 2400 | from analytics.greedy_v2_splits import chronological_split
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\ask_greedy_connection_audit.txt | LINE 2499 | split = chronological_split(dataset.adjusted_prices, allow_sparse_evaluation=True)
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\ask_greedy_engine_audit.txt | LINE 811 | def chronological_split(
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\greedy_lab_frontend_bundle.txt | LINE 612 | def chronological_split(
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\greedy_lab_frontend_bundle.txt | LINE 1290 | from analytics.greedy_v2_splits import chronological_split
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\greedy_lab_frontend_bundle.txt | LINE 1438 | splits = chronological_split(prices, train_fraction=0.60, validation_fraction=0.20, allow_sparse_evaluation=True)
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\greedy_lab_frontend_bundle.txt | LINE 1737 | from greedy_v2_splits import chronological_split
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\greedy_lab_frontend_bundle.txt | LINE 1752 | splits = chronological_split(
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\greedy_lab_frontend_bundle.txt | LINE 1930 | from analytics.greedy_v2_splits import chronological_split
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\greedy_lab_frontend_bundle.txt | LINE 2197 | splits = chronological_split(
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\greedy_lab_frontend_bundle.txt | LINE 2349 | from analytics.greedy_v2_splits import chronological_split
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\greedy_lab_frontend_bundle.txt | LINE 2495 | splits = chronological_split(
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\greedy_lab_frontend_bundle.txt | LINE 2802 | from analytics.greedy_v2_splits import chronological_split
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\greedy_lab_frontend_bundle.txt | LINE 2967 | splits = chronological_split(
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\greedy_lab_frontend_bundle.txt | LINE 3346 | from analytics.greedy_v2_splits import chronological_split
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\greedy_lab_frontend_bundle.txt | LINE 3512 | splits = chronological_split(
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\greedy_lab_frontend_bundle.txt | LINE 4898 | from analytics.greedy_v2_splits import chronological_split
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\greedy_lab_frontend_bundle.txt | LINE 4914 | def test_chronological_split_sizes(self):
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\greedy_lab_frontend_bundle.txt | LINE 4915 | result = chronological_split(self.prices)
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\greedy_lab_frontend_bundle.txt | LINE 4922 | result = chronological_split(self.prices)
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\greedy_lab_frontend_bundle.txt | LINE 4931 | result = chronological_split(self.prices)
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\greedy_lab_frontend_bundle.txt | LINE 4939 | result = chronological_split(self.prices)
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\greedy_lab_frontend_bundle.txt | LINE 4947 | result = chronological_split(self.prices)
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\greedy_lab_frontend_bundle.txt | LINE 4959 | result = chronological_split(self.prices)
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\greedy_lab_frontend_bundle.txt | LINE 4970 | chronological_split(prices)
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\greedy_lab_frontend_bundle.txt | LINE 4976 | chronological_split(prices)
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\greedy_lab_frontend_bundle.txt | LINE 4983 | chronological_split(prices)
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\greedy_lab_frontend_bundle.txt | LINE 4990 | chronological_split(prices)
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\greedy_lab_frontend_bundle.txt | LINE 4994 | chronological_split(self.prices.iloc[:50])
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\greedy_lab_frontend_bundle.txt | LINE 4998 | chronological_split(self.prices, train_fraction=0)
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\greedy_lab_frontend_bundle.txt | LINE 5001 | chronological_split(self.prices, validation_fraction=1)
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\greedy_lab_frontend_bundle.txt | LINE 5004 | chronological_split(
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\greedy_lab_frontend_bundle.txt | LINE 6499 | from analytics.greedy_v2_splits import chronological_split
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\greedy_lab_frontend_bundle.txt | LINE 6554 | split = chronological_split(
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\greedy_lab_frontend_bundle.txt | LINE 6721 | from analytics.greedy_v2_splits import chronological_split
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\greedy_lab_frontend_bundle.txt | LINE 6821 | split = chronological_split(dataset.adjusted_prices, allow_sparse_evaluation=True)
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\greedy_lab_frontend_bundle.txt | LINE 34216 | from analytics.greedy_v2_splits import chronological_split
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\greedy_lab_frontend_bundle.txt | LINE 34270 | split = chronological_split(
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\greedy_lab_frontend_bundle.txt | LINE 34436 | from analytics.greedy_v2_splits import chronological_split
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\greedy_lab_frontend_bundle.txt | LINE 34535 | split = chronological_split(dataset.adjusted_prices, allow_sparse_evaluation=True)
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\greedy_strategy_source_bundle.txt | LINE 552 | from analytics.greedy_v2_splits import chronological_split
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\greedy_strategy_source_bundle.txt | LINE 718 | splits = chronological_split(
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\PHASE2_ARCHITECTURE_AUDIT.txt | LINE 440 | FUNCTION: chronological_split (line 16)
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\PHASE2_ARCHITECTURE_AUDIT.txt | LINE 685 | FUNCTION: test_chronological_split_sizes (line 22)
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\PHASE4_ARCHITECTURE_AUDIT.txt | LINE 482 | 16: def chronological_split(
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\PHASE4_ARCHITECTURE_AUDIT.txt | LINE 677 | 14: from analytics.greedy_v2_splits import chronological_split
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\PHASE4_ARCHITECTURE_AUDIT.txt | LINE 714 | 9: from greedy_v2_splits import chronological_split
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\PHASE4_ARCHITECTURE_AUDIT.txt | LINE 716 | 24: splits = chronological_split(
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\PHASE4_ARCHITECTURE_AUDIT.txt | LINE 728 | 13: from analytics.greedy_v2_splits import chronological_split
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\PHASE4_ARCHITECTURE_AUDIT.txt | LINE 734 | 280: splits = chronological_split(
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\PHASE4_ARCHITECTURE_AUDIT.txt | LINE 747 | 11: from analytics.greedy_v2_splits import chronological_split
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\PHASE4_ARCHITECTURE_AUDIT.txt | LINE 757 | 157: splits = chronological_split(
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\PHASE4_ARCHITECTURE_AUDIT.txt | LINE 768 | 11: from analytics.greedy_v2_splits import chronological_split
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\PHASE4_ARCHITECTURE_AUDIT.txt | LINE 779 | 176: splits = chronological_split(
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\PHASE4_ARCHITECTURE_AUDIT.txt | LINE 789 | 11: from analytics.greedy_v2_splits import chronological_split
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\PHASE4_ARCHITECTURE_AUDIT.txt | LINE 799 | 177: splits = chronological_split(
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\PHASE4_ARCHITECTURE_AUDIT.txt | LINE 876 | 19: from greedy_v2_splits import chronological_split
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\PHASE4_ARCHITECTURE_AUDIT.txt | LINE 1064 | 6: from analytics.greedy_v2_splits import chronological_split
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\PHASE4_ARCHITECTURE_AUDIT.txt | LINE 1066 | 22: def test_chronological_split_sizes(self):
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\PHASE4_ARCHITECTURE_AUDIT.txt | LINE 1067 | 23: result = chronological_split(self.prices)
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\PHASE4_ARCHITECTURE_AUDIT.txt | LINE 1069 | 30: result = chronological_split(self.prices)
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\PHASE4_ARCHITECTURE_AUDIT.txt | LINE 1070 | 39: result = chronological_split(self.prices)
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\PHASE4_ARCHITECTURE_AUDIT.txt | LINE 1071 | 47: result = chronological_split(self.prices)
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\PHASE4_ARCHITECTURE_AUDIT.txt | LINE 1072 | 55: result = chronological_split(self.prices)
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\PHASE4_ARCHITECTURE_AUDIT.txt | LINE 1074 | 67: result = chronological_split(self.prices)
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\PHASE4_ARCHITECTURE_AUDIT.txt | LINE 1076 | 78: chronological_split(prices)
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\PHASE4_ARCHITECTURE_AUDIT.txt | LINE 1078 | 84: chronological_split(prices)
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\PHASE4_ARCHITECTURE_AUDIT.txt | LINE 1955 | 17: from analytics.greedy_v2_splits import chronological_split
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\PHASE4_ARCHITECTURE_AUDIT.txt | LINE 1959 | 72: split = chronological_split(
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\portfolio_selection_audit.txt | LINE 645 | 17: from analytics.greedy_v2_splits import chronological_split
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\portfolio_selection_audit.txt | LINE 699 | 71:         split = chronological_split(
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\portfolio_selection_audit.txt | LINE 865 | 237: from analytics.greedy_v2_splits import chronological_split
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\portfolio_selection_audit.txt | LINE 964 | 336:         split = chronological_split(dataset.adjusted_prices, allow_sparse_evaluation=True)
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\greedy_v2_splits.py | LINE 16 | def chronological_split(
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_five_greedy_strategies.py | LINE 14 | from analytics.greedy_v2_splits import chronological_split
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_five_greedy_strategies.py | LINE 162 | splits = chronological_split(prices, train_fraction=0.60, validation_fraction=0.20, allow_sparse_evaluation=True)
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_greedy_stability.py | LINE 9 | from greedy_v2_splits import chronological_split
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_greedy_stability.py | LINE 24 | splits = chronological_split(
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_greedy_v2_baselines.py | LINE 13 | from analytics.greedy_v2_splits import chronological_split
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_greedy_v2_baselines.py | LINE 280 | splits = chronological_split(
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_greedy_v2_experiment.backup_20261109_124456.py | LINE 11 | from analytics.greedy_v2_splits import chronological_split
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_greedy_v2_experiment.backup_20261109_124456.py | LINE 157 | splits = chronological_split(
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_greedy_v2_experiment.backup_sparse_20261109_124756.py | LINE 11 | from analytics.greedy_v2_splits import chronological_split
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_greedy_v2_experiment.backup_sparse_20261109_124756.py | LINE 176 | splits = chronological_split(
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_greedy_v2_experiment.py | LINE 11 | from analytics.greedy_v2_splits import chronological_split
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_greedy_v2_experiment.py | LINE 177 | splits = chronological_split(
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_multi_strategy_validation.py | LINE 19 | from greedy_v2_splits import chronological_split
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_multi_strategy_validation.py | LINE 144 | splits = chronological_split(
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\test_greedy_v2_splits.py | LINE 6 | from analytics.greedy_v2_splits import chronological_split
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\test_greedy_v2_splits.py | LINE 22 | def test_chronological_split_sizes(self):
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\test_greedy_v2_splits.py | LINE 23 | result = chronological_split(self.prices)
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\test_greedy_v2_splits.py | LINE 30 | result = chronological_split(self.prices)
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\test_greedy_v2_splits.py | LINE 39 | result = chronological_split(self.prices)
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\test_greedy_v2_splits.py | LINE 47 | result = chronological_split(self.prices)
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\test_greedy_v2_splits.py | LINE 55 | result = chronological_split(self.prices)
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\test_greedy_v2_splits.py | LINE 67 | result = chronological_split(self.prices)
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\test_greedy_v2_splits.py | LINE 78 | chronological_split(prices)
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\test_greedy_v2_splits.py | LINE 84 | chronological_split(prices)
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\test_greedy_v2_splits.py | LINE 91 | chronological_split(prices)
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\test_greedy_v2_splits.py | LINE 98 | chronological_split(prices)
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\test_greedy_v2_splits.py | LINE 102 | chronological_split(self.prices.iloc[:50])
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\test_greedy_v2_splits.py | LINE 106 | chronological_split(self.prices, train_fraction=0)
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\test_greedy_v2_splits.py | LINE 109 | chronological_split(self.prices, validation_fraction=1)
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\test_greedy_v2_splits.py | LINE 112 | chronological_split(
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\backend\portfolio_routes.py | LINE 17 | from analytics.greedy_v2_splits import chronological_split
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\backend\portfolio_routes.py | LINE 72 | split = chronological_split(
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\backend\portfolio_routes.py | LINE 239 | from analytics.greedy_v2_splits import chronological_split
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\backend\portfolio_routes.py | LINE 339 | split = chronological_split(dataset.adjusted_prices, allow_sparse_evaluation=True)
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\algorithm_integration_audit.json | LINE 1137 | "text": "from analytics.greedy_v2_splits import chronological_split"
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\algorithm_integration_audit.json | LINE 1217 | "text": "from greedy_v2_splits import chronological_split"
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\algorithm_integration_audit.json | LINE 1279 | "text": "from analytics.greedy_v2_splits import chronological_split"
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\algorithm_integration_audit.json | LINE 1401 | "text": "from analytics.greedy_v2_splits import chronological_split"
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\algorithm_integration_audit.json | LINE 1479 | "text": "from analytics.greedy_v2_splits import chronological_split"
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\algorithm_integration_audit.json | LINE 1577 | "text": "from analytics.greedy_v2_splits import chronological_split"
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\algorithm_integration_audit.json | LINE 1745 | "text": "from greedy_v2_splits import chronological_split"
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\algorithm_integration_audit.json | LINE 2063 | "text": "from analytics.greedy_v2_splits import chronological_split"
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\algorithm_integration_audit.json | LINE 2985 | "text": "from analytics.greedy_v2_splits import chronological_split"
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\algorithm_integration_audit.json | LINE 3025 | "text": "from analytics.greedy_v2_splits import chronological_split"
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\final_integration_source_20261109_235509.txt | LINE 557 | def chronological_split(
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\final_integration_source_20261109_235509.txt | LINE 675 | from analytics.greedy_v2_splits import chronological_split
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\final_integration_source_20261109_235509.txt | LINE 942 | splits = chronological_split(
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\final_integration_source_20261109_235509.txt | LINE 1354 | from analytics.greedy_v2_splits import chronological_split
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\final_integration_source_20261109_235509.txt | LINE 1502 | splits = chronological_split(prices, train_fraction=0.60, validation_fraction=0.20, allow_sparse_evaluation=True)
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\final_integration_source_20261109_235509.txt | LINE 1590 | from analytics.greedy_v2_splits import chronological_split
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\final_integration_source_20261109_235509.txt | LINE 1756 | splits = chronological_split(
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\final_integration_source_20261109_235535.txt | LINE 559 | def chronological_split(
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\final_integration_source_20261109_235535.txt | LINE 678 | from analytics.greedy_v2_splits import chronological_split
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\final_integration_source_20261109_235535.txt | LINE 945 | splits = chronological_split(
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\final_integration_source_20261109_235535.txt | LINE 1359 | from analytics.greedy_v2_splits import chronological_split
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\final_integration_source_20261109_235535.txt | LINE 1507 | splits = chronological_split(prices, train_fraction=0.60, validation_fraction=0.20, allow_sparse_evaluation=True)
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\final_integration_source_20261109_235535.txt | LINE 1596 | from analytics.greedy_v2_splits import chronological_split
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\final_integration_source_20261109_235535.txt | LINE 1762 | splits = chronological_split(
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\final_integration_source_20261109_235535.txt | LINE 4909 | def chronological_split(
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\final_integration_source_20261109_235535.txt | LINE 5027 | from analytics.greedy_v2_splits import chronological_split
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\final_integration_source_20261109_235535.txt | LINE 5294 | splits = chronological_split(
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\final_integration_source_20261109_235535.txt | LINE 5706 | from analytics.greedy_v2_splits import chronological_split
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\final_integration_source_20261109_235535.txt | LINE 5854 | splits = chronological_split(prices, train_fraction=0.60, validation_fraction=0.20, allow_sparse_evaluation=True)
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\final_integration_source_20261109_235535.txt | LINE 5942 | from analytics.greedy_v2_splits import chronological_split
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\final_integration_source_20261109_235535.txt | LINE 6108 | splits = chronological_split(
+
+========== prepare_greedy_v2_dataset ==========
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\ask_greedy_connection_audit.txt | LINE 2179 | from analytics.greedy_v2_data import prepare_greedy_v2_dataset
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\ask_greedy_connection_audit.txt | LINE 2229 | dataset = prepare_greedy_v2_dataset(
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\ask_greedy_connection_audit.txt | LINE 2399 | from analytics.greedy_v2_data import prepare_greedy_v2_dataset
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\ask_greedy_connection_audit.txt | LINE 2487 | dataset = prepare_greedy_v2_dataset(
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\ask_greedy_engine_audit.txt | LINE 385 | def prepare_greedy_v2_dataset(
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\ask_greedy_engine_audit.txt | LINE 516 | dataset = prepare_greedy_v2_dataset()
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\greedy_lab_frontend_bundle.txt | LINE 129 | def prepare_greedy_v2_dataset(
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\greedy_lab_frontend_bundle.txt | LINE 273 | dataset = prepare_greedy_v2_dataset()
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\greedy_lab_frontend_bundle.txt | LINE 1289 | from analytics.greedy_v2_data import prepare_greedy_v2_dataset
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\greedy_lab_frontend_bundle.txt | LINE 1433 | dataset = prepare_greedy_v2_dataset("2025-04-01", "2026-11-05")
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\greedy_lab_frontend_bundle.txt | LINE 1736 | from greedy_v2_data import prepare_greedy_v2_dataset
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\greedy_lab_frontend_bundle.txt | LINE 1747 | dataset = prepare_greedy_v2_dataset(
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\greedy_lab_frontend_bundle.txt | LINE 1929 | from analytics.greedy_v2_data import prepare_greedy_v2_dataset
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\greedy_lab_frontend_bundle.txt | LINE 2185 | dataset = prepare_greedy_v2_dataset(
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\greedy_lab_frontend_bundle.txt | LINE 2348 | from analytics.greedy_v2_data import prepare_greedy_v2_dataset
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\greedy_lab_frontend_bundle.txt | LINE 2462 | dataset = prepare_greedy_v2_dataset(
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\greedy_lab_frontend_bundle.txt | LINE 2801 | from analytics.greedy_v2_data import prepare_greedy_v2_dataset
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\greedy_lab_frontend_bundle.txt | LINE 2916 | dataset = prepare_greedy_v2_dataset(
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\greedy_lab_frontend_bundle.txt | LINE 3345 | from analytics.greedy_v2_data import prepare_greedy_v2_dataset
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\greedy_lab_frontend_bundle.txt | LINE 3460 | dataset = prepare_greedy_v2_dataset(
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\greedy_lab_frontend_bundle.txt | LINE 6498 | from analytics.greedy_v2_data import prepare_greedy_v2_dataset
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\greedy_lab_frontend_bundle.txt | LINE 6549 | dataset = prepare_greedy_v2_dataset(
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\greedy_lab_frontend_bundle.txt | LINE 6720 | from analytics.greedy_v2_data import prepare_greedy_v2_dataset
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\greedy_lab_frontend_bundle.txt | LINE 6809 | dataset = prepare_greedy_v2_dataset(
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\greedy_lab_frontend_bundle.txt | LINE 34215 | from analytics.greedy_v2_data import prepare_greedy_v2_dataset
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\greedy_lab_frontend_bundle.txt | LINE 34265 | dataset = prepare_greedy_v2_dataset(
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\greedy_lab_frontend_bundle.txt | LINE 34435 | from analytics.greedy_v2_data import prepare_greedy_v2_dataset
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\greedy_lab_frontend_bundle.txt | LINE 34523 | dataset = prepare_greedy_v2_dataset(
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\greedy_strategy_source_bundle.txt | LINE 387 | def prepare_greedy_v2_dataset(
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\greedy_strategy_source_bundle.txt | LINE 531 | dataset = prepare_greedy_v2_dataset()
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\greedy_strategy_source_bundle.txt | LINE 551 | from analytics.greedy_v2_data import prepare_greedy_v2_dataset
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\greedy_strategy_source_bundle.txt | LINE 666 | dataset = prepare_greedy_v2_dataset(
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\PHASE2_ARCHITECTURE_AUDIT.txt | LINE 432 | FUNCTION: prepare_greedy_v2_dataset (line 68)
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\PHASE4_ARCHITECTURE_AUDIT.txt | LINE 676 | 13: from analytics.greedy_v2_data import prepare_greedy_v2_dataset
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\PHASE4_ARCHITECTURE_AUDIT.txt | LINE 713 | 8: from greedy_v2_data import prepare_greedy_v2_dataset
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\PHASE4_ARCHITECTURE_AUDIT.txt | LINE 727 | 12: from analytics.greedy_v2_data import prepare_greedy_v2_dataset
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\PHASE4_ARCHITECTURE_AUDIT.txt | LINE 746 | 10: from analytics.greedy_v2_data import prepare_greedy_v2_dataset
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\PHASE4_ARCHITECTURE_AUDIT.txt | LINE 767 | 10: from analytics.greedy_v2_data import prepare_greedy_v2_dataset
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\PHASE4_ARCHITECTURE_AUDIT.txt | LINE 788 | 10: from analytics.greedy_v2_data import prepare_greedy_v2_dataset
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\PHASE4_ARCHITECTURE_AUDIT.txt | LINE 875 | 18: from greedy_v2_data import prepare_greedy_v2_dataset
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\PHASE4_ARCHITECTURE_AUDIT.txt | LINE 942 | 9: from greedy_v2_data import prepare_greedy_v2_dataset
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\PHASE4_ARCHITECTURE_AUDIT.txt | LINE 963 | 9: from greedy_v2_data import prepare_greedy_v2_dataset
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\PHASE4_ARCHITECTURE_AUDIT.txt | LINE 1954 | 16: from analytics.greedy_v2_data import prepare_greedy_v2_dataset
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\portfolio_selection_audit.txt | LINE 644 | 16: from analytics.greedy_v2_data import prepare_greedy_v2_dataset
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\portfolio_selection_audit.txt | LINE 694 | 66:         dataset = prepare_greedy_v2_dataset(
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\portfolio_selection_audit.txt | LINE 864 | 236: from analytics.greedy_v2_data import prepare_greedy_v2_dataset
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\portfolio_selection_audit.txt | LINE 952 | 324:         dataset = prepare_greedy_v2_dataset(
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\strategy_experiment_preflight.txt | LINE 246 | > def prepare_greedy_v2_dataset(
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\greedy_v2_data.py | LINE 68 | def prepare_greedy_v2_dataset(
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\greedy_v2_data.py | LINE 212 | dataset = prepare_greedy_v2_dataset()
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_five_greedy_strategies.py | LINE 13 | from analytics.greedy_v2_data import prepare_greedy_v2_dataset
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_five_greedy_strategies.py | LINE 157 | dataset = prepare_greedy_v2_dataset("2025-04-01", "2026-11-05")
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_greedy_stability.py | LINE 8 | from greedy_v2_data import prepare_greedy_v2_dataset
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_greedy_stability.py | LINE 19 | dataset = prepare_greedy_v2_dataset(
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_greedy_v2_baselines.py | LINE 12 | from analytics.greedy_v2_data import prepare_greedy_v2_dataset
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_greedy_v2_baselines.py | LINE 268 | dataset = prepare_greedy_v2_dataset(
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_greedy_v2_experiment.backup_20261109_124456.py | LINE 10 | from analytics.greedy_v2_data import prepare_greedy_v2_dataset
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_greedy_v2_experiment.backup_20261109_124456.py | LINE 124 | dataset = prepare_greedy_v2_dataset(
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_greedy_v2_experiment.backup_sparse_20261109_124756.py | LINE 10 | from analytics.greedy_v2_data import prepare_greedy_v2_dataset
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_greedy_v2_experiment.backup_sparse_20261109_124756.py | LINE 125 | dataset = prepare_greedy_v2_dataset(
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_greedy_v2_experiment.py | LINE 10 | from analytics.greedy_v2_data import prepare_greedy_v2_dataset
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_greedy_v2_experiment.py | LINE 125 | dataset = prepare_greedy_v2_dataset(
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_multi_strategy_validation.py | LINE 18 | from greedy_v2_data import prepare_greedy_v2_dataset
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_multi_strategy_validation.py | LINE 129 | dataset = prepare_greedy_v2_dataset(
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_walk_forward_cost_validation.backup_20261109_130430.py | LINE 9 | from greedy_v2_data import prepare_greedy_v2_dataset
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_walk_forward_cost_validation.backup_20261109_130430.py | LINE 117 | dataset = prepare_greedy_v2_dataset(
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_walk_forward_cost_validation.py | LINE 9 | from greedy_v2_data import prepare_greedy_v2_dataset
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_walk_forward_cost_validation.py | LINE 117 | dataset = prepare_greedy_v2_dataset(
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\backend\portfolio_routes.py | LINE 16 | from analytics.greedy_v2_data import prepare_greedy_v2_dataset
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\backend\portfolio_routes.py | LINE 67 | dataset = prepare_greedy_v2_dataset(
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\backend\portfolio_routes.py | LINE 238 | from analytics.greedy_v2_data import prepare_greedy_v2_dataset
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\backend\portfolio_routes.py | LINE 327 | dataset = prepare_greedy_v2_dataset(
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\algorithm_integration_audit.json | LINE 837 | "text": "def prepare_greedy_v2_dataset("
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\algorithm_integration_audit.json | LINE 849 | "text": "dataset = prepare_greedy_v2_dataset()"
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\algorithm_integration_audit.json | LINE 1133 | "text": "from analytics.greedy_v2_data import prepare_greedy_v2_dataset"
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\algorithm_integration_audit.json | LINE 1157 | "text": "dataset = prepare_greedy_v2_dataset(\"2025-04-01\", \"2026-11-05\")"
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\algorithm_integration_audit.json | LINE 1213 | "text": "from greedy_v2_data import prepare_greedy_v2_dataset"
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\algorithm_integration_audit.json | LINE 1229 | "text": "dataset = prepare_greedy_v2_dataset("
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\algorithm_integration_audit.json | LINE 1275 | "text": "from analytics.greedy_v2_data import prepare_greedy_v2_dataset"
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\algorithm_integration_audit.json | LINE 1319 | "text": "dataset = prepare_greedy_v2_dataset("
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\algorithm_integration_audit.json | LINE 1397 | "text": "from analytics.greedy_v2_data import prepare_greedy_v2_dataset"
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\algorithm_integration_audit.json | LINE 1417 | "text": "dataset = prepare_greedy_v2_dataset("
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\algorithm_integration_audit.json | LINE 1475 | "text": "from analytics.greedy_v2_data import prepare_greedy_v2_dataset"
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\algorithm_integration_audit.json | LINE 1495 | "text": "dataset = prepare_greedy_v2_dataset("
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\algorithm_integration_audit.json | LINE 1573 | "text": "from analytics.greedy_v2_data import prepare_greedy_v2_dataset"
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\algorithm_integration_audit.json | LINE 1593 | "text": "dataset = prepare_greedy_v2_dataset("
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\algorithm_integration_audit.json | LINE 1741 | "text": "from greedy_v2_data import prepare_greedy_v2_dataset"
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\algorithm_integration_audit.json | LINE 1773 | "text": "dataset = prepare_greedy_v2_dataset("
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\algorithm_integration_audit.json | LINE 1877 | "text": "from greedy_v2_data import prepare_greedy_v2_dataset"
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\algorithm_integration_audit.json | LINE 1889 | "text": "dataset = prepare_greedy_v2_dataset("
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\algorithm_integration_audit.json | LINE 1923 | "text": "from greedy_v2_data import prepare_greedy_v2_dataset"
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\algorithm_integration_audit.json | LINE 1935 | "text": "dataset = prepare_greedy_v2_dataset("
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\algorithm_integration_audit.json | LINE 2981 | "text": "from analytics.greedy_v2_data import prepare_greedy_v2_dataset"
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\algorithm_integration_audit.json | LINE 3001 | "text": "dataset = prepare_greedy_v2_dataset("
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\algorithm_integration_audit.json | LINE 3021 | "text": "from analytics.greedy_v2_data import prepare_greedy_v2_dataset"
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\algorithm_integration_audit.json | LINE 3041 | "text": "dataset = prepare_greedy_v2_dataset("
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\final_integration_source_20261109_235509.txt | LINE 387 | def prepare_greedy_v2_dataset(
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\final_integration_source_20261109_235509.txt | LINE 531 | dataset = prepare_greedy_v2_dataset()
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\final_integration_source_20261109_235509.txt | LINE 674 | from analytics.greedy_v2_data import prepare_greedy_v2_dataset
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\final_integration_source_20261109_235509.txt | LINE 930 | dataset = prepare_greedy_v2_dataset(
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\final_integration_source_20261109_235509.txt | LINE 1353 | from analytics.greedy_v2_data import prepare_greedy_v2_dataset
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\final_integration_source_20261109_235509.txt | LINE 1497 | dataset = prepare_greedy_v2_dataset("2025-04-01", "2026-11-05")
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\final_integration_source_20261109_235509.txt | LINE 1589 | from analytics.greedy_v2_data import prepare_greedy_v2_dataset
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\final_integration_source_20261109_235509.txt | LINE 1704 | dataset = prepare_greedy_v2_dataset(
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\final_integration_source_20261109_235535.txt | LINE 388 | def prepare_greedy_v2_dataset(
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\final_integration_source_20261109_235535.txt | LINE 532 | dataset = prepare_greedy_v2_dataset()
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\final_integration_source_20261109_235535.txt | LINE 677 | from analytics.greedy_v2_data import prepare_greedy_v2_dataset
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\final_integration_source_20261109_235535.txt | LINE 933 | dataset = prepare_greedy_v2_dataset(
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\final_integration_source_20261109_235535.txt | LINE 1358 | from analytics.greedy_v2_data import prepare_greedy_v2_dataset
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\final_integration_source_20261109_235535.txt | LINE 1502 | dataset = prepare_greedy_v2_dataset("2025-04-01", "2026-11-05")
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\final_integration_source_20261109_235535.txt | LINE 1595 | from analytics.greedy_v2_data import prepare_greedy_v2_dataset
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\final_integration_source_20261109_235535.txt | LINE 1710 | dataset = prepare_greedy_v2_dataset(
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\final_integration_source_20261109_235535.txt | LINE 4739 | def prepare_greedy_v2_dataset(
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\final_integration_source_20261109_235535.txt | LINE 4883 | dataset = prepare_greedy_v2_dataset()
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\final_integration_source_20261109_235535.txt | LINE 5026 | from analytics.greedy_v2_data import prepare_greedy_v2_dataset
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\final_integration_source_20261109_235535.txt | LINE 5282 | dataset = prepare_greedy_v2_dataset(
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\final_integration_source_20261109_235535.txt | LINE 5705 | from analytics.greedy_v2_data import prepare_greedy_v2_dataset
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\final_integration_source_20261109_235535.txt | LINE 5849 | dataset = prepare_greedy_v2_dataset("2025-04-01", "2026-11-05")
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\final_integration_source_20261109_235535.txt | LINE 5941 | from analytics.greedy_v2_data import prepare_greedy_v2_dataset
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\final_integration_source_20261109_235535.txt | LINE 6056 | dataset = prepare_greedy_v2_dataset(
+
+========== GREEDY_V2_CHRONOLOGICAL ==========
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\ask_greedy_final_wiring_audit.txt | LINE 1738 | experiment = GREEDY_V2_CHRONOLOGICAL
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\greedy_lab_frontend_bundle.txt | LINE 2636 | "experiment": "GREEDY_V2_CHRONOLOGICAL",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\greedy_lab_frontend_bundle.txt | LINE 3180 | "experiment": "GREEDY_V2_CHRONOLOGICAL",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\greedy_lab_frontend_bundle.txt | LINE 3726 | "experiment": "GREEDY_V2_CHRONOLOGICAL",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\greedy_strategy_source_bundle.txt | LINE 932 | "experiment": "GREEDY_V2_CHRONOLOGICAL",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\strategy_experiment_preflight.txt | LINE 571 | "experiment": "GREEDY_V2_CHRONOLOGICAL",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_greedy_v2_experiment.backup_20261109_124456.py | LINE 298 | "experiment": "GREEDY_V2_CHRONOLOGICAL",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_greedy_v2_experiment.backup_sparse_20261109_124756.py | LINE 389 | "experiment": "GREEDY_V2_CHRONOLOGICAL",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_greedy_v2_experiment.py | LINE 391 | "experiment": "GREEDY_V2_CHRONOLOGICAL",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\greedy_v2_experiment.json | LINE 2 | "experiment": "GREEDY_V2_CHRONOLOGICAL",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\algorithm_integration_audit.json | LINE 1445 | "text": "\"experiment\": \"GREEDY_V2_CHRONOLOGICAL\","
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\algorithm_integration_audit.json | LINE 1543 | "text": "\"experiment\": \"GREEDY_V2_CHRONOLOGICAL\","
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\algorithm_integration_audit.json | LINE 1641 | "text": "\"experiment\": \"GREEDY_V2_CHRONOLOGICAL\","
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\algorithm_integration_audit.json | LINE 5063 | "text": "\"experiment\": \"GREEDY_V2_CHRONOLOGICAL\","
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\algorithm_integration_audit.json | LINE 5241 | "text": "\"experiment\": \"GREEDY_V2_CHRONOLOGICAL\","
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\algorithm_integration_audit.json | LINE 5387 | "text": "\"experiment\": \"GREEDY_V2_CHRONOLOGICAL\","
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\final_integration_source_20261109_235509.txt | LINE 1970 | "experiment": "GREEDY_V2_CHRONOLOGICAL",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\final_integration_source_20261109_235535.txt | LINE 1976 | "experiment": "GREEDY_V2_CHRONOLOGICAL",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\final_integration_source_20261109_235535.txt | LINE 6322 | "experiment": "GREEDY_V2_CHRONOLOGICAL",
+
+========== 2025-04-01 ==========
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\ask_greedy_final_wiring_audit.txt | LINE 724 | start_date="2025-04-01",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\ask_greedy_final_wiring_audit.txt | LINE 1858 | 1 EXPANDING                   GREEDY_V2                    120     2025-04-01   2025-09-23 2025-09-24 2025-11-07                                                                                                                                                                                                                                                                                                                                      ETERNAL,MARUTI,BEL,EICHERMOT,HINDUNILVR,M&M,SBILIFE,TITAN,APOLLOHOSP,JIOFIN
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\ask_greedy_final_wiring_audit.txt | LINE 1859 | 1 EXPANDING TOP10_INDEX_WEIGHT_SELECTED                    120     2025-04-01   2025-09-23 2025-09-24 2025-11-07                                                                                                                                                                                                                                                                                                                                      HDFCBANK,ICICIBANK,RELIANCE,BHARTIARTL,LT,INFY,SBIN,AXISBANK,ITC,BAJFINANCE
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\ask_greedy_final_wiring_audit.txt | LINE 1860 | 1 EXPANDING       EQUAL_WEIGHT_UNIVERSE                    120     2025-04-01   2025-09-23 2025-09-24 2025-11-07 ADANIENT,ADANIPORTS,APOLLOHOSP,ASIANPAINT,AXISBANK,BAJAJ-AUTO,BAJAJFINSV,BAJFINANCE,BEL,BHARTIARTL,BSE,CIPLA,COALINDIA,DRREDDY,EICHERMOT,ETERNAL,GRASIM,HCLTECH,HDFCBANK,HDFCLIFE,HINDALCO,HINDUNILVR,ICICIBANK,INDIGO,INFY,ITC,JIOFIN,JSWSTEEL,KOTAKBANK,LT,M&M,MARUTI,MAXHEALTH,NESTLEIND,NTPC,ONGC,POWERGRID,RELIANCE,SBILIFE,SBIN,SHRIRAMFIN,SUNPHARMA,TATACONSUM,TATASTEEL,TCS,TECHM,TITAN,TRENT,ULTRACEMCO
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\ask_greedy_final_wiring_audit.txt | LINE 1864 | date_start = 2025-04-01
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\greedy_lab_frontend_bundle.txt | LINE 17 | START = "2025-04-01"
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\greedy_lab_frontend_bundle.txt | LINE 1433 | dataset = prepare_greedy_v2_dataset("2025-04-01", "2026-11-05")
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\greedy_lab_frontend_bundle.txt | LINE 1748 | start_date="2025-04-01",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\greedy_lab_frontend_bundle.txt | LINE 2186 | start_date="2025-04-01",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\greedy_lab_frontend_bundle.txt | LINE 2463 | start_date="2025-04-01",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\greedy_lab_frontend_bundle.txt | LINE 2917 | start_date="2025-04-01",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\greedy_lab_frontend_bundle.txt | LINE 3461 | start_date="2025-04-01",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\greedy_lab_frontend_bundle.txt | LINE 4418 | START_DATE = "2025-04-01"
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\greedy_strategy_source_bundle.txt | LINE 667 | start_date="2025-04-01",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\PHASE4_CHECKPOINT2_CODE_MAP.txt | LINE 128 | 154:             start_date="2025-04-01",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\PHASE4_DATABASE_SNAPSHOT.txt | LINE 143 | DATE RANGE [first_observed_month]: 2025-04-01 -> 2026-09-01
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\PHASE4_DATABASE_SNAPSHOT.txt | LINE 171 | DATE RANGE [report_month]: 2025-04-01 -> 2026-10-01
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\PHASE4_DEEP_INTEGRITY_AUDIT.txt | LINE 98 | NSE CM-UDiFF EQ - historical ticker ZOMATO | 6 | 2025-04-01 | 2025-04-08
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\PHASE4_DEEP_INTEGRITY_AUDIT.txt | LINE 155 | NIFTY 50 | 2025-04-01 | 50 | 50 | 1
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\PHASE4_DEEP_INTEGRITY_AUDIT.txt | LINE 331 | NIFTY 50 | ADANIENT | 2025-04-01 | 2026-10-01 | 19 | 0 | CONTIGUOUS | OBSERVATION_BOUNDARY_ONLY | OBSERVATION_BOUNDARY_ONLY | NIFTY 50 Monthly Constituent Reports
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\PHASE4_DEEP_INTEGRITY_AUDIT.txt | LINE 332 | NIFTY 50 | ADANIPORTS | 2025-04-01 | 2026-10-01 | 19 | 0 | CONTIGUOUS | OBSERVATION_BOUNDARY_ONLY | OBSERVATION_BOUNDARY_ONLY | NIFTY 50 Monthly Constituent Reports
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\PHASE4_DEEP_INTEGRITY_AUDIT.txt | LINE 333 | NIFTY 50 | APOLLOHOSP | 2025-04-01 | 2026-10-01 | 19 | 0 | CONTIGUOUS | OBSERVATION_BOUNDARY_ONLY | OBSERVATION_BOUNDARY_ONLY | NIFTY 50 Monthly Constituent Reports
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\PHASE4_DEEP_INTEGRITY_AUDIT.txt | LINE 334 | NIFTY 50 | ASIANPAINT | 2025-04-01 | 2026-10-01 | 19 | 0 | CONTIGUOUS | OBSERVATION_BOUNDARY_ONLY | OBSERVATION_BOUNDARY_ONLY | NIFTY 50 Monthly Constituent Reports
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\PHASE4_DEEP_INTEGRITY_AUDIT.txt | LINE 335 | NIFTY 50 | AXISBANK | 2025-04-01 | 2026-10-01 | 19 | 0 | CONTIGUOUS | OBSERVATION_BOUNDARY_ONLY | OBSERVATION_BOUNDARY_ONLY | NIFTY 50 Monthly Constituent Reports
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\PHASE4_DEEP_INTEGRITY_AUDIT.txt | LINE 336 | NIFTY 50 | BAJAJ-AUTO | 2025-04-01 | 2026-10-01 | 19 | 0 | CONTIGUOUS | OBSERVATION_BOUNDARY_ONLY | OBSERVATION_BOUNDARY_ONLY | NIFTY 50 Monthly Constituent Reports
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\PHASE4_DEEP_INTEGRITY_AUDIT.txt | LINE 337 | NIFTY 50 | BAJAJFINSV | 2025-04-01 | 2026-10-01 | 19 | 0 | CONTIGUOUS | OBSERVATION_BOUNDARY_ONLY | OBSERVATION_BOUNDARY_ONLY | NIFTY 50 Monthly Constituent Reports
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\PHASE4_DEEP_INTEGRITY_AUDIT.txt | LINE 338 | NIFTY 50 | BAJFINANCE | 2025-04-01 | 2026-10-01 | 19 | 0 | CONTIGUOUS | OBSERVATION_BOUNDARY_ONLY | OBSERVATION_BOUNDARY_ONLY | NIFTY 50 Monthly Constituent Reports
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\PHASE4_DEEP_INTEGRITY_AUDIT.txt | LINE 339 | NIFTY 50 | BEL | 2025-04-01 | 2026-10-01 | 19 | 0 | CONTIGUOUS | OBSERVATION_BOUNDARY_ONLY | OBSERVATION_BOUNDARY_ONLY | NIFTY 50 Monthly Constituent Reports
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\PHASE4_DEEP_INTEGRITY_AUDIT.txt | LINE 340 | NIFTY 50 | BHARTIARTL | 2025-04-01 | 2026-10-01 | 19 | 0 | CONTIGUOUS | OBSERVATION_BOUNDARY_ONLY | OBSERVATION_BOUNDARY_ONLY | NIFTY 50 Monthly Constituent Reports
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\PHASE4_DEEP_INTEGRITY_AUDIT.txt | LINE 342 | NIFTY 50 | CIPLA | 2025-04-01 | 2026-10-01 | 19 | 0 | CONTIGUOUS | OBSERVATION_BOUNDARY_ONLY | OBSERVATION_BOUNDARY_ONLY | NIFTY 50 Monthly Constituent Reports
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\PHASE4_DEEP_INTEGRITY_AUDIT.txt | LINE 343 | NIFTY 50 | COALINDIA | 2025-04-01 | 2026-10-01 | 19 | 0 | CONTIGUOUS | OBSERVATION_BOUNDARY_ONLY | OBSERVATION_BOUNDARY_ONLY | NIFTY 50 Monthly Constituent Reports
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\PHASE4_DEEP_INTEGRITY_AUDIT.txt | LINE 344 | NIFTY 50 | DRREDDY | 2025-04-01 | 2026-10-01 | 19 | 0 | CONTIGUOUS | OBSERVATION_BOUNDARY_ONLY | OBSERVATION_BOUNDARY_ONLY | NIFTY 50 Monthly Constituent Reports
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\PHASE4_DEEP_INTEGRITY_AUDIT.txt | LINE 345 | NIFTY 50 | EICHERMOT | 2025-04-01 | 2026-10-01 | 19 | 0 | CONTIGUOUS | OBSERVATION_BOUNDARY_ONLY | OBSERVATION_BOUNDARY_ONLY | NIFTY 50 Monthly Constituent Reports
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\PHASE4_DEEP_INTEGRITY_AUDIT.txt | LINE 346 | NIFTY 50 | ETERNAL | 2025-04-01 | 2026-10-01 | 19 | 0 | CONTIGUOUS | OBSERVATION_BOUNDARY_ONLY | OBSERVATION_BOUNDARY_ONLY | NIFTY 50 Monthly Constituent Reports
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\PHASE4_DEEP_INTEGRITY_AUDIT.txt | LINE 347 | NIFTY 50 | GRASIM | 2025-04-01 | 2026-10-01 | 19 | 0 | CONTIGUOUS | OBSERVATION_BOUNDARY_ONLY | OBSERVATION_BOUNDARY_ONLY | NIFTY 50 Monthly Constituent Reports
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\PHASE4_DEEP_INTEGRITY_AUDIT.txt | LINE 348 | NIFTY 50 | HCLTECH | 2025-04-01 | 2026-10-01 | 19 | 0 | CONTIGUOUS | OBSERVATION_BOUNDARY_ONLY | OBSERVATION_BOUNDARY_ONLY | NIFTY 50 Monthly Constituent Reports
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\PHASE4_DEEP_INTEGRITY_AUDIT.txt | LINE 349 | NIFTY 50 | HDFCBANK | 2025-04-01 | 2026-10-01 | 19 | 0 | CONTIGUOUS | OBSERVATION_BOUNDARY_ONLY | OBSERVATION_BOUNDARY_ONLY | NIFTY 50 Monthly Constituent Reports
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\PHASE4_DEEP_INTEGRITY_AUDIT.txt | LINE 350 | NIFTY 50 | HDFCLIFE | 2025-04-01 | 2026-10-01 | 19 | 0 | CONTIGUOUS | OBSERVATION_BOUNDARY_ONLY | OBSERVATION_BOUNDARY_ONLY | NIFTY 50 Monthly Constituent Reports
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\PHASE4_DEEP_INTEGRITY_AUDIT.txt | LINE 351 | NIFTY 50 | HEROMOTOCO | 2025-04-01 | 2025-08-01 | 5 | 0 | CONTIGUOUS | OBSERVATION_BOUNDARY_ONLY | OBSERVATION_BOUNDARY_ONLY | NIFTY 50 Monthly Constituent Reports
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\PHASE4_DEEP_INTEGRITY_AUDIT.txt | LINE 352 | NIFTY 50 | HINDALCO | 2025-04-01 | 2026-10-01 | 19 | 0 | CONTIGUOUS | OBSERVATION_BOUNDARY_ONLY | OBSERVATION_BOUNDARY_ONLY | NIFTY 50 Monthly Constituent Reports
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\PHASE4_DEEP_INTEGRITY_AUDIT.txt | LINE 353 | NIFTY 50 | HINDUNILVR | 2025-04-01 | 2026-10-01 | 19 | 0 | CONTIGUOUS | OBSERVATION_BOUNDARY_ONLY | OBSERVATION_BOUNDARY_ONLY | NIFTY 50 Monthly Constituent Reports
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\PHASE4_DEEP_INTEGRITY_AUDIT.txt | LINE 354 | NIFTY 50 | ICICIBANK | 2025-04-01 | 2026-10-01 | 19 | 0 | CONTIGUOUS | OBSERVATION_BOUNDARY_ONLY | OBSERVATION_BOUNDARY_ONLY | NIFTY 50 Monthly Constituent Reports
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\PHASE4_DEEP_INTEGRITY_AUDIT.txt | LINE 356 | NIFTY 50 | INDUSINDBK | 2025-04-01 | 2025-08-01 | 5 | 0 | CONTIGUOUS | OBSERVATION_BOUNDARY_ONLY | OBSERVATION_BOUNDARY_ONLY | NIFTY 50 Monthly Constituent Reports
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\PHASE4_DEEP_INTEGRITY_AUDIT.txt | LINE 357 | NIFTY 50 | INFY | 2025-04-01 | 2026-10-01 | 19 | 0 | CONTIGUOUS | OBSERVATION_BOUNDARY_ONLY | OBSERVATION_BOUNDARY_ONLY | NIFTY 50 Monthly Constituent Reports
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\PHASE4_DEEP_INTEGRITY_AUDIT.txt | LINE 358 | NIFTY 50 | ITC | 2025-04-01 | 2026-10-01 | 19 | 0 | CONTIGUOUS | OBSERVATION_BOUNDARY_ONLY | OBSERVATION_BOUNDARY_ONLY | NIFTY 50 Monthly Constituent Reports
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\PHASE4_DEEP_INTEGRITY_AUDIT.txt | LINE 359 | NIFTY 50 | JIOFIN | 2025-04-01 | 2026-10-01 | 19 | 0 | CONTIGUOUS | OBSERVATION_BOUNDARY_ONLY | OBSERVATION_BOUNDARY_ONLY | NIFTY 50 Monthly Constituent Reports
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\PHASE4_DEEP_INTEGRITY_AUDIT.txt | LINE 360 | NIFTY 50 | JSWSTEEL | 2025-04-01 | 2026-10-01 | 19 | 0 | CONTIGUOUS | OBSERVATION_BOUNDARY_ONLY | OBSERVATION_BOUNDARY_ONLY | NIFTY 50 Monthly Constituent Reports
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\PHASE4_DEEP_INTEGRITY_AUDIT.txt | LINE 361 | NIFTY 50 | KOTAKBANK | 2025-04-01 | 2026-10-01 | 19 | 0 | CONTIGUOUS | OBSERVATION_BOUNDARY_ONLY | OBSERVATION_BOUNDARY_ONLY | NIFTY 50 Monthly Constituent Reports
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\PHASE4_DEEP_INTEGRITY_AUDIT.txt | LINE 362 | NIFTY 50 | LT | 2025-04-01 | 2026-10-01 | 19 | 0 | CONTIGUOUS | OBSERVATION_BOUNDARY_ONLY | OBSERVATION_BOUNDARY_ONLY | NIFTY 50 Monthly Constituent Reports
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\PHASE4_DEEP_INTEGRITY_AUDIT.txt | LINE 363 | NIFTY 50 | M&M | 2025-04-01 | 2026-10-01 | 19 | 0 | CONTIGUOUS | OBSERVATION_BOUNDARY_ONLY | OBSERVATION_BOUNDARY_ONLY | NIFTY 50 Monthly Constituent Reports
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\PHASE4_DEEP_INTEGRITY_AUDIT.txt | LINE 364 | NIFTY 50 | MARUTI | 2025-04-01 | 2026-10-01 | 19 | 0 | CONTIGUOUS | OBSERVATION_BOUNDARY_ONLY | OBSERVATION_BOUNDARY_ONLY | NIFTY 50 Monthly Constituent Reports
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\PHASE4_DEEP_INTEGRITY_AUDIT.txt | LINE 366 | NIFTY 50 | NESTLEIND | 2025-04-01 | 2026-10-01 | 19 | 0 | CONTIGUOUS | OBSERVATION_BOUNDARY_ONLY | OBSERVATION_BOUNDARY_ONLY | NIFTY 50 Monthly Constituent Reports
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\PHASE4_DEEP_INTEGRITY_AUDIT.txt | LINE 367 | NIFTY 50 | NTPC | 2025-04-01 | 2026-10-01 | 19 | 0 | CONTIGUOUS | OBSERVATION_BOUNDARY_ONLY | OBSERVATION_BOUNDARY_ONLY | NIFTY 50 Monthly Constituent Reports
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\PHASE4_DEEP_INTEGRITY_AUDIT.txt | LINE 368 | NIFTY 50 | ONGC | 2025-04-01 | 2026-10-01 | 19 | 0 | CONTIGUOUS | OBSERVATION_BOUNDARY_ONLY | OBSERVATION_BOUNDARY_ONLY | NIFTY 50 Monthly Constituent Reports
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\PHASE4_DEEP_INTEGRITY_AUDIT.txt | LINE 369 | NIFTY 50 | POWERGRID | 2025-04-01 | 2026-10-01 | 19 | 0 | CONTIGUOUS | OBSERVATION_BOUNDARY_ONLY | OBSERVATION_BOUNDARY_ONLY | NIFTY 50 Monthly Constituent Reports
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\PHASE4_DEEP_INTEGRITY_AUDIT.txt | LINE 370 | NIFTY 50 | RELIANCE | 2025-04-01 | 2026-10-01 | 19 | 0 | CONTIGUOUS | OBSERVATION_BOUNDARY_ONLY | OBSERVATION_BOUNDARY_ONLY | NIFTY 50 Monthly Constituent Reports
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\PHASE4_DEEP_INTEGRITY_AUDIT.txt | LINE 371 | NIFTY 50 | SBILIFE | 2025-04-01 | 2026-10-01 | 19 | 0 | CONTIGUOUS | OBSERVATION_BOUNDARY_ONLY | OBSERVATION_BOUNDARY_ONLY | NIFTY 50 Monthly Constituent Reports
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\PHASE4_DEEP_INTEGRITY_AUDIT.txt | LINE 372 | NIFTY 50 | SBIN | 2025-04-01 | 2026-10-01 | 19 | 0 | CONTIGUOUS | OBSERVATION_BOUNDARY_ONLY | OBSERVATION_BOUNDARY_ONLY | NIFTY 50 Monthly Constituent Reports
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\PHASE4_DEEP_INTEGRITY_AUDIT.txt | LINE 373 | NIFTY 50 | SHRIRAMFIN | 2025-04-01 | 2026-10-01 | 19 | 0 | CONTIGUOUS | OBSERVATION_BOUNDARY_ONLY | OBSERVATION_BOUNDARY_ONLY | NIFTY 50 Monthly Constituent Reports
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\PHASE4_DEEP_INTEGRITY_AUDIT.txt | LINE 374 | NIFTY 50 | SUNPHARMA | 2025-04-01 | 2026-10-01 | 19 | 0 | CONTIGUOUS | OBSERVATION_BOUNDARY_ONLY | OBSERVATION_BOUNDARY_ONLY | NIFTY 50 Monthly Constituent Reports
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\PHASE4_DEEP_INTEGRITY_AUDIT.txt | LINE 375 | NIFTY 50 | TATACONSUM | 2025-04-01 | 2026-10-01 | 19 | 0 | CONTIGUOUS | OBSERVATION_BOUNDARY_ONLY | OBSERVATION_BOUNDARY_ONLY | NIFTY 50 Monthly Constituent Reports
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\PHASE4_DEEP_INTEGRITY_AUDIT.txt | LINE 376 | NIFTY 50 | TATAMOTORS | 2025-04-01 | 2025-09-01 | 6 | 0 | CONTIGUOUS | OBSERVATION_BOUNDARY_ONLY | OBSERVATION_BOUNDARY_ONLY | NIFTY 50 Monthly Constituent Reports
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\PHASE4_DEEP_INTEGRITY_AUDIT.txt | LINE 377 | NIFTY 50 | TATASTEEL | 2025-04-01 | 2026-10-01 | 19 | 0 | CONTIGUOUS | OBSERVATION_BOUNDARY_ONLY | OBSERVATION_BOUNDARY_ONLY | NIFTY 50 Monthly Constituent Reports
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\PHASE4_DEEP_INTEGRITY_AUDIT.txt | LINE 378 | NIFTY 50 | TCS | 2025-04-01 | 2026-10-01 | 19 | 0 | CONTIGUOUS | OBSERVATION_BOUNDARY_ONLY | OBSERVATION_BOUNDARY_ONLY | NIFTY 50 Monthly Constituent Reports
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\PHASE4_DEEP_INTEGRITY_AUDIT.txt | LINE 379 | NIFTY 50 | TECHM | 2025-04-01 | 2026-10-01 | 19 | 0 | CONTIGUOUS | OBSERVATION_BOUNDARY_ONLY | OBSERVATION_BOUNDARY_ONLY | NIFTY 50 Monthly Constituent Reports
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\PHASE4_DEEP_INTEGRITY_AUDIT.txt | LINE 380 | NIFTY 50 | TITAN | 2025-04-01 | 2026-10-01 | 19 | 0 | CONTIGUOUS | OBSERVATION_BOUNDARY_ONLY | OBSERVATION_BOUNDARY_ONLY | NIFTY 50 Monthly Constituent Reports
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\PHASE4_DEEP_INTEGRITY_AUDIT.txt | LINE 382 | NIFTY 50 | TRENT | 2025-04-01 | 2026-10-01 | 19 | 0 | CONTIGUOUS | OBSERVATION_BOUNDARY_ONLY | OBSERVATION_BOUNDARY_ONLY | NIFTY 50 Monthly Constituent Reports
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\PHASE4_DEEP_INTEGRITY_AUDIT.txt | LINE 383 | NIFTY 50 | ULTRACEMCO | 2025-04-01 | 2026-10-01 | 19 | 0 | CONTIGUOUS | OBSERVATION_BOUNDARY_ONLY | OBSERVATION_BOUNDARY_ONLY | NIFTY 50 Monthly Constituent Reports
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\PHASE4_DEEP_INTEGRITY_AUDIT.txt | LINE 384 | NIFTY 50 | WIPRO | 2025-04-01 | 2026-08-01 | 17 | 0 | CONTIGUOUS | OBSERVATION_BOUNDARY_ONLY | OBSERVATION_BOUNDARY_ONLY | NIFTY 50 Monthly Constituent Reports
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\strategy_experiment_preflight.txt | LINE 602 | "requested_start_date": "2025-04-01",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\strategy_experiment_preflight.txt | LINE 604 | "actual_start_date": "2025-04-01",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\adjusted_price_adapter.py | LINE 154 | start_date="2025-04-01",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\audit_greedy_universe.py | LINE 12 | START = "2025-04-01"
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_adjusted_price_validation.py | LINE 26 | START_DATE = "2025-04-01"
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_five_greedy_strategies.py | LINE 157 | dataset = prepare_greedy_v2_dataset("2025-04-01", "2026-11-05")
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_greedy_stability.py | LINE 20 | start_date="2025-04-01",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_greedy_v2_baselines.py | LINE 269 | start_date="2025-04-01",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_greedy_v2_experiment.backup_20261109_124456.py | LINE 125 | start_date="2025-04-01",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_greedy_v2_experiment.backup_sparse_20261109_124756.py | LINE 126 | start_date="2025-04-01",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_greedy_v2_experiment.py | LINE 126 | start_date="2025-04-01",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_multi_strategy_validation.py | LINE 27 | START_DATE = "2025-04-01"
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_real_portfolio.py | LINE 16 | START_DATE = "2025-04-01"
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_walk_forward_cost_validation.backup_20261109_130430.py | LINE 15 | START_DATE = "2025-04-01"
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_walk_forward_cost_validation.py | LINE 15 | START_DATE = "2025-04-01"
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\backend\audit_phase2_final.py | LINE 194 | and str(price_summary["first_date"]) == "2025-04-01"
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\backend\fix_eternal_historical_ticker.py | LINE 158 | AND valid_from = '2025-04-01'
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\backend\fix_eternal_historical_ticker.py | LINE 171 | '2025-04-01', '2025-04-08',
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\backend\fix_eternal_historical_ticker.py | LINE 185 | print("Observed ticker dates: 2025-04-01 to 2025-04-08")
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\backend\log_phase2_reconciliation.py | LINE 20 | ("PRICE_COVERAGE", "19,557 prices; 54 instruments; 369 trading dates; 2025-04-01 to 2026-11-05."),
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\greedy_training_stability.json | LINE 192 | "training_start": "2025-04-01",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\greedy_training_stability.json | LINE 206 | "training_start": "2025-04-01",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\greedy_training_stability.json | LINE 220 | "training_start": "2025-04-01",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\greedy_training_stability.json | LINE 234 | "training_start": "2025-04-01",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\greedy_v2_baseline_comparison.json | LINE 24 | "requested_start_date": "2025-04-01",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\greedy_v2_baseline_comparison.json | LINE 96 | "first_date": "2025-04-01T00:00:00",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\greedy_v2_baseline_comparison.json | LINE 104 | "first_date": "2025-04-01T00:00:00",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\greedy_v2_baseline_comparison.json | LINE 112 | "first_date": "2025-04-01T00:00:00",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\greedy_v2_baseline_comparison.json | LINE 120 | "first_date": "2025-04-01T00:00:00",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\greedy_v2_baseline_comparison.json | LINE 128 | "first_date": "2025-04-01T00:00:00",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\greedy_v2_baseline_comparison.json | LINE 136 | "first_date": "2025-04-01T00:00:00",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\greedy_v2_baseline_comparison.json | LINE 144 | "first_date": "2025-04-01T00:00:00",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\greedy_v2_baseline_comparison.json | LINE 152 | "first_date": "2025-04-01T00:00:00",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\greedy_v2_baseline_comparison.json | LINE 160 | "first_date": "2025-04-01T00:00:00",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\greedy_v2_baseline_comparison.json | LINE 168 | "first_date": "2025-04-01T00:00:00",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\greedy_v2_baseline_comparison.json | LINE 176 | "first_date": "2025-04-01T00:00:00",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\greedy_v2_baseline_comparison.json | LINE 184 | "first_date": "2025-04-01T00:00:00",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\greedy_v2_baseline_comparison.json | LINE 192 | "first_date": "2025-04-01T00:00:00",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\greedy_v2_baseline_comparison.json | LINE 200 | "first_date": "2025-04-01T00:00:00",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\greedy_v2_baseline_comparison.json | LINE 208 | "first_date": "2025-04-01T00:00:00",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\greedy_v2_baseline_comparison.json | LINE 216 | "first_date": "2025-04-01T00:00:00",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\greedy_v2_baseline_comparison.json | LINE 224 | "first_date": "2025-04-01T00:00:00",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\greedy_v2_baseline_comparison.json | LINE 232 | "first_date": "2025-04-01T00:00:00",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\greedy_v2_baseline_comparison.json | LINE 240 | "first_date": "2025-04-01T00:00:00",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\greedy_v2_baseline_comparison.json | LINE 248 | "first_date": "2025-04-01T00:00:00",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\greedy_v2_baseline_comparison.json | LINE 256 | "first_date": "2025-04-01T00:00:00",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\greedy_v2_baseline_comparison.json | LINE 264 | "first_date": "2025-04-01T00:00:00",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\greedy_v2_baseline_comparison.json | LINE 272 | "first_date": "2025-04-01T00:00:00",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\greedy_v2_baseline_comparison.json | LINE 280 | "first_date": "2025-04-01T00:00:00",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\greedy_v2_baseline_comparison.json | LINE 288 | "first_date": "2025-04-01T00:00:00",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\greedy_v2_baseline_comparison.json | LINE 296 | "first_date": "2025-04-01T00:00:00",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\greedy_v2_baseline_comparison.json | LINE 304 | "first_date": "2025-04-01T00:00:00",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\greedy_v2_baseline_comparison.json | LINE 312 | "first_date": "2025-04-01T00:00:00",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\greedy_v2_baseline_comparison.json | LINE 320 | "first_date": "2025-04-01T00:00:00",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\greedy_v2_baseline_comparison.json | LINE 328 | "first_date": "2025-04-01T00:00:00",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\greedy_v2_baseline_comparison.json | LINE 336 | "first_date": "2025-04-01T00:00:00",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\greedy_v2_baseline_comparison.json | LINE 344 | "first_date": "2025-04-01T00:00:00",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\greedy_v2_baseline_comparison.json | LINE 352 | "first_date": "2025-04-01T00:00:00",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\greedy_v2_baseline_comparison.json | LINE 360 | "first_date": "2025-04-01T00:00:00",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\greedy_v2_baseline_comparison.json | LINE 368 | "first_date": "2025-04-01T00:00:00",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\greedy_v2_baseline_comparison.json | LINE 376 | "first_date": "2025-04-01T00:00:00",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\greedy_v2_baseline_comparison.json | LINE 384 | "first_date": "2025-04-01T00:00:00",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\greedy_v2_baseline_comparison.json | LINE 392 | "first_date": "2025-04-01T00:00:00",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\greedy_v2_baseline_comparison.json | LINE 400 | "first_date": "2025-04-01T00:00:00",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\greedy_v2_baseline_comparison.json | LINE 408 | "first_date": "2025-04-01T00:00:00",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\greedy_v2_baseline_comparison.json | LINE 416 | "first_date": "2025-04-01T00:00:00",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\greedy_v2_baseline_comparison.json | LINE 424 | "first_date": "2025-04-01T00:00:00",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\greedy_v2_baseline_comparison.json | LINE 432 | "first_date": "2025-04-01T00:00:00",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\greedy_v2_baseline_comparison.json | LINE 440 | "first_date": "2025-04-01T00:00:00",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\greedy_v2_baseline_comparison.json | LINE 448 | "first_date": "2025-04-01T00:00:00",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\greedy_v2_baseline_comparison.json | LINE 456 | "first_date": "2025-04-01T00:00:00",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\greedy_v2_baseline_comparison.json | LINE 464 | "first_date": "2025-04-01T00:00:00",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\greedy_v2_baseline_comparison.json | LINE 480 | "first_date": "2025-04-01T00:00:00",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\greedy_v2_baseline_comparison.json | LINE 488 | "first_date": "2025-04-01T00:00:00",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\greedy_v2_experiment.json | LINE 33 | "requested_start_date": "2025-04-01",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\greedy_v2_experiment.json | LINE 35 | "actual_start_date": "2025-04-01",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\greedy_v2_experiment.json | LINE 139 | "first_date": "2025-04-01T00:00:00",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\greedy_v2_experiment.json | LINE 145 | "first_date": "2025-04-01T00:00:00",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\greedy_v2_experiment.json | LINE 151 | "first_date": "2025-04-01T00:00:00",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\greedy_v2_experiment.json | LINE 157 | "first_date": "2025-04-01T00:00:00",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\greedy_v2_experiment.json | LINE 163 | "first_date": "2025-04-01T00:00:00",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\greedy_v2_experiment.json | LINE 169 | "first_date": "2025-04-01T00:00:00",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\greedy_v2_experiment.json | LINE 175 | "first_date": "2025-04-01T00:00:00",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\greedy_v2_experiment.json | LINE 181 | "first_date": "2025-04-01T00:00:00",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\greedy_v2_experiment.json | LINE 187 | "first_date": "2025-04-01T00:00:00",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\greedy_v2_experiment.json | LINE 193 | "first_date": "2025-04-01T00:00:00",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\greedy_v2_experiment.json | LINE 199 | "first_date": "2025-04-01T00:00:00",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\greedy_v2_experiment.json | LINE 205 | "first_date": "2025-04-01T00:00:00",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\greedy_v2_experiment.json | LINE 211 | "first_date": "2025-04-01T00:00:00",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\greedy_v2_experiment.json | LINE 217 | "first_date": "2025-04-01T00:00:00",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\greedy_v2_experiment.json | LINE 223 | "first_date": "2025-04-01T00:00:00",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\greedy_v2_experiment.json | LINE 229 | "first_date": "2025-04-01T00:00:00",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\greedy_v2_experiment.json | LINE 235 | "first_date": "2025-04-01T00:00:00",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\greedy_v2_experiment.json | LINE 241 | "first_date": "2025-04-01T00:00:00",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\greedy_v2_experiment.json | LINE 247 | "first_date": "2025-04-01T00:00:00",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\greedy_v2_experiment.json | LINE 253 | "first_date": "2025-04-01T00:00:00",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\greedy_v2_experiment.json | LINE 259 | "first_date": "2025-04-01T00:00:00",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\greedy_v2_experiment.json | LINE 265 | "first_date": "2025-04-01T00:00:00",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\greedy_v2_experiment.json | LINE 271 | "first_date": "2025-04-01T00:00:00",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\greedy_v2_experiment.json | LINE 277 | "first_date": "2025-04-01T00:00:00",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\greedy_v2_experiment.json | LINE 283 | "first_date": "2025-04-01T00:00:00",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\greedy_v2_experiment.json | LINE 289 | "first_date": "2025-04-01T00:00:00",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\greedy_v2_experiment.json | LINE 295 | "first_date": "2025-04-01T00:00:00",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\greedy_v2_experiment.json | LINE 301 | "first_date": "2025-04-01T00:00:00",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\greedy_v2_experiment.json | LINE 307 | "first_date": "2025-04-01T00:00:00",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\greedy_v2_experiment.json | LINE 313 | "first_date": "2025-04-01T00:00:00",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\greedy_v2_experiment.json | LINE 319 | "first_date": "2025-04-01T00:00:00",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\greedy_v2_experiment.json | LINE 325 | "first_date": "2025-04-01T00:00:00",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\greedy_v2_experiment.json | LINE 331 | "first_date": "2025-04-01T00:00:00",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\greedy_v2_experiment.json | LINE 337 | "first_date": "2025-04-01T00:00:00",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\greedy_v2_experiment.json | LINE 343 | "first_date": "2025-04-01T00:00:00",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\greedy_v2_experiment.json | LINE 349 | "first_date": "2025-04-01T00:00:00",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\greedy_v2_experiment.json | LINE 355 | "first_date": "2025-04-01T00:00:00",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\greedy_v2_experiment.json | LINE 361 | "first_date": "2025-04-01T00:00:00",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\greedy_v2_experiment.json | LINE 367 | "first_date": "2025-04-01T00:00:00",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\greedy_v2_experiment.json | LINE 373 | "first_date": "2025-04-01T00:00:00",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\greedy_v2_experiment.json | LINE 379 | "first_date": "2025-04-01T00:00:00",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\greedy_v2_experiment.json | LINE 385 | "first_date": "2025-04-01T00:00:00",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\greedy_v2_experiment.json | LINE 391 | "first_date": "2025-04-01T00:00:00",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\greedy_v2_experiment.json | LINE 397 | "first_date": "2025-04-01T00:00:00",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\greedy_v2_experiment.json | LINE 403 | "first_date": "2025-04-01T00:00:00",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\greedy_v2_experiment.json | LINE 409 | "first_date": "2025-04-01T00:00:00",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\greedy_v2_experiment.json | LINE 415 | "first_date": "2025-04-01T00:00:00",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\greedy_v2_experiment.json | LINE 421 | "first_date": "2025-04-01T00:00:00",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\greedy_v2_experiment.json | LINE 427 | "first_date": "2025-04-01T00:00:00",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\greedy_v2_experiment.json | LINE 433 | "first_date": "2025-04-01T00:00:00",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\greedy_v2_experiment.json | LINE 439 | "first_date": "2025-04-01T00:00:00",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\greedy_v2_experiment.json | LINE 445 | "first_date": "2025-04-01T00:00:00",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\greedy_v2_experiment.json | LINE 451 | "first_date": "2025-04-01T00:00:00",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\greedy_v2_experiment.json | LINE 457 | "first_date": "2025-04-01T00:00:00",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\greedy_v2_experiment.json | LINE 463 | "first_date": "2025-04-01T00:00:00",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\greedy_v2_experiment.json | LINE 469 | "first_date": "2025-04-01T00:00:00",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\greedy_v2_experiment.json | LINE 475 | "first_date": "2025-04-01T00:00:00",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\greedy_v2_experiment.json | LINE 481 | "first_date": "2025-04-01T00:00:00",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\greedy_v2_experiment.json | LINE 487 | "first_date": "2025-04-01T00:00:00",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\greedy_v2_experiment.json | LINE 493 | "first_date": "2025-04-01T00:00:00",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\greedy_v2_experiment.json | LINE 499 | "first_date": "2025-04-01T00:00:00",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\greedy_v2_experiment.json | LINE 505 | "first_date": "2025-04-01T00:00:00",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\greedy_v2_experiment.json | LINE 511 | "first_date": "2025-04-01T00:00:00",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\greedy_v2_experiment.json | LINE 517 | "first_date": "2025-04-01T00:00:00",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\greedy_v2_experiment.json | LINE 523 | "first_date": "2025-04-01T00:00:00",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\greedy_v2_experiment.json | LINE 529 | "first_date": "2025-04-01T00:00:00",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\greedy_v2_experiment.json | LINE 535 | "first_date": "2025-04-01T00:00:00",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\greedy_v2_experiment.json | LINE 547 | "first_date": "2025-04-01T00:00:00",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\greedy_v2_experiment.json | LINE 553 | "first_date": "2025-04-01T00:00:00",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\greedy_v2_experiment.json | LINE 559 | "first_date": "2025-04-01T00:00:00",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\greedy_v2_experiment.json | LINE 565 | "first_date": "2025-04-01T00:00:00",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\greedy_v2_experiment.json | LINE 571 | "first_date": "2025-04-01T00:00:00",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\greedy_v2_experiment.json | LINE 577 | "first_date": "2025-04-01T00:00:00",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\greedy_v2_experiment.json | LINE 583 | "first_date": "2025-04-01T00:00:00",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\greedy_v2_experiment.json | LINE 594 | "train_start": "2025-04-01",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\greedy_v2_experiment.json | LINE 707 | "start_date": "2025-04-01",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\multi_strategy_validation_report.json | LINE 12 | "training_start": "2025-04-01",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\walk_forward_validation_report.json | LINE 3 | "date_start": "2025-04-01",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\five_strategy_experiment\five_strategy_comparison.json | LINE 5 | "2025-04-01",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\raw\index\bhavcopy_dates.txt | LINE 1 | 2025-04-01
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\algorithm_integration_audit.json | LINE 1157 | "text": "dataset = prepare_greedy_v2_dataset(\"2025-04-01\", \"2026-11-05\")"
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\final_integration_source_20261109_235509.txt | LINE 931 | start_date="2025-04-01",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\final_integration_source_20261109_235509.txt | LINE 1497 | dataset = prepare_greedy_v2_dataset("2025-04-01", "2026-11-05")
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\final_integration_source_20261109_235509.txt | LINE 1705 | start_date="2025-04-01",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\final_integration_source_20261109_235535.txt | LINE 934 | start_date="2025-04-01",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\final_integration_source_20261109_235535.txt | LINE 1502 | dataset = prepare_greedy_v2_dataset("2025-04-01", "2026-11-05")
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\final_integration_source_20261109_235535.txt | LINE 1711 | start_date="2025-04-01",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\final_integration_source_20261109_235535.txt | LINE 5283 | start_date="2025-04-01",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\final_integration_source_20261109_235535.txt | LINE 5849 | dataset = prepare_greedy_v2_dataset("2025-04-01", "2026-11-05")
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\final_integration_source_20261109_235535.txt | LINE 6057 | start_date="2025-04-01",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\final_integration_source_20261109_235535.txt | LINE 10023 | "first_date": "2025-04-01",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\final_integration_source_20261109_235535.txt | LINE 10778 | "month": "2025-04-01",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\final_integration_source_20261109_235535.txt | LINE 11427 | "report_month": "2025-04-01",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\final_integration_source_20261109_235535.txt | LINE 11446 | "report_month": "2025-04-01",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\final_integration_source_20261109_235535.txt | LINE 11465 | "report_month": "2025-04-01",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\final_integration_source_20261109_235535.txt | LINE 11484 | "report_month": "2025-04-01",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\final_integration_source_20261109_235535.txt | LINE 11503 | "report_month": "2025-04-01",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\final_integration_source_20261109_235535.txt | LINE 11664 | "first_observed_month": "2025-04-01",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\final_integration_source_20261109_235535.txt | LINE 11685 | "first_observed_month": "2025-04-01",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\final_integration_source_20261109_235535.txt | LINE 11706 | "first_observed_month": "2025-04-01",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\final_integration_source_20261109_235535.txt | LINE 11727 | "first_observed_month": "2025-04-01",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\final_integration_source_20261109_235535.txt | LINE 11748 | "first_observed_month": "2025-04-01",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\final_integration_source_20261109_235535.txt | LINE 11973 | "valid_from": "2025-04-01",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\final_integration_source_20261109_235535.txt | LINE 11995 | "valid_from": "2025-04-01",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\final_integration_source_20261109_235535.txt | LINE 12017 | "valid_from": "2025-04-01",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\final_integration_source_20261109_235535.txt | LINE 12060 | "report_month": "2025-04-01",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\final_integration_source_20261109_235535.txt | LINE 12061 | "comparison_date": "2025-04-01",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\final_integration_source_20261109_235535.txt | LINE 12350 | "report_month": "2025-04-01",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\historical_coverage_10y.json | LINE 1242 | "first_date": "2025-04-01",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\membership_integrity_audit.json | LINE 20 | "month": "2025-04-01",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\membership_schema_audit.json | LINE 538 | "report_month": "2025-04-01",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\membership_schema_audit.json | LINE 557 | "report_month": "2025-04-01",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\membership_schema_audit.json | LINE 576 | "report_month": "2025-04-01",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\membership_schema_audit.json | LINE 595 | "report_month": "2025-04-01",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\membership_schema_audit.json | LINE 614 | "report_month": "2025-04-01",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\membership_schema_audit.json | LINE 775 | "first_observed_month": "2025-04-01",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\membership_schema_audit.json | LINE 796 | "first_observed_month": "2025-04-01",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\membership_schema_audit.json | LINE 817 | "first_observed_month": "2025-04-01",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\membership_schema_audit.json | LINE 838 | "first_observed_month": "2025-04-01",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\membership_schema_audit.json | LINE 859 | "first_observed_month": "2025-04-01",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\membership_schema_audit.json | LINE 1084 | "valid_from": "2025-04-01",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\membership_schema_audit.json | LINE 1106 | "valid_from": "2025-04-01",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\membership_schema_audit.json | LINE 1128 | "valid_from": "2025-04-01",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\snapshot_interval_reconciliation.json | LINE 31 | "report_month": "2025-04-01",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\snapshot_interval_reconciliation.json | LINE 32 | "comparison_date": "2025-04-01",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\snapshot_interval_reconciliation.json | LINE 321 | "report_month": "2025-04-01",
+
+========== walk_forward ==========
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\ask_greedy_engine_audit.txt | LINE 22 | analytics\audit_walk_forward_results.backup_20261109_130619.py
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\ask_greedy_engine_audit.txt | LINE 23 | analytics\audit_walk_forward_results.py
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\ask_greedy_engine_audit.txt | LINE 47 | analytics\run_greedy_walk_forward.py
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\ask_greedy_engine_audit.txt | LINE 53 | analytics\run_walk_forward_cost_validation.backup_20261109_130430.py
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\ask_greedy_engine_audit.txt | LINE 54 | analytics\run_walk_forward_cost_validation.py
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\ask_greedy_engine_audit.txt | LINE 2013 | database\processed\analytics\greedy_walk_forward_results.csv
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\ask_greedy_engine_audit.txt | LINE 2014 | database\processed\analytics\walk_forward_aggregate_metrics.csv
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\ask_greedy_engine_audit.txt | LINE 2015 | database\processed\analytics\walk_forward_clean_oos_paths.csv
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\ask_greedy_engine_audit.txt | LINE 2016 | database\processed\analytics\walk_forward_clean_report.json
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\ask_greedy_engine_audit.txt | LINE 2017 | database\processed\analytics\walk_forward_clean_summary.csv
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\ask_greedy_engine_audit.txt | LINE 2018 | database\processed\analytics\walk_forward_daily_returns.csv
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\ask_greedy_engine_audit.txt | LINE 2019 | database\processed\analytics\walk_forward_fold_metrics.csv
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\ask_greedy_engine_audit.txt | LINE 2020 | database\processed\analytics\walk_forward_selections.csv
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\ask_greedy_engine_audit.txt | LINE 2021 | database\processed\analytics\walk_forward_validation_report.json
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\ask_greedy_final_wiring_audit.txt | LINE 1762 | CSV: greedy_walk_forward_results.csv
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\ask_greedy_final_wiring_audit.txt | LINE 1809 | CSV: walk_forward_aggregate_metrics.csv
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\ask_greedy_final_wiring_audit.txt | LINE 1816 | CSV: walk_forward_clean_oos_paths.csv
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\ask_greedy_final_wiring_audit.txt | LINE 1823 | JSON: walk_forward_clean_report.json
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\ask_greedy_final_wiring_audit.txt | LINE 1824 | experiment = CLEANED_WALK_FORWARD_AUDIT
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\ask_greedy_final_wiring_audit.txt | LINE 1834 | CSV: walk_forward_clean_summary.csv
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\ask_greedy_final_wiring_audit.txt | LINE 1841 | CSV: walk_forward_daily_returns.csv
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\ask_greedy_final_wiring_audit.txt | LINE 1848 | CSV: walk_forward_fold_metrics.csv
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\ask_greedy_final_wiring_audit.txt | LINE 1855 | CSV: walk_forward_selections.csv
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\ask_greedy_final_wiring_audit.txt | LINE 1862 | JSON: walk_forward_validation_report.json
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\ask_greedy_final_wiring_audit.txt | LINE 1863 | experiment = GREEDY_STOCKS_ROLLING_EXPANDING_WALK_FORWARD
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\ask_greedy_final_wiring_audit.txt | LINE 1881 | files list length: 4 sample: ['walk_forward_fold_metrics.csv']
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\greedy_lab_frontend_bundle.txt | LINE 4144 | FILE: analytics\run_greedy_walk_forward.py
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\greedy_lab_frontend_bundle.txt | LINE 4354 | output_dir / "greedy_walk_forward_results.csv",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\greedy_lab_frontend_bundle.txt | LINE 4389 | print("\nSaved: greedy_walk_forward_results.csv")
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\greedy_lab_frontend_bundle.txt | LINE 20485 | "walk_results": "greedy_walk_forward_results.csv",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\greedy_lab_frontend_bundle.txt | LINE 20486 | "walk_selections": "walk_forward_selections.csv",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\greedy_lab_frontend_bundle.txt | LINE 20487 | "walk_report": "walk_forward_clean_report.json",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\greedy_lab_frontend_bundle.txt | LINE 20638 | "walk_forward_evidence": {
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\greedy_lab_frontend_bundle.txt | LINE 20644 | "walk_forward_audit": walk_report,
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\greedy_lab_frontend_bundle.txt | LINE 44382 | "walk_results": "greedy_walk_forward_results.csv",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\greedy_lab_frontend_bundle.txt | LINE 44383 | "walk_selections": "walk_forward_selections.csv",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\greedy_lab_frontend_bundle.txt | LINE 44384 | "walk_report": "walk_forward_clean_report.json",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\greedy_lab_frontend_bundle.txt | LINE 44535 | "walk_forward_evidence": {
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\greedy_lab_frontend_bundle.txt | LINE 44541 | "walk_forward_audit": walk_report,
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\PHASE2_ARCHITECTURE_AUDIT.txt | LINE 402 | FILE: analytics\audit_walk_forward_results.py
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\PHASE2_ARCHITECTURE_AUDIT.txt | LINE 547 | FILE: analytics\run_greedy_walk_forward.py
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\PHASE2_ARCHITECTURE_AUDIT.txt | LINE 575 | FILE: analytics\run_walk_forward_cost_validation.py
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\PHASE4_ARCHITECTURE_AUDIT.txt | LINE 345 | ### analytics\audit_walk_forward_results.backup_20261109_130619.py (166 lines)
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\PHASE4_ARCHITECTURE_AUDIT.txt | LINE 361 | ### analytics\audit_walk_forward_results.py (173 lines)
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\PHASE4_ARCHITECTURE_AUDIT.txt | LINE 825 | ### analytics\run_greedy_walk_forward.py (252 lines)
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\PHASE4_ARCHITECTURE_AUDIT.txt | LINE 937 | ### analytics\run_walk_forward_cost_validation.backup_20261109_130430.py (389 lines)
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\PHASE4_ARCHITECTURE_AUDIT.txt | LINE 958 | ### analytics\run_walk_forward_cost_validation.py (395 lines)
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\portfolio_selection_audit.txt | LINE 1250 | C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_greedy_walk_forward.py:22: MAX_PER_SECTOR = 3
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\portfolio_selection_audit.txt | LINE 1251 | C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_greedy_walk_forward.py:39: if sector_count >= MAX_PER_SECTOR:
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\portfolio_selection_audit.txt | LINE 1273 | C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_walk_forward_cost_validation.backup_20261109_130430.py:209: max_per_sector=SECTOR_CAP,
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\portfolio_selection_audit.txt | LINE 1274 | C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_walk_forward_cost_validation.backup_20261109_130430.py:213: greedy_symbols = result["selected_symbols"]
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\portfolio_selection_audit.txt | LINE 1275 | C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_walk_forward_cost_validation.backup_20261109_130430.py:266: "stock_count": len(symbols),
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\portfolio_selection_audit.txt | LINE 1276 | C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_walk_forward_cost_validation.py:215: max_per_sector=SECTOR_CAP,
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\portfolio_selection_audit.txt | LINE 1277 | C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_walk_forward_cost_validation.py:219: greedy_symbols = result["selected_symbols"]
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\portfolio_selection_audit.txt | LINE 1278 | C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_walk_forward_cost_validation.py:272: "stock_count": len(symbols),
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\universe_discovery.txt | LINE 378 | FILE: analytics\audit_walk_forward_results.backup_20261109_130619.py
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\universe_discovery.txt | LINE 398 | FILE: analytics\audit_walk_forward_results.py
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\universe_discovery.txt | LINE 698 | FILE: analytics\run_walk_forward_cost_validation.backup_20261109_130430.py
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\universe_discovery.txt | LINE 730 | FILE: analytics\run_walk_forward_cost_validation.py
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\audit_walk_forward_results.backup_20261109_130619.py | LINE 9 | fold_path = OUT / "walk_forward_fold_metrics.csv"
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\audit_walk_forward_results.backup_20261109_130619.py | LINE 10 | daily_path = OUT / "walk_forward_daily_returns.csv"
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\audit_walk_forward_results.backup_20261109_130619.py | LINE 11 | selection_path = OUT / "walk_forward_selections.csv"
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\audit_walk_forward_results.backup_20261109_130619.py | LINE 116 | OUT / "walk_forward_clean_summary.csv",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\audit_walk_forward_results.backup_20261109_130619.py | LINE 120 | OUT / "walk_forward_clean_oos_paths.csv",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\audit_walk_forward_results.backup_20261109_130619.py | LINE 125 | "experiment": "CLEANED_WALK_FORWARD_AUDIT",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\audit_walk_forward_results.backup_20261109_130619.py | LINE 153 | with (OUT / "walk_forward_clean_report.json").open(
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\audit_walk_forward_results.backup_20261109_130619.py | LINE 162 | print(OUT / "walk_forward_clean_summary.csv")
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\audit_walk_forward_results.backup_20261109_130619.py | LINE 163 | print(OUT / "walk_forward_clean_oos_paths.csv")
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\audit_walk_forward_results.backup_20261109_130619.py | LINE 164 | print(OUT / "walk_forward_clean_report.json")
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\audit_walk_forward_results.py | LINE 9 | fold_path = OUT / "walk_forward_fold_metrics.csv"
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\audit_walk_forward_results.py | LINE 10 | daily_path = OUT / "walk_forward_daily_returns.csv"
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\audit_walk_forward_results.py | LINE 11 | selection_path = OUT / "walk_forward_selections.csv"
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\audit_walk_forward_results.py | LINE 116 | OUT / "walk_forward_clean_summary.csv",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\audit_walk_forward_results.py | LINE 120 | OUT / "walk_forward_clean_oos_paths.csv",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\audit_walk_forward_results.py | LINE 125 | "experiment": "CLEANED_WALK_FORWARD_AUDIT",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\audit_walk_forward_results.py | LINE 153 | with (OUT / "walk_forward_clean_report.json").open(
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\audit_walk_forward_results.py | LINE 169 | print(OUT / "walk_forward_clean_summary.csv")
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\audit_walk_forward_results.py | LINE 170 | print(OUT / "walk_forward_clean_oos_paths.csv")
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\audit_walk_forward_results.py | LINE 171 | print(OUT / "walk_forward_clean_report.json")
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\phase4_algorithm_integration_audit.py | LINE 17 | "walk_forward": r"walk.?forward|out.?of.?sample|oos|fold",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_greedy_walk_forward.py | LINE 209 | output_dir / "greedy_walk_forward_results.csv",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_greedy_walk_forward.py | LINE 244 | print("\nSaved: greedy_walk_forward_results.csv")
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_indian_delivery_cost_model.py | LINE 10 | ASSIGN = BASE / "experiment3_nested_walk_forward/outer_selections.csv"
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_walk_forward_cost_validation.backup_20261109_130430.py | LINE 321 | fold_df.to_csv(OUT / "walk_forward_fold_metrics.csv", index=False)
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_walk_forward_cost_validation.backup_20261109_130430.py | LINE 322 | selection_df.to_csv(OUT / "walk_forward_selections.csv", index=False)
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_walk_forward_cost_validation.backup_20261109_130430.py | LINE 323 | daily_df.to_csv(OUT / "walk_forward_daily_returns.csv", index=False)
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_walk_forward_cost_validation.backup_20261109_130430.py | LINE 324 | aggregate.to_csv(OUT / "walk_forward_aggregate_metrics.csv", index=False)
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_walk_forward_cost_validation.backup_20261109_130430.py | LINE 327 | "experiment": "GREEDY_STOCKS_ROLLING_EXPANDING_WALK_FORWARD",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_walk_forward_cost_validation.backup_20261109_130430.py | LINE 362 | "walk_forward_fold_metrics.csv",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_walk_forward_cost_validation.backup_20261109_130430.py | LINE 363 | "walk_forward_selections.csv",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_walk_forward_cost_validation.backup_20261109_130430.py | LINE 364 | "walk_forward_daily_returns.csv",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_walk_forward_cost_validation.backup_20261109_130430.py | LINE 365 | "walk_forward_aggregate_metrics.csv",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_walk_forward_cost_validation.backup_20261109_130430.py | LINE 369 | with (OUT / "walk_forward_validation_report.json").open(
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_walk_forward_cost_validation.backup_20261109_130430.py | LINE 382 | print(OUT / "walk_forward_validation_report.json")
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_walk_forward_cost_validation.py | LINE 327 | fold_df.to_csv(OUT / "walk_forward_fold_metrics.csv", index=False)
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_walk_forward_cost_validation.py | LINE 328 | selection_df.to_csv(OUT / "walk_forward_selections.csv", index=False)
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_walk_forward_cost_validation.py | LINE 329 | daily_df.to_csv(OUT / "walk_forward_daily_returns.csv", index=False)
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_walk_forward_cost_validation.py | LINE 330 | aggregate.to_csv(OUT / "walk_forward_aggregate_metrics.csv", index=False)
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_walk_forward_cost_validation.py | LINE 333 | "experiment": "GREEDY_STOCKS_ROLLING_EXPANDING_WALK_FORWARD",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_walk_forward_cost_validation.py | LINE 368 | "walk_forward_fold_metrics.csv",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_walk_forward_cost_validation.py | LINE 369 | "walk_forward_selections.csv",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_walk_forward_cost_validation.py | LINE 370 | "walk_forward_daily_returns.csv",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_walk_forward_cost_validation.py | LINE 371 | "walk_forward_aggregate_metrics.csv",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_walk_forward_cost_validation.py | LINE 375 | with (OUT / "walk_forward_validation_report.json").open(
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\run_walk_forward_cost_validation.py | LINE 388 | print(OUT / "walk_forward_validation_report.json")
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\ask_greedy\greedy_v2_evidence.py | LINE 17 | "walk_results": "greedy_walk_forward_results.csv",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\ask_greedy\greedy_v2_evidence.py | LINE 18 | "walk_selections": "walk_forward_selections.csv",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\ask_greedy\greedy_v2_evidence.py | LINE 19 | "walk_report": "walk_forward_clean_report.json",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\ask_greedy\greedy_v2_evidence.py | LINE 170 | "walk_forward_evidence": {
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\analytics\ask_greedy\greedy_v2_evidence.py | LINE 176 | "walk_forward_audit": walk_report,
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\walk_forward_clean_report.json | LINE 2 | "experiment": "CLEANED_WALK_FORWARD_AUDIT",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\walk_forward_validation_report.json | LINE 2 | "experiment": "GREEDY_STOCKS_ROLLING_EXPANDING_WALK_FORWARD",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\walk_forward_validation_report.json | LINE 92 | "walk_forward_fold_metrics.csv",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\walk_forward_validation_report.json | LINE 93 | "walk_forward_selections.csv",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\walk_forward_validation_report.json | LINE 94 | "walk_forward_daily_returns.csv",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\database\processed\analytics\walk_forward_validation_report.json | LINE 95 | "walk_forward_aggregate_metrics.csv"
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\algorithm_integration_audit.json | LINE 52 | "path": "analytics/audit_walk_forward_results.backup_20261109_130619.py",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\algorithm_integration_audit.json | LINE 57 | "path": "analytics/audit_walk_forward_results.py",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\algorithm_integration_audit.json | LINE 212 | "path": "analytics/run_greedy_walk_forward.py",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\algorithm_integration_audit.json | LINE 242 | "path": "analytics/run_walk_forward_cost_validation.backup_20261109_130430.py",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\algorithm_integration_audit.json | LINE 247 | "path": "analytics/run_walk_forward_cost_validation.py",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\algorithm_integration_audit.json | LINE 774 | "file": "analytics/audit_walk_forward_results.backup_20261109_130619.py",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\algorithm_integration_audit.json | LINE 784 | "file": "analytics/audit_walk_forward_results.py",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\algorithm_integration_audit.json | LINE 1700 | "file": "analytics/run_greedy_walk_forward.py",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\algorithm_integration_audit.json | LINE 1717 | "text": "output_dir / \"greedy_walk_forward_results.csv\","
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\algorithm_integration_audit.json | LINE 1721 | "text": "print(\"\\nSaved: greedy_walk_forward_results.csv\")"
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\algorithm_integration_audit.json | LINE 1872 | "file": "analytics/run_walk_forward_cost_validation.backup_20261109_130430.py",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\algorithm_integration_audit.json | LINE 1909 | "text": "\"experiment\": \"GREEDY_STOCKS_ROLLING_EXPANDING_WALK_FORWARD\","
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\algorithm_integration_audit.json | LINE 1918 | "file": "analytics/run_walk_forward_cost_validation.py",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\algorithm_integration_audit.json | LINE 1955 | "text": "\"experiment\": \"GREEDY_STOCKS_ROLLING_EXPANDING_WALK_FORWARD\","
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\algorithm_integration_audit.json | LINE 2253 | "text": "\"walk_results\": \"greedy_walk_forward_results.csv\","
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\algorithm_integration_audit.json | LINE 3146 | "walk_forward": [
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\algorithm_integration_audit.json | LINE 3148 | "file": "analytics/audit_walk_forward_results.backup_20261109_130619.py",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\algorithm_integration_audit.json | LINE 3153 | "text": "fold_path = OUT / \"walk_forward_fold_metrics.csv\""
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\algorithm_integration_audit.json | LINE 3157 | "text": "daily_path = OUT / \"walk_forward_daily_returns.csv\""
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\algorithm_integration_audit.json | LINE 3161 | "text": "selection_path = OUT / \"walk_forward_selections.csv\""
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\algorithm_integration_audit.json | LINE 3253 | "text": "OUT / \"walk_forward_clean_summary.csv\","
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\algorithm_integration_audit.json | LINE 3257 | "text": "OUT / \"walk_forward_clean_oos_paths.csv\","
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\algorithm_integration_audit.json | LINE 3261 | "text": "\"experiment\": \"CLEANED_WALK_FORWARD_AUDIT\","
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\algorithm_integration_audit.json | LINE 3277 | "text": "with (OUT / \"walk_forward_clean_report.json\").open("
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\algorithm_integration_audit.json | LINE 3285 | "text": "print(OUT / \"walk_forward_clean_summary.csv\")"
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\algorithm_integration_audit.json | LINE 3289 | "text": "print(OUT / \"walk_forward_clean_oos_paths.csv\")"
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\algorithm_integration_audit.json | LINE 3294 | "file": "analytics/audit_walk_forward_results.py",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\algorithm_integration_audit.json | LINE 3299 | "text": "fold_path = OUT / \"walk_forward_fold_metrics.csv\""
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\algorithm_integration_audit.json | LINE 3303 | "text": "daily_path = OUT / \"walk_forward_daily_returns.csv\""
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\algorithm_integration_audit.json | LINE 3307 | "text": "selection_path = OUT / \"walk_forward_selections.csv\""
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\algorithm_integration_audit.json | LINE 3399 | "text": "OUT / \"walk_forward_clean_summary.csv\","
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\algorithm_integration_audit.json | LINE 3403 | "text": "OUT / \"walk_forward_clean_oos_paths.csv\","
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\algorithm_integration_audit.json | LINE 3407 | "text": "\"experiment\": \"CLEANED_WALK_FORWARD_AUDIT\","
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\algorithm_integration_audit.json | LINE 3423 | "text": "with (OUT / \"walk_forward_clean_report.json\").open("
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\algorithm_integration_audit.json | LINE 3431 | "text": "print(OUT / \"walk_forward_clean_summary.csv\")"
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\algorithm_integration_audit.json | LINE 3435 | "text": "print(OUT / \"walk_forward_clean_oos_paths.csv\")"
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\algorithm_integration_audit.json | LINE 3473 | "text": "\"walk_forward\": r\"walk.?forward|out.?of.?sample|oos|fold\","
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\algorithm_integration_audit.json | LINE 3560 | "file": "analytics/run_greedy_walk_forward.py",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\algorithm_integration_audit.json | LINE 3593 | "text": "output_dir / \"greedy_walk_forward_results.csv\","
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\algorithm_integration_audit.json | LINE 3613 | "text": "print(\"\\nSaved: greedy_walk_forward_results.csv\")"
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\algorithm_integration_audit.json | LINE 3627 | "text": "ASSIGN = BASE / \"experiment3_nested_walk_forward/outer_selections.csv\""
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\algorithm_integration_audit.json | LINE 3670 | "file": "analytics/run_walk_forward_cost_validation.backup_20261109_130430.py",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\algorithm_integration_audit.json | LINE 3751 | "text": "fold_df.to_csv(OUT / \"walk_forward_fold_metrics.csv\", index=False)"
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\algorithm_integration_audit.json | LINE 3755 | "text": "selection_df.to_csv(OUT / \"walk_forward_selections.csv\", index=False)"
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\algorithm_integration_audit.json | LINE 3759 | "text": "daily_df.to_csv(OUT / \"walk_forward_daily_returns.csv\", index=False)"
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\algorithm_integration_audit.json | LINE 3763 | "text": "aggregate.to_csv(OUT / \"walk_forward_aggregate_metrics.csv\", index=False)"
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\algorithm_integration_audit.json | LINE 3767 | "text": "\"experiment\": \"GREEDY_STOCKS_ROLLING_EXPANDING_WALK_FORWARD\","
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\algorithm_integration_audit.json | LINE 3779 | "text": "\"walk_forward_fold_metrics.csv\","
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\algorithm_integration_audit.json | LINE 3783 | "text": "\"walk_forward_selections.csv\","
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\algorithm_integration_audit.json | LINE 3787 | "text": "\"walk_forward_daily_returns.csv\","
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\algorithm_integration_audit.json | LINE 3791 | "text": "\"walk_forward_aggregate_metrics.csv\","
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\algorithm_integration_audit.json | LINE 3795 | "text": "with (OUT / \"walk_forward_validation_report.json\").open("
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\algorithm_integration_audit.json | LINE 3803 | "text": "print(OUT / \"walk_forward_validation_report.json\")"
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\algorithm_integration_audit.json | LINE 3812 | "file": "analytics/run_walk_forward_cost_validation.py",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\algorithm_integration_audit.json | LINE 3893 | "text": "fold_df.to_csv(OUT / \"walk_forward_fold_metrics.csv\", index=False)"
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\algorithm_integration_audit.json | LINE 3897 | "text": "selection_df.to_csv(OUT / \"walk_forward_selections.csv\", index=False)"
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\algorithm_integration_audit.json | LINE 3901 | "text": "daily_df.to_csv(OUT / \"walk_forward_daily_returns.csv\", index=False)"
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\algorithm_integration_audit.json | LINE 3905 | "text": "aggregate.to_csv(OUT / \"walk_forward_aggregate_metrics.csv\", index=False)"
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\algorithm_integration_audit.json | LINE 3909 | "text": "\"experiment\": \"GREEDY_STOCKS_ROLLING_EXPANDING_WALK_FORWARD\","
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\algorithm_integration_audit.json | LINE 3921 | "text": "\"walk_forward_fold_metrics.csv\","
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\algorithm_integration_audit.json | LINE 3925 | "text": "\"walk_forward_selections.csv\","
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\algorithm_integration_audit.json | LINE 3929 | "text": "\"walk_forward_daily_returns.csv\","
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\algorithm_integration_audit.json | LINE 3933 | "text": "\"walk_forward_aggregate_metrics.csv\","
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\algorithm_integration_audit.json | LINE 3937 | "text": "with (OUT / \"walk_forward_validation_report.json\").open("
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\algorithm_integration_audit.json | LINE 3945 | "text": "print(OUT / \"walk_forward_validation_report.json\")"
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\algorithm_integration_audit.json | LINE 3959 | "text": "\"walk_results\": \"greedy_walk_forward_results.csv\","
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\algorithm_integration_audit.json | LINE 3963 | "text": "\"walk_selections\": \"walk_forward_selections.csv\","
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\algorithm_integration_audit.json | LINE 3967 | "text": "\"walk_report\": \"walk_forward_clean_report.json\","
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\algorithm_integration_audit.json | LINE 4011 | "text": "\"walk_forward_evidence\": {"
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\algorithm_integration_audit.json | LINE 4027 | "text": "\"walk_forward_audit\": walk_report,"
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\algorithm_integration_audit.json | LINE 4398 | "file": "analytics/audit_walk_forward_results.backup_20261109_130619.py",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\algorithm_integration_audit.json | LINE 4403 | "text": "\"experiment\": \"CLEANED_WALK_FORWARD_AUDIT\","
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\algorithm_integration_audit.json | LINE 4412 | "file": "analytics/audit_walk_forward_results.py",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\algorithm_integration_audit.json | LINE 4417 | "text": "\"experiment\": \"CLEANED_WALK_FORWARD_AUDIT\","
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\algorithm_integration_audit.json | LINE 5466 | "file": "analytics/run_greedy_walk_forward.py",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\algorithm_integration_audit.json | LINE 5541 | "text": "ASSIGN = BASE / \"experiment3_nested_walk_forward/outer_selections.csv\""
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\algorithm_integration_audit.json | LINE 5790 | "file": "analytics/run_walk_forward_cost_validation.backup_20261109_130430.py",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\algorithm_integration_audit.json | LINE 5847 | "text": "\"experiment\": \"GREEDY_STOCKS_ROLLING_EXPANDING_WALK_FORWARD\","
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\algorithm_integration_audit.json | LINE 5876 | "file": "analytics/run_walk_forward_cost_validation.py",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\algorithm_integration_audit.json | LINE 5945 | "text": "\"experiment\": \"GREEDY_STOCKS_ROLLING_EXPANDING_WALK_FORWARD\","
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\algorithm_integration_audit.json | LINE 6542 | "file": "analytics/audit_walk_forward_results.backup_20261109_130619.py",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\algorithm_integration_audit.json | LINE 6568 | "file": "analytics/audit_walk_forward_results.py",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\algorithm_integration_audit.json | LINE 7540 | "file": "analytics/run_greedy_walk_forward.py",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\algorithm_integration_audit.json | LINE 7820 | "file": "analytics/run_walk_forward_cost_validation.backup_20261109_130430.py",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\algorithm_integration_audit.json | LINE 7858 | "file": "analytics/run_walk_forward_cost_validation.py",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\algorithm_integration_audit.json | LINE 9422 | "file": "analytics/audit_walk_forward_results.backup_20261109_130619.py",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\algorithm_integration_audit.json | LINE 9436 | "file": "analytics/audit_walk_forward_results.py",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\algorithm_integration_audit.json | LINE 10494 | "file": "analytics/run_greedy_walk_forward.py",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\algorithm_integration_audit.json | LINE 10830 | "file": "analytics/run_walk_forward_cost_validation.backup_20261109_130430.py",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\algorithm_integration_audit.json | LINE 10868 | "file": "analytics/run_walk_forward_cost_validation.py",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\final_integration_source_20261109_235509.txt | LINE 1082 | FILE: analytics/run_greedy_walk_forward.py
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\final_integration_source_20261109_235509.txt | LINE 1292 | output_dir / "greedy_walk_forward_results.csv",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\final_integration_source_20261109_235509.txt | LINE 1327 | print("\nSaved: greedy_walk_forward_results.csv")
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\final_integration_source_20261109_235535.txt | LINE 1086 | FILE: analytics/run_greedy_walk_forward.py
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\final_integration_source_20261109_235535.txt | LINE 1296 | output_dir / "greedy_walk_forward_results.csv",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\final_integration_source_20261109_235535.txt | LINE 1331 | print("\nSaved: greedy_walk_forward_results.csv")
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\final_integration_source_20261109_235535.txt | LINE 5434 | FILE: analytics/run_greedy_walk_forward.py
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\final_integration_source_20261109_235535.txt | LINE 5644 | output_dir / "greedy_walk_forward_results.csv",
+C:\Users\Sarthak S Shelke\GREEDY STOCKS\reports\phase4\final_integration_source_20261109_235535.txt | LINE 5679 | print("\nSaved: greedy_walk_forward_results.csv")

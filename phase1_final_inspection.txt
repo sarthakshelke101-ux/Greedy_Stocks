@@ -1,0 +1,406 @@
+﻿
+========== analytics/market_ideas.py ==========
+
+--- def build_idea( ---
+58: def build_idea(
+59:     category,
+60:     title,
+61:     what,
+62:     why,
+63:     risk,
+64:     explore,
+65:     evidence,
+66:     status="AVAILABLE",
+67: ):
+68:     """Build a consistent Market Ideas record."""
+69:     return {
+70:         "category": category,
+71:         "title": title,
+72:         "what": what,
+73:         "why": why,
+74:         "risk": risk,
+75:         "explore": explore,
+76:         "evidence": evidence,
+77:         "status": status,
+78:     }
+79: 
+80: 
+81: def performance_standouts(ranking, period, top_n=5):
+82:     """Identify companies with the strongest historical returns."""
+83:     valid = ranking[
+84:         ranking["period_return"].notna()
+85:         & (ranking["data_status"] == "CALCULATED")
+86:     ].copy()
+87: 
+88:     valid = valid.sort_values(
+89:         ["period_return", "symbol"],
+90:         ascending=[False, True],
+91:     )
+92: 
+93:     ideas = []
+94: 
+95:     for _, row in valid.head(top_n).iterrows():
+96:         company = company_reference(row)
+97:         return_pct = safe_number(row["period_return"])
+98: 
+99:         ideas.append(
+100:             build_idea(
+101:                 category="PERFORMANCE_STANDOUTS",
+102:                 title=(
+103:                     f"{company['symbol']} ù "
+104:                     "Historical performance standout"
+105:                 ),
+106:                 what=(
+107:                     f"{company['company_name']} recorded a "
+108:                     f"{return_pct}% return over {period}."
+109:                 ),
+110:                 why=(
+111:                     "It ranked among the strongest NIFTY 50 "
+112:                     "historical performers for the selected period."
+113:                 ),
+114:                 risk=(
+115:                     "Past performance does not predict future returns. "
+116:                     "Review volatility, drawdown and company fundamentals "
+117:                     "before drawing conclusions."
+118:                 ),
+119:                 explore=(
+120:                     f"Explain the historical performance and risks "
+121:                     f"of {company['symbol']}."
+122:                 ),
+
+--- def performance_standouts( ---
+81: def performance_standouts(ranking, period, top_n=5):
+82:     """Identify companies with the strongest historical returns."""
+83:     valid = ranking[
+84:         ranking["period_return"].notna()
+85:         & (ranking["data_status"] == "CALCULATED")
+86:     ].copy()
+87: 
+88:     valid = valid.sort_values(
+89:         ["period_return", "symbol"],
+90:         ascending=[False, True],
+91:     )
+92: 
+93:     ideas = []
+94: 
+95:     for _, row in valid.head(top_n).iterrows():
+96:         company = company_reference(row)
+97:         return_pct = safe_number(row["period_return"])
+98: 
+99:         ideas.append(
+100:             build_idea(
+101:                 category="PERFORMANCE_STANDOUTS",
+102:                 title=(
+103:                     f"{company['symbol']} ù "
+104:                     "Historical performance standout"
+105:                 ),
+106:                 what=(
+107:                     f"{company['company_name']} recorded a "
+108:                     f"{return_pct}% return over {period}."
+109:                 ),
+110:                 why=(
+111:                     "It ranked among the strongest NIFTY 50 "
+112:                     "historical performers for the selected period."
+113:                 ),
+114:                 risk=(
+115:                     "Past performance does not predict future returns. "
+116:                     "Review volatility, drawdown and company fundamentals "
+117:                     "before drawing conclusions."
+118:                 ),
+119:                 explore=(
+120:                     f"Explain the historical performance and risks "
+121:                     f"of {company['symbol']}."
+122:                 ),
+123:                 evidence={
+124:                     **company,
+125:                     "period": period,
+126:                     "period_return_pct": return_pct,
+127:                     "return_rank": safe_number(row["return_rank"]),
+128:                     "annualized_volatility_pct": safe_number(
+129:                         row["annualized_volatility"]
+130:                     ),
+131:                     "maximum_drawdown_pct": safe_number(
+132:                         row["maximum_drawdown"]
+133:                     ),
+134:                     "sharpe_ratio": safe_number(row["sharpe_ratio"]),
+135:                     "observations": int(row["observations"]),
+136:                 },
+137:             )
+138:         )
+139: 
+140:     return ideas
+141: 
+142: 
+143: def risk_stability_insights(ranking, period, top_n=5):
+144:     """Find historically lower-volatility and lower-drawdown stocks."""
+145:     valid = ranking[
+
+--- def risk_stability_insights( ---
+143: def risk_stability_insights(ranking, period, top_n=5):
+144:     """Find historically lower-volatility and lower-drawdown stocks."""
+145:     valid = ranking[
+146:         ranking["annualized_volatility"].notna()
+147:         & ranking["maximum_drawdown"].notna()
+148:         & (ranking["data_status"] == "CALCULATED")
+149:     ].copy()
+150: 
+151:     if valid.empty:
+152:         return []
+153: 
+154:     # Prefer lower volatility, then drawdowns closer to zero.
+155:     valid = valid.sort_values(
+156:         ["annualized_volatility", "maximum_drawdown"],
+157:         ascending=[True, False],
+158:     )
+159: 
+160:     ideas = []
+161: 
+162:     for _, row in valid.head(top_n).iterrows():
+163:         company = company_reference(row)
+164: 
+165:         volatility = safe_number(row["annualized_volatility"])
+166:         drawdown = safe_number(row["maximum_drawdown"])
+167: 
+168:         ideas.append(
+169:             build_idea(
+170:                 category="RISK_AND_STABILITY",
+171:                 title=(
+172:                     f"{company['symbol']} ù "
+173:                     "Lower historical volatility"
+174:                 ),
+175:                 what=(
+176:                     f"{company['company_name']} had annualised "
+177:                     f"volatility of {volatility}% and maximum "
+178:                     f"drawdown of {drawdown}% over {period}."
+179:                 ),
+180:                 why=(
+181:                     "It ranked relatively well on historical "
+182:                     "volatility and drawdown within the available universe."
+183:                 ),
+184:                 risk=(
+185:                     "Lower historical volatility does not mean "
+186:                     "capital protection or low future risk. "
+187:                     "This is not a measure of fundamental business risk."
+188:                 ),
+189:                 explore=(
+190:                     f"Compare the historical risk profile of "
+191:                     f"{company['symbol']} with its sector."
+192:                 ),
+193:                 evidence={
+194:                     **company,
+195:                     "period": period,
+196:                     "annualized_volatility_pct": volatility,
+197:                     "maximum_drawdown_pct": drawdown,
+198:                     "period_return_pct": safe_number(
+199:                         row["period_return"]
+200:                     ),
+201:                     "sharpe_ratio": safe_number(row["sharpe_ratio"]),
+202:                     "observations": int(row["observations"]),
+203:                 },
+204:             )
+205:         )
+206: 
+207:     return ideas
+
+--- def generate_market_ideas( ---
+428: def generate_market_ideas(period="3M", top_n=5):
+429:     """Generate structured, evidence-backed NIFTY 50 market ideas."""
+430:     if not isinstance(period, str):
+431:         raise ValueError("Period must be a string.")
+432: 
+433:     period = period.upper()
+434: 
+435:     if period not in SUPPORTED_PERIODS:
+436:         raise ValueError(
+437:             f"Unsupported period {period}. "
+438:             f"Choose from {sorted(SUPPORTED_PERIODS)}."
+439:         )
+440: 
+441:     if not isinstance(top_n, int) or isinstance(top_n, bool):
+442:         raise ValueError("top_n must be an integer.")
+443: 
+444:     if top_n < 1 or top_n > 10:
+445:         raise ValueError("top_n must be between 1 and 10.")
+446: 
+447:     print(f"Generating Market Ideas for {period}...")
+448: 
+449:     ranking = run_historical_rankings(period)
+450: 
+451:     metadata = {
+452:         "index": ranking.attrs.get("index", "NIFTY 50"),
+453:         "period": period,
+454:         "requested_start_date": ranking.attrs.get("requested_start_date"),
+455:         "common_end_date": ranking.attrs.get("common_end_date"),
+456:         "snapshot_month": str(ranking.attrs.get("snapshot_month")),
+457:         "price_basis": ranking.attrs.get("price_basis"),
+458:         "dividend_adjusted": ranking.attrs.get("dividend_adjusted"),
+459:         "membership_basis": ranking.attrs.get("membership_basis"),
+460:         "corporate_action_coverage": ranking.attrs.get(
+461:             "corporate_action_coverage"
+462:         ),
+463:         "data_as_of": (
+464:             str(ranking["last_price_date"].max())
+465:             if (
+466:                 "last_price_date" in ranking.columns
+467:                 and ranking["last_price_date"].notna().any()
+468:             )
+469:             else None
+470:         ),
+471:         "universe_size": int(len(ranking)),
+472:         "calculated_companies": int(
+473:             (ranking["data_status"] == "CALCULATED").sum()
+474:         ),
+475:         "insufficient_data_companies": int(
+476:             (ranking["data_status"] != "CALCULATED").sum()
+477:         ),
+478:         "database_writes": False,
+479:         "interpretation": "HISTORICAL_RESEARCH_NOT_INVESTMENT_ADVICE",
+480:     }
+481: 
+482:     ideas = []
+483: 
+484:     ideas.extend(
+485:         performance_standouts(ranking, period, top_n)
+486:     )
+487: 
+488:     ideas.extend(
+489:         risk_stability_insights(ranking, period, top_n)
+490:     )
+491: 
+492:     ideas.extend(
+
+========== backend/chat_routes.py ==========
+
+--- def format_insights( ---
+297: def format_insights(ideas, metadata, category):
+298:     categories = (
+299:         [category] if isinstance(category, str)
+300:         else list(category)
+301:     )
+302: 
+303:     lines = []
+304: 
+305:     for current_category in categories:
+306:         selected = [
+307:             idea for idea in ideas
+308:             if idea.get("category") == current_category
+309:             and idea.get("status") == "AVAILABLE"
+310:         ]
+311: 
+312:         if not selected:
+313:             lines.append(
+314:                 f"{current_category}: No sufficient verified "
+315:                 "financial insight is available in this report."
+316:             )
+317:             lines.append("")
+318:             continue
+319: 
+320:         lines.append(f"===== {current_category} =====")
+321: 
+322:         for index, idea in enumerate(selected, start=1):
+323:             evidence = idea.get("evidence") or {}
+324: 
+325:             lines.append(
+326:                 f"{index}. {idea.get('title', 'Historical insight')}"
+327:             )
+328:             lines.append(
+329:                 f"What: {idea.get('what', 'Not available')}"
+330:             )
+331: 
+332:             if idea.get("why"):
+333:                 lines.append(f"Why: {idea['why']}")
+334: 
+335:             fields = [
+336:                 ("period_return_pct", "Historical return", "%"),
+337:                 ("annualized_volatility_pct", "Annualised volatility", "%"),
+338:                 ("maximum_drawdown_pct", "Maximum drawdown", "%"),
+339:                 ("sharpe_ratio", "Sharpe ratio", ""),
+340:                 ("observations", "Return observations", ""),
+341:             ]
+342: 
+343:             for key, label, suffix in fields:
+344:                 value = evidence.get(key)
+345:                 if value is not None:
+346:                     lines.append(f"{label}: {value}{suffix}")
+347: 
+348:             if idea.get("risk"):
+349:                 lines.append(f"Risk: {idea['risk']}")
+350: 
+351:             lines.append("")
+352: 
+353:     lines.extend([
+354:         "DATA METHODOLOGY",
+355:         f"Index: {metadata.get('index')}",
+356:         f"Period: {metadata.get('period')}",
+357:         f"Historical start date: {metadata.get('requested_start_date')}",
+358:         f"Historical end date: {metadata.get('common_end_date')}",
+359:         f"Data as of: {metadata.get('data_as_of')}",
+360:         f"Snapshot month: {metadata.get('snapshot_month')}",
+361:         f"Price basis: {metadata.get('price_basis')}",
+
+--- def build_financial_context( ---
+378: def build_financial_context(question):
+379:     intents = detect_intents(question)
+380: 
+381:     if intents == ["FUNDAMENTAL_RESEARCH"]:
+382:         return (
+383:             "QUESTION CATEGORY: FUNDAMENTAL RESEARCH\\n\\n"
+384:             "VERIFIED DATA STATUS:\\n"
+385:             "Company fundamentals and valuation data are not yet "
+386:             "integrated into GREEDY STOCKS.\\n"
+387:             "Historical share-price performance cannot establish "
+388:             "whether a company is undervalued or overvalued.\\n"
+389:             "Do not invent financial statements, revenue, profit, "
+390:             "debt, cash flow or valuation ratios.\\n"
+391:             "You may explain what data would be needed for "
+392:             "a proper fundamental analysis."
+393:         )
+394: 
+395:     if intents == ["EDUCATION"]:
+396:         return (
+397:             "QUESTION CATEGORY: FINANCIAL EDUCATION\\n"
+398:             "Explain NIFTY 50 and basic stock market concepts "
+399:             "at a beginner-friendly level.\\n"
+400:             "Do not invent current market figures."
+401:         )
+402: 
+403:     if intents == ["GENERAL"]:
+404:         return (
+405:             "QUESTION CATEGORY: GENERAL GREEDY STOCKS HELP\\n"
+406:             "GREEDY STOCKS currently supports historical NIFTY 50 "
+407:             "performance, volatility, drawdown, sector performance, "
+408:             "historical Greedy Algorithm experiments and financial "
+409:             "education. Fundamental valuation data is not yet integrated."
+410:         )
+411: 
+412:     period = detect_period(question)
+413: 
+414:     try:
+415:         report = generate_market_ideas(
+416:             period=period,
+417:             top_n=5,
+418:         )
+419: 
+420:         verified_context = format_insights(
+421:             ideas=report["ideas"],
+422:             metadata=report["metadata"],
+423:             category=intents,
+424:         )
+425: 
+426:         return (
+427:             f"QUESTION CATEGORIES: {', '.join(intents)}\\n"
+428:             f"REQUESTED PERIOD: {period}\\n\\n"
+429:             "THE FOLLOWING IS VERIFIED APPLICATION DATA. "
+430:             "Do not modify or invent its figures.\\n\\n"
+431:             f"{verified_context}"
+432:         )
+433: 
+434:     except Exception:
+435:         logger.exception(
+436:             "Financial intelligence generation failed."
+437:         )
+438:         return (
+439:             "VERIFIED FINANCIAL DATA IS CURRENTLY UNAVAILABLE. "
+440:             "Do not invent rankings, returns or risk metrics."
+441:         )
+442: 

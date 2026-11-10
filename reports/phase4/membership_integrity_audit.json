@@ -1,0 +1,125 @@
+{
+  "audit": "GREEDY STOCKS Phase 4 membership integrity",
+  "read_only": true,
+  "findings": {
+    "invalid_intervals": [],
+    "overlapping_intervals": [],
+    "action_verification_status_counts": {
+      "OFFICIAL_SOURCE_VERIFIED": 57
+    },
+    "event_verification_status_counts": {
+      "RECONCILED_SOURCE_REGISTER": 4
+    },
+    "actions_missing_source_reference": [],
+    "events_missing_source_reference": [],
+    "spans_with_internal_gaps": [],
+    "spans_missing_source_reference": [],
+    "unresolved_snapshot_symbols": [],
+    "snapshot_month_symbol_counts": [
+      {
+        "month": "2025-04-01",
+        "symbol_pairs": 50
+      },
+      {
+        "month": "2025-05-01",
+        "symbol_pairs": 50
+      },
+      {
+        "month": "2025-06-01",
+        "symbol_pairs": 50
+      },
+      {
+        "month": "2025-07-01",
+        "symbol_pairs": 50
+      },
+      {
+        "month": "2025-08-01",
+        "symbol_pairs": 50
+      },
+      {
+        "month": "2025-09-01",
+        "symbol_pairs": 50
+      },
+      {
+        "month": "2025-10-01",
+        "symbol_pairs": 50
+      },
+      {
+        "month": "2025-11-01",
+        "symbol_pairs": 50
+      },
+      {
+        "month": "2025-12-01",
+        "symbol_pairs": 50
+      },
+      {
+        "month": "2026-01-01",
+        "symbol_pairs": 50
+      },
+      {
+        "month": "2026-02-01",
+        "symbol_pairs": 50
+      },
+      {
+        "month": "2026-03-01",
+        "symbol_pairs": 50
+      },
+      {
+        "month": "2026-04-01",
+        "symbol_pairs": 50
+      },
+      {
+        "month": "2026-05-01",
+        "symbol_pairs": 50
+      },
+      {
+        "month": "2026-06-01",
+        "symbol_pairs": 50
+      },
+      {
+        "month": "2026-07-01",
+        "symbol_pairs": 50
+      },
+      {
+        "month": "2026-08-01",
+        "symbol_pairs": 50
+      },
+      {
+        "month": "2026-09-01",
+        "symbol_pairs": 50
+      },
+      {
+        "month": "2026-10-01",
+        "symbol_pairs": 50
+      }
+    ],
+    "action_company_ids_without_interval": [],
+    "event_company_ids_without_interval": [
+      51
+    ]
+  },
+  "summary": {
+    "interval_count": 79,
+    "action_count": 57,
+    "event_count": 4,
+    "observation_span_count": 54,
+    "snapshot_month_symbol_pairs": 950,
+    "snapshot_months": 19,
+    "company_count": 80,
+    "identifier_count": 39,
+    "invalid_intervals": 0,
+    "overlapping_intervals": 0,
+    "actions_missing_source_reference": 0,
+    "events_missing_source_reference": 0,
+    "spans_with_internal_gaps": 0,
+    "spans_missing_source_reference": 0,
+    "unresolved_snapshot_symbol_pairs": 0
+  },
+  "methodology_notes": [
+    "Overlapping intervals are flagged for review, not automatically treated as errors.",
+    "Actions and events without interval matches may represent valid historical transitions.",
+    "Snapshot symbols are checked against current symbols and explicitly typed historical identifiers only.",
+    "A missing source reference is an evidence gap, not proof that an event is false.",
+    "This audit does not certify point-in-time index membership or remove survivorship bias."
+  ]
+}
